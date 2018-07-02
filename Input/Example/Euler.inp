@@ -1,0 +1,9 @@
+**
+**
+** Euler angles file
+**
+**
+*EULER
+** phi1,   PHI,   phi2, weight
+    0.0,   0.0,    0.0,      1
+	0.0,  45.0,    0.0,      1
