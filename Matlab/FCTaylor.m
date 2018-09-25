@@ -1,4 +1,4 @@
-%% 
+%% Post-process the FC-Taylor data
 
 clf
 close all
@@ -26,12 +26,29 @@ s23=s23/s0;
 s31=s31/s0;
 s12=s12/s0;
 
+% in case of centro symmetry
+s11=[s11;-s11];
+s22=[s22;-s22];
+s33=[s33;-s33];
+s23=[s23;-s23];
+s31=[s31;-s31];
+s12=[s12;-s12];
+
 %% Plotting
 %% 2D
 figure
 plot(s11,s22,'k.')
 hold on
-plot(-s11,-s22,'k.') % in case of centro symmetry
+% plot(-s11,-s22,'k.') % in case of centro symmetry
+% axis square
+xlim([-1.5,1.5])
+ylim([-1.5,1.5])
+
+figure
+plot(s11,s22,'k.')
+hold on
+tri=delaunay(s11,s22);
+triplot(tri,s11,s22,'Color', [0,0,0])
 axis square
 xlim([-1.5,1.5])
 ylim([-1.5,1.5])
@@ -39,7 +56,18 @@ ylim([-1.5,1.5])
 %% 3D
 figure
 plot3(s11,s22,s12,'k.')
-hold on
-plot3(-s11,-s22,-s12,'k.') % in case of centro symmetry
+% hold on
+% plot3(-s11,-s22,-s12,'k.') % in case of centro symmetry
 axis square
+xlim([-1.5,1.5])
+ylim([-1.5,1.5])
+zlim([-1.5,1.5])
 
+figure
+tri=delaunay(s11,s22,s12);
+trisurf(tri,s11,s22,s12,'FaceColor', [0.5,0.5,0.5],'FaceAlpha',1)
+axis square
+grid off
+xlim([-1.5,1.5])
+ylim([-1.5,1.5])
+zlim([-1.5,1.5])
