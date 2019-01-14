@@ -8,25 +8,30 @@
 !-----------------------------------------------------------------------
       program driver
       implicit none
-	  integer nangmax,nDmax,nprops
-	  parameter(nangmax=100000,nDmax=2808992,nprops=250)
+      real*8, allocatable :: ang(:,:), STRESSOLD(:,:), STRESSNEW(:,:),
+     .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
+     .                  defgradOld(:,:), Dissipation(:), Dij(:,:)
+	  integer nDmax,nprops
+	  !parameter(nangmax=100000,nDmax=2808992)
+      parameter(nprops=250)
       integer k,ITER,ndef,i,km
       integer NITER,NSTATEV,nblock
       parameter(NSTATEV=28)
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
-      real*8 strain(6),ang(nangmax,4),Dij(nDmax,6)
+      real*8 strain(6)
+      !real*8 ang(nangmax,4),Dij(nDmax,6)
 	  real*8 domega32,domega13,domega21
 c
       real*8 TIME
       real*8 DT
       real*8 PROPS(nprops)
-      real*8 STRESSOLD(nangmax,6)
-      real*8 STRESSNEW(nangmax,6)
-      real*8 STATEOLD(nangmax,NSTATEV)
-      real*8 STATENEW(nangmax,NSTATEV)
-	  real*8 defgradNew(nangmax,9)
-	  real*8 defgradOld(nangmax,9)
-	  real*8 Dissipation(nangmax)
+      !real*8 STRESSOLD(nangmax,6)
+      !real*8 STRESSNEW(nangmax,6)
+      !real*8 STATEOLD(nangmax,NSTATEV)
+      !real*8 STATENEW(nangmax,NSTATEV)
+	  !real*8 defgradNew(nangmax,9)
+	  !real*8 defgradOld(nangmax,9)
+	  !real*8 Dissipation(nangmax)
 	  real*8 work
 	  real*8 totweight
 	  real*8 sigma(6)
@@ -38,7 +43,16 @@ c
 !     Define material properties
 !-----------------------------------------------------------------------
 	  call readprops(props,nprops)			! Read material properties and stuff...
-	  call readeuler(ang,nangmax,nblock)	! Read Euler angles and weights
+	  call readeulerlength(nblock)
+      allocate(ang(nblock,4))
+      allocate(STRESSOLD(nblock,6))
+      allocate(STRESSNEW(nblock,6))
+      allocate(STATEOLD(nblock,NSTATEV))
+      allocate(STATENEW(nblock,NSTATEV))
+      allocate(defgradNew(nblock,9))
+      allocate(defgradOld(nblock,9))
+      allocate(Dissipation(nblock))
+      call readeuler(ang,nblock)	! Read Euler angles and weights
 	  totweight = 0.d0
 	  do i=1,nblock
 		totweight = totweight + ang(i,4)
@@ -143,7 +157,7 @@ c
 !-----------------------------------------------------------------------
 !        CALL UMAT
 !-----------------------------------------------------------------------
-         CALL Hypo(stressNew,stateNew,defgradNew,nangmax,
+         CALL Hypo(stressNew,stateNew,defgradNew,nblock,
      +               stressOld,stateOld,defgradOld,dt,props,
      +               nblock,3,3,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
