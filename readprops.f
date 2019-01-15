@@ -4,15 +4,17 @@
 ! Reads information to the FORTRAN program
 ! 
 !-----------------------------------------------------------------------
-      subroutine readprops(props,nprops)
+      subroutine readprops(props,nprops,
+     .                     planestress,centro,npts,epsdot,wp)
 !
       implicit none
 !
       integer, intent(in) :: nprops
-	  real*8, intent(out) :: props(nprops)
+	  real*8, intent(out) :: props(nprops), epsdot, wp
+      integer, intent(out) :: planestress, centro, npts
 !     Local variables
-      real*8 dummy(nprops),epsdot,wp
-	  integer ios,readflag,planestress,centro,npts
+      real*8 dummy(nprops)
+	  integer ios,readflag
 	  character*1000 line
 	  LOGICAL THERE
 !-----------------------------------------------------------------------
@@ -103,11 +105,11 @@
 		write(6,*) 'npts must be greater or equal to 2'
 		stop
 	  endif
-	  props(201)= planestress
-	  props(202)= centro
-	  props(203)= npts
-	  props(204)= epsdot
-	  props(205)= wp
+!	  props(201)= planestress
+!	  props(202)= centro
+!	  props(203)= npts
+!	  props(204)= epsdot
+!	  props(205)= wp
 !-----------------------------------------------------------------------
 !         Write information
 !-----------------------------------------------------------------------

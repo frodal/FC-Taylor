@@ -4,37 +4,21 @@
 ! 
 ! 
 !-----------------------------------------------------------------------
-      subroutine deformation(props,nprops,D,nDmax,i)
+      subroutine deformation(D,nDmax,i,planestress,centro,npts,epsdot)
 !
       implicit none
 !
-      integer, intent(in) :: nprops,nDmax
-	  real*8, intent(in) :: props(nprops)
+      integer, intent(in) :: nDmax,planestress,npts,centro
+      integer, intent(out) :: i
+	  real*8, intent(in) :: epsdot
 	  real*8, intent(out) :: D(nDmax,6)
-	  integer, intent(out) :: i
 !     Local variables
-      real*8 epsdot,Dp(nDmax,5),temp
-	  integer planestress,centro,npts,k,n
+      real*8 Dp(nDmax,5),temp
+	  integer k,n
 !-----------------------------------------------------------------------
 !         Deformation properties
 !-----------------------------------------------------------------------
-	  planestress = int(props(201))
-	  centro = int(props(202))
-	  npts = int(props(203))
-	  epsdot = props(204)
-	  if (planestress.eq.1) then
-		n = 6*(npts-2)**2 + 12*(npts-2) + 8
-	  else
-		n = 10*(npts-2)**4 + 40*(npts-2)**3 +
-     +  80*(npts-2)**2 + 80*(npts-2) + 32
-	   endif
-	   if (n.gt.nDmax) then
-		write(6,*) '!! Error'
-		write(6,*) 'Too many stress points selected'
-		write(6,*) 'Number of stress points slected : ',n
-		write(6,*) 'Please use less than or equal to: ',nDmax
-		stop
-	  endif
+      n = nDmax
 !-----------------------------------------------------------------------
 !         Deformation to be used
 !-----------------------------------------------------------------------
