@@ -1,5 +1,5 @@
 !-----umat subroutine
-      include './Hypo.f'
+      include '../SIMLab/scmm-hypo/Hypo.f'
 	  include './readprops.f'
 	  include './readeuler.f'
 	  include './Deformation.f'
@@ -18,8 +18,9 @@
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
       real*8 strain(6),epsdot,wp
 	  real*8 domega32,domega13,domega21
+      CHARACTER*12 DATE1,TIME1
 c
-      real*8 TIME
+      real*8 TIME,printDelay,currentTime,printTime
       real*8 DT
       real*8 PROPS(nprops)
 	  real*8 work
@@ -27,7 +28,7 @@ c
       real*8 oneovertotweight
 	  real*8 sigma(6)
       real*8 one,zero
-      parameter(zero=0.d0,one=1.d0)
+      parameter(zero=0.d0,one=1.d0,printDelay=5.d0*60.d0)
 !-----------------------------------------------------------------------
 !     Define some parameters
 !-----------------------------------------------------------------------
@@ -63,14 +64,24 @@ c
       allocate(Dij(nDmax,6))
       call deformation(Dij,nDmax,ndef,planestress,centro,npts,epsdot)
 c
-      NITER  = 1000001 ! Max number of iterations
+      NITER  = 100001 ! Max number of iterations
 c
-      DT     = wp/(epsdot*props(6)*3.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
+      DT     = wp/(epsdot*props(6)*1.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
 !-----------------------------------------------------------------------
 !     Write to file
 !-----------------------------------------------------------------------
 	  open (unit = 2, file = ".\Output\output.txt")
       WRITE(2,*) 'S11, S22, S33, S12, S23, S31, wp'
+!-----------------------------------------------------------------------
+!     Write to start date and time
+!-----------------------------------------------------------------------
+      write(6,*) '----------------------------------------------------'
+      call DATE_AND_TIME(DATE1,TIME1)
+      call cpu_time(printTime)
+      write(6,*)'Started: ',DATE1(7:8),'.',DATE1(5:6),'.',
+     &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
+     &           TIME1(5:6)
+      write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
@@ -140,7 +151,7 @@ c
 !-----------------------------------------------------------------------
 !        Extract strain increments 
 !-----------------------------------------------------------------------
-         if(time.gt.zero)then
+!         if(time.gt.zero)then
 c
             do i=1,nblock
 				defgradNew(i,1) = defgradOld(i,1)*(Dij(km,1)*dt+one)
@@ -171,11 +182,11 @@ c
      +           +defgradOld(i,5)*Dij(km,4)*dt
      +           +defgradOld(i,3)*Dij(km,6)*dt
 			enddo
-         endif
+!         endif
 !-----------------------------------------------------------------------
 !        CALL UMAT
 !-----------------------------------------------------------------------
-         CALL Hypo(stressNew,stateNew,defgradNew,nblock,
+         CALL Hypo(stressNew,stateNew,defgradNew,
      +               stressOld,stateOld,defgradOld,dt,props,
      +               nblock,3,3,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
@@ -213,6 +224,13 @@ c
 			work = work + Dissipation(i)*ang(i,4)*oneovertotweight
 		 enddo
 		 if (work.ge.wp) then
+            call cpu_time(currentTime)
+            if(currentTime.ge.(printTime+printDelay))then
+               printTime = printTime+printDelay
+               write(6,*) 'Deformation points completed: ',
+     .                    km, ' of ', ndef
+            endif
+!            write(6,*) iter
             sigma = zero
             do i=1,nblock
                sigma(1) = sigma(1)+STRESSNEW(i,1)*ang(i,4)
@@ -239,6 +257,15 @@ c
       enddo
    51 continue
 	  close(2)
+!-----------------------------------------------------------------------
+!     Write to start date and time
+!-----------------------------------------------------------------------
+      write(6,*) '----------------------------------------------------'
+      CALL DATE_AND_TIME(DATE1,TIME1)
+      write(6,*)'Started: ',DATE1(7:8),'.',DATE1(5:6),'.',
+     &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
+     &           TIME1(5:6)
+      write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
 !     END PROGRAM
 !-----------------------------------------------------------------------
