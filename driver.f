@@ -225,7 +225,8 @@ c
 		 enddo
 		 if (work.ge.wp) then
             call cpu_time(currentTime)
-            if(currentTime.ge.(printTime+printDelay))then
+            if((currentTime.ge.(printTime+printDelay)).or.
+     .         (km.eq.ndef))then
                printTime = printTime+printDelay
                write(6,*) 'Deformation points completed: ',
      .                    km, ' of ', ndef
@@ -262,7 +263,7 @@ c
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       CALL DATE_AND_TIME(DATE1,TIME1)
-      write(6,*)'Started: ',DATE1(7:8),'.',DATE1(5:6),'.',
+      write(6,*)'Finished: ',DATE1(7:8),'.',DATE1(5:6),'.',
      &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
