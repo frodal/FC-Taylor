@@ -40,7 +40,7 @@ figure
 plot(s11,s22,'k.')
 hold on
 % plot(-s11,-s22,'k.') % in case of centro symmetry
-% axis square
+axis square
 xlim([-1.5,1.5])
 ylim([-1.5,1.5])
 
