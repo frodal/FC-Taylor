@@ -1,8 +1,8 @@
 !-----umat subroutine
       include '../SIMLab/scmm-hypo/Hypo.f'
-	  include './readprops.f'
-	  include './readeuler.f'
-	  include './Deformation.f'
+      include './readprops.f'
+      include './readeuler.f'
+      include './Deformation.f'
 !-----------------------------------------------------------------------
 !     Driver program
 !-----------------------------------------------------------------------
@@ -12,21 +12,20 @@
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
-	  integer nDmax,nprops
+      integer nDmax,nprops
       integer k,ITER,ndef,i,km,planestress,centro,npts
       integer NITER,NSTATEV,nblock
       parameter(nprops=16,NSTATEV=28)
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
       real*8 strain(6),epsdot,wp
-	  real*8 domega32,domega13,domega21
+      real*8 domega32,domega13,domega21
       CHARACTER*12 DATE1,TIME1
 c
       real*8 printDelay,currentTime,printTime
       real*8 DT
       real*8 PROPS(nprops)
-	  real*8 work
-	  real*8 totweight
-      real*8 oneovertotweight
+      real*8 work
+      real*8 totweight
       real*8 one,zero
       parameter(zero=0.d0,one=1.d0,printDelay=5.d0*60.d0)
 !-----------------------------------------------------------------------
@@ -36,8 +35,8 @@ c
 !-----------------------------------------------------------------------
 !     Define material properties
 !-----------------------------------------------------------------------
-	  call readprops(props,nprops,planestress,centro,npts,epsdot,wp)			! Read material properties and stuff...
-	  call readeulerlength(nblock)
+      call readprops(props,nprops,planestress,centro,npts,epsdot,wp)			! Read material properties and stuff...
+      call readeulerlength(nblock)
       allocate(ang(nblock,4))
       allocate(STRESSOLD(nblock,6))
       allocate(STRESSNEW(nblock,6))
@@ -47,20 +46,22 @@ c
       allocate(defgradOld(nblock,9))
       allocate(Dissipation(nblock))
       call readeuler(ang,nblock)	! Read Euler angles and weights
-	  totweight = zero
-	  do i=1,nblock
-		totweight = totweight + ang(i,4)
-	  enddo
-      oneovertotweight = one/totweight
+      totweight = zero
+      do i=1,nblock
+        totweight = totweight + ang(i,4)
+      enddo
+      do i=1,nblock
+        ang(i,4) = ang(i,4)/totweight
+      enddo
 !-----------------------------------------------------------------------
 !     Define loading
 !-----------------------------------------------------------------------
       if (planestress.eq.1) then
-		nDmax = 6*(npts-2)**2 + 12*(npts-2) + 8
-	  else
-		nDmax = 10*(npts-2)**4 + 40*(npts-2)**3 +
+        nDmax = 6*(npts-2)**2 + 12*(npts-2) + 8
+      else
+        nDmax = 10*(npts-2)**4 + 40*(npts-2)**3 +
      +  80*(npts-2)**2 + 80*(npts-2) + 32
-	  endif
+      endif
       allocate(Dij(nDmax,6))
       call deformation(Dij,nDmax,ndef,planestress,centro,npts,epsdot)
       allocate(sigma(ndef,7))
@@ -86,24 +87,22 @@ c
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
-	  work = zero
+      work = zero
 c
       STRESSOLD = zero
-      STRESSNEW = zero
 c
       do i=1,nblock
-		STATEOLD(i,1) = ang(i,1)
-		STATEOLD(i,2) = ang(i,2)
-		STATEOLD(i,3) = ang(i,3)
-	  enddo
+        STATEOLD(i,1) = ang(i,1)
+        STATEOLD(i,2) = ang(i,2)
+        STATEOLD(i,3) = ang(i,3)
+      enddo
       do k=4,NSTATEV
-		do i=1,nblock
-			STATEOLD(i,k) = zero
-			STATENEW(i,k) = zero
-		enddo
-	  enddo
+        do i=1,nblock
+            STATEOLD(i,k) = zero
+        enddo
+      enddo
 c
-	  do i=1,nblock
+      do i=1,nblock
         defgradOld(i,1) = one
         defgradOld(i,2) = one
         defgradOld(i,3) = one
@@ -113,7 +112,7 @@ c
         defgradOld(i,7) = zero
         defgradOld(i,8) = zero
         defgradOld(i,9) = zero
-	  enddo
+      enddo
 !-----------------------------------------------------------------------
 !     Start loop
 !-----------------------------------------------------------------------
@@ -123,35 +122,35 @@ c
 !-----------------------------------------------------------------------
 !        Extract strain increments 
 !-----------------------------------------------------------------------
-            do i=1,nblock
-				defgradNew(i,1) = defgradOld(i,1)*(Dij(km,1)*dt+one)
+         do i=1,nblock
+            defgradNew(i,1) = defgradOld(i,1)*(Dij(km,1)*dt+one)
      +           +defgradOld(i,7)*Dij(km,4)*dt
      +           +defgradOld(i,6)*Dij(km,6)*dt
-				defgradNew(i,2) = defgradOld(i,2)*(Dij(km,2)*dt+one)
+            defgradNew(i,2) = defgradOld(i,2)*(Dij(km,2)*dt+one)
      +           +defgradOld(i,4)*Dij(km,4)*dt
      +           +defgradOld(i,8)*Dij(km,5)*dt
-				defgradNew(i,3) = defgradOld(i,3)*(Dij(km,3)*dt+one)
+            defgradNew(i,3) = defgradOld(i,3)*(Dij(km,3)*dt+one)
      +           +defgradOld(i,9)*Dij(km,6)*dt
      +           +defgradOld(i,5)*Dij(km,5)*dt
-				defgradNew(i,4) = defgradOld(i,4)*(Dij(km,1)*dt+one)
+            defgradNew(i,4) = defgradOld(i,4)*(Dij(km,1)*dt+one)
      +           +defgradOld(i,2)*Dij(km,4)*dt
      +           +defgradOld(i,8)*Dij(km,6)*dt
-				defgradNew(i,5) = defgradOld(i,5)*(Dij(km,2)*dt+one)
+            defgradNew(i,5) = defgradOld(i,5)*(Dij(km,2)*dt+one)
      +           +defgradOld(i,9)*Dij(km,4)*dt
      +           +defgradOld(i,3)*Dij(km,5)*dt
-				defgradNew(i,6) = defgradOld(i,6)*(Dij(km,3)*dt+one)
+            defgradNew(i,6) = defgradOld(i,6)*(Dij(km,3)*dt+one)
      +           +defgradOld(i,1)*Dij(km,6)*dt
      +           +defgradOld(i,7)*Dij(km,5)*dt
-				defgradNew(i,7) = defgradOld(i,7)*(Dij(km,2)*dt+one)
+            defgradNew(i,7) = defgradOld(i,7)*(Dij(km,2)*dt+one)
      +           +defgradOld(i,1)*Dij(km,4)*dt
      +           +defgradOld(i,6)*Dij(km,5)*dt
-				defgradNew(i,8) = defgradOld(i,8)*(Dij(km,3)*dt+one)
+            defgradNew(i,8) = defgradOld(i,8)*(Dij(km,3)*dt+one)
      +           +defgradOld(i,4)*Dij(km,6)*dt
      +           +defgradOld(i,2)*Dij(km,5)*dt
-				defgradNew(i,9) = defgradOld(i,9)*(Dij(km,1)*dt+one)
+            defgradNew(i,9) = defgradOld(i,9)*(Dij(km,1)*dt+one)
      +           +defgradOld(i,5)*Dij(km,4)*dt
      +           +defgradOld(i,3)*Dij(km,6)*dt
-			enddo
+         enddo
 !-----------------------------------------------------------------------
 !        CALL UMAT
 !-----------------------------------------------------------------------
@@ -164,9 +163,9 @@ c
          STRESSOLD = STRESSNEW
          STATEOLD = STATENEW
          defgradOld = defgradNew
-		 do i=1,nblock
-			work = work + Dissipation(i)*ang(i,4)*oneovertotweight
-		 enddo
+         do i=1,nblock
+            work = work + Dissipation(i)*ang(i,4)
+         enddo
       enddo
       if (work.ge.wp) then
 !-----------------------------------------------------------------------
@@ -195,9 +194,7 @@ c
         sigma(km,2) = sigma(km,2)-sigma(km,3)	! Yielding is not dependent upon hydrostatic stress!
         sigma(km,3) = sigma(km,3)-sigma(km,3)
         sigma(km,7) = work
-        sigma(km,1:6) = sigma(km,1:6)*oneovertotweight
-      endif
-      if (ITER.ge.NITER) then
+      elseif (ITER.ge.NITER) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
         stop
@@ -212,7 +209,7 @@ c
         write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +              sigma(km,5),sigma(km,6), sigma(km,7)
       enddo
-	  close(2)
+      close(2)
 !-----------------------------------------------------------------------
 !     Write to finish date and time
 !-----------------------------------------------------------------------
