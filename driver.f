@@ -14,7 +14,7 @@
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
-      integer nDmax,nprops
+      integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts
       integer NITER,NSTATEV,nblock
       parameter(nprops=16,NSTATEV=28)
@@ -75,6 +75,7 @@
       allocate(sigma(ndef,7))
 !-----------------------------------------------------------------------
       sigma = zero
+      iComplete = 0
 !-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
 !-----------------------------------------------------------------------
@@ -92,6 +93,7 @@
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
+!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
 !-----------------------------------------------------------------------
 !     Initialize some variables
@@ -179,16 +181,20 @@
 !-----------------------------------------------------------------------
 !     Write to window if enough time has passed
 !-----------------------------------------------------------------------
+!$OMP MASTER
         call cpu_time(currentTime)
         if((currentTime.ge.(printTime+printDelay)).or.
-     .      (km.eq.ndef))then
+     .      (iComplete+1.eq.ndef))then
             printTime = printTime+printDelay
             write(6,*) 'Deformation points completed: ',
-     .                  km, ' of ', ndef
+     .                  iComplete+1, ' of ', ndef
         endif
+!$OMP END MASTER
 !-----------------------------------------------------------------------
 !     Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
+!$OMP CRITICAL
+        iComplete = iComplete+1
         do i=1,nblock
             sigma(km,1) = sigma(km,1)+STRESSNEW(i,1)*ang(i,4)
             sigma(km,2) = sigma(km,2)+STRESSNEW(i,2)*ang(i,4)
@@ -201,17 +207,19 @@
         sigma(km,2) = sigma(km,2)-sigma(km,3)	! Yielding is not dependent upon hydrostatic stress!
         sigma(km,3) = sigma(km,3)-sigma(km,3)
         sigma(km,7) = work
+!$OMP END CRITICAL
       elseif (ITER.ge.NITER) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
         stop
       endif
       enddo
+!$OMP END PARALLEL DO
 !-----------------------------------------------------------------------
 !     Write the result to file
 !-----------------------------------------------------------------------
       open (unit = 2, file = ".\Output\output.txt")
-      WRITE(2,*) 'S11, S22, S33, S12, S23, S31, wp'
+      write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       do km=1,ndef
         write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +              sigma(km,5),sigma(km,6), sigma(km,7)
@@ -221,7 +229,7 @@
 !     Write to finish date and time
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
-      CALL DATE_AND_TIME(DATE1,TIME1)
+      call DATE_AND_TIME(DATE1,TIME1)
       write(6,*)'Finished: ',DATE1(7:8),'.',DATE1(5:6),'.',
      &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
      &           TIME1(5:6)
@@ -243,7 +251,7 @@
 !     END PROGRAM
 !-----------------------------------------------------------------------
       stop
-   98 FORMAT(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
+   98 format(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
      +              ',',es15.6e3,',',es15.6e3,',',es15.6e3)
       end
 !-----------------------------------------------------------------------
