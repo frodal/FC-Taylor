@@ -7,7 +7,9 @@
 !     Driver program
 !-----------------------------------------------------------------------
       program driver
+!-----------------------------------------------------------------------
       implicit none
+!-----------------------------------------------------------------------
       real*8, allocatable :: ang(:,:), STRESSOLD(:,:), STRESSNEW(:,:),
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
@@ -20,7 +22,7 @@
       real*8 strain(6),epsdot,wp
       real*8 domega32,domega13,domega21
       CHARACTER*12 DATE1,TIME1
-c
+!-----------------------------------------------------------------------
       real*8 printDelay,currentTime,printTime
       real*8 DT
       real*8 PROPS(nprops)
@@ -37,6 +39,7 @@ c
 !-----------------------------------------------------------------------
       call readprops(props,nprops,planestress,centro,npts,epsdot,wp)			! Read material properties and stuff...
       call readeulerlength(nblock)
+!-----------------------------------------------------------------------
       allocate(ang(nblock,4))
       allocate(STRESSOLD(nblock,6))
       allocate(STRESSNEW(nblock,6))
@@ -45,7 +48,9 @@ c
       allocate(defgradNew(nblock,9))
       allocate(defgradOld(nblock,9))
       allocate(Dissipation(nblock))
+!-----------------------------------------------------------------------
       call readeuler(ang,nblock)	! Read Euler angles and weights
+!-----------------------------------------------------------------------
       totweight = zero
       do i=1,nblock
         totweight = totweight + ang(i,4)
@@ -62,13 +67,17 @@ c
         nDmax = 10*(npts-2)**4 + 40*(npts-2)**3 +
      +  80*(npts-2)**2 + 80*(npts-2) + 32
       endif
+!-----------------------------------------------------------------------
       allocate(Dij(nDmax,6))
+!-----------------------------------------------------------------------
       call deformation(Dij,nDmax,ndef,planestress,centro,npts,epsdot)
+!-----------------------------------------------------------------------
       allocate(sigma(ndef,7))
+!-----------------------------------------------------------------------
       sigma = zero
-c
+!-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
-c
+!-----------------------------------------------------------------------
       DT     = wp/(epsdot*props(6)*1.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
 !-----------------------------------------------------------------------
 !     Write to start date and time
@@ -88,9 +97,8 @@ c
 !     Initialize some variables
 !-----------------------------------------------------------------------
       work = zero
-c
       STRESSOLD = zero
-c
+!-----------------------------------------------------------------------
       do i=1,nblock
         STATEOLD(i,1) = ang(i,1)
         STATEOLD(i,2) = ang(i,2)
@@ -101,7 +109,7 @@ c
             STATEOLD(i,k) = zero
         enddo
       enddo
-c
+!-----------------------------------------------------------------------
       do i=1,nblock
         defgradOld(i,1) = one
         defgradOld(i,2) = one
@@ -178,7 +186,6 @@ c
             write(6,*) 'Deformation points completed: ',
      .                  km, ' of ', ndef
         endif
-!        write(6,*) iter
 !-----------------------------------------------------------------------
 !     Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
@@ -220,9 +227,23 @@ c
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
+!     Deallocate allocated memory
+!-----------------------------------------------------------------------
+      if(allocated(ang)) deallocate(ang)
+      if(allocated(STRESSOLD)) deallocate(STRESSOLD)
+      if(allocated(STRESSNEW)) deallocate(STRESSNEW)
+      if(allocated(STATEOLD)) deallocate(STATEOLD)
+      if(allocated(STATENEW)) deallocate(STATENEW)
+      if(allocated(defgradNew)) deallocate(defgradNew)
+      if(allocated(defgradOld)) deallocate(defgradOld)
+      if(allocated(Dissipation)) deallocate(Dissipation)
+      if(allocated(Dij)) deallocate(Dij)
+      if(allocated(sigma)) deallocate(sigma)
+!-----------------------------------------------------------------------
 !     END PROGRAM
 !-----------------------------------------------------------------------
       stop
    98 FORMAT(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
      +              ',',es15.6e3,',',es15.6e3,',',es15.6e3)
       end
+!-----------------------------------------------------------------------
