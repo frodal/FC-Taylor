@@ -1,3 +1,7 @@
+!     For gfortran, compile the program with -fopenmp 
+!     For ifort, compile the program with -openmp
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !-----umat subroutine
       include '../SIMLab/scmm-hypo/Hypo.f'
       include './readprops.f'
@@ -93,7 +97,9 @@
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
-!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
+!$    call OMP_set_num_threads(2)
+!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
+!$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
 !-----------------------------------------------------------------------
 !     Initialize some variables
@@ -181,7 +187,7 @@
 !-----------------------------------------------------------------------
 !     Write to window if enough time has passed
 !-----------------------------------------------------------------------
-!$OMP MASTER
+!$OMP CRITICAL
         call cpu_time(currentTime)
         if((currentTime.ge.(printTime+printDelay)).or.
      .      (iComplete+1.eq.ndef))then
@@ -189,11 +195,9 @@
             write(6,*) 'Deformation points completed: ',
      .                  iComplete+1, ' of ', ndef
         endif
-!$OMP END MASTER
 !-----------------------------------------------------------------------
 !     Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
-!$OMP CRITICAL
         iComplete = iComplete+1
         do i=1,nblock
             sigma(km,1) = sigma(km,1)+STRESSNEW(i,1)*ang(i,4)
