@@ -19,7 +19,7 @@
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
       integer nDmax,nprops, iComplete
-      integer k,ITER,ndef,i,km,planestress,centro,npts
+      integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock
       parameter(nprops=16,NSTATEV=28)
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
@@ -41,7 +41,8 @@
 !-----------------------------------------------------------------------
 !     Define material properties
 !-----------------------------------------------------------------------
-      call readprops(props,nprops,planestress,centro,npts,epsdot,wp)			! Read material properties and stuff...
+      call readprops(props,nprops,planestress,centro,npts,epsdot,wp,
+     &               ncpus)     ! Read material properties and stuff...
       call readeulerlength(nblock)
 !-----------------------------------------------------------------------
       allocate(ang(nblock,4))
@@ -97,7 +98,7 @@
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
-!$    call OMP_set_num_threads(2)
+!$    call OMP_set_num_threads(ncpus)
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
 !$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
@@ -189,9 +190,9 @@
 !-----------------------------------------------------------------------
 !$OMP CRITICAL
         call cpu_time(currentTime)
-        if((currentTime.ge.(printTime+printDelay)).or.
+        if((currentTime.ge.(printTime+printDelay*real(ncpus))).or.
      .      (iComplete+1.eq.ndef))then
-            printTime = printTime+printDelay
+            printTime = printTime+printDelay*real(ncpus)
             write(6,*) 'Deformation points completed: ',
      .                  iComplete+1, ' of ', ndef
         endif

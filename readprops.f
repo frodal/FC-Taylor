@@ -5,16 +5,16 @@
 ! 
 !-----------------------------------------------------------------------
       subroutine readprops(props,nprops,
-     .                     planestress,centro,npts,epsdot,wp)
+     .                     planestress,centro,npts,epsdot,wp,ncpus)
 !-----------------------------------------------------------------------
       implicit none
 !-----------------------------------------------------------------------
       integer, intent(in) :: nprops
       real*8, intent(out) :: props(nprops), epsdot, wp
-      integer, intent(out) :: planestress, centro, npts
+      integer, intent(out) :: planestress, centro, npts, ncpus
 !     Local variables
       real*8 dummy(nprops)
-      integer ios,readflag
+      integer ios,readflag,tmpcpu,omp_get_num_procs
       character*1000 line
       LOGICAL THERE
 !-----------------------------------------------------------------------
@@ -27,6 +27,8 @@
       planestress = 1
       centro      = 1
       npts        = 2
+      ncpus       = 1
+      tmpcpu      = 1
       epsdot      = 1.d-3
       wp          = 2.d-1
       dummy       = 0.d0
@@ -75,7 +77,7 @@
           if (readflag .eq. 1) then
             read(line,*,end=78) dummy
           elseif (readflag .eq. 2) then
-            read(line,*,end=78) planestress,centro,npts,epsdot,wp
+            read(line,*,end=78) planestress,centro,npts,epsdot,wp,tmpcpu
           endif
         endif
    78 continue
@@ -144,6 +146,14 @@
       else
         write(6,*) 'Centro-symmetry not used'
       endif
+!$    if(tmpcpu.eq.0) then
+!$      ncpus = OMP_get_num_procs()
+!$    elseif(tmpcpu.lt.0) then
+!$      ncpus = 1
+!$    else
+!$      ncpus = tmpcpu
+!$    endif
+      write(6,*) 'Number of threads/cpus used: ',ncpus
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
       return
