@@ -1,5 +1,8 @@
 !     For gfortran, compile the program with -fopenmp 
 !     For ifort, compile the program with -openmp
+!     Remember to increase the Stack size with -Fn where n is the 
+!     number of bytes, e.g., 
+!     ifort -openmp -F1000000000 driver.f
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !-----umat subroutine
@@ -99,6 +102,7 @@
 !     Loop over deformation points
 !-----------------------------------------------------------------------
 !$    call OMP_set_num_threads(ncpus)
+!$    call kmp_set_stacksize(1000000000)
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
 !$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
