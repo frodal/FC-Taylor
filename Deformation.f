@@ -4,21 +4,20 @@
 ! 
 ! 
 !-----------------------------------------------------------------------
-      subroutine deformation(D,nDmax,i,planestress,centro,npts,epsdot)
+      subroutine deformation(D,nDmax,ndef,planestress,centro,npts,
+     +                       epsdot)
 !-----------------------------------------------------------------------
       implicit none
 !-----------------------------------------------------------------------
-      integer, intent(in) :: nDmax,planestress,npts,centro
-      integer, intent(out) :: i
+      integer, intent(in) :: nDmax,ndef,planestress,npts,centro
       real*8, intent(in) :: epsdot
-      real*8, intent(out) :: D(nDmax,6)
+      real*8, intent(out) :: D(ndef,6)
 !     Local variables
       real*8 Dp(nDmax,5),temp
-      integer k,n
+      integer k,i
 !-----------------------------------------------------------------------
 !         Deformation properties
 !-----------------------------------------------------------------------
-      n = nDmax
 !-----------------------------------------------------------------------
 !         Deformation to be used
 !-----------------------------------------------------------------------
@@ -30,7 +29,7 @@
 !-----------------------------------------------------------------------
       if(centro.eq.1)then
         i = 0
-        do k=1,n
+        do k=1,nDmax
         temp=epsdot*((3.0**0.5+3.0)*Dp(k,1)/6.0+
      +               (3.0**0.5-3.0)*Dp(k,2)/6.0)    ! D11
         if(temp.ge.0d0)then
@@ -46,7 +45,7 @@
         endif
         enddo
       else
-      do k=1,n
+      do k=1,nDmax
         D(k,1) = epsdot*((3.0**0.5+3.0)*Dp(k,1)/6.0+
      +                   (3.0**0.5-3.0)*Dp(k,2)/6.0)! D11
         D(k,2) = epsdot*((3.0**0.5-3.0)*Dp(k,1)/6.0+
@@ -56,13 +55,12 @@
         D(k,5) = epsdot*sqrt(2.0)*Dp(k,4)/2.0! D23
         D(k,6) = epsdot*sqrt(2.0)*Dp(k,5)/2.0! D31
       enddo
-      i = n
       endif
 !-----------------------------------------------------------------------
 !         Write information
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
-      write(6,*) 'Number of generated strain rate points: ',i
+      write(6,*) 'Number of generated strain rate points: ',ndef
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
       return
@@ -180,3 +178,46 @@
       return
       end subroutine
 !-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!                         SUBROUTINE deformationPoints
+!-----------------------------------------------------------------------
+! 
+! 
+!-----------------------------------------------------------------------
+      subroutine deformationPoints(nDmax,ndef,planestress,centro,npts,
+     +                             epsdot)
+!-----------------------------------------------------------------------
+      implicit none
+      integer, intent(in) :: nDmax,planestress,npts,centro
+      integer, intent(out) :: ndef
+      real*8, intent(in) :: epsdot
+!     Local variables
+      real*8 Dp(nDmax,5),temp
+      integer k
+!-----------------------------------------------------------------------
+!         Deformation properties
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!         Deformation to be used
+!-----------------------------------------------------------------------
+      if (planestress.eq.1) then
+        call generatestrainrate2d(Dp,nDmax,npts)
+      else
+        call generatestrainrate3d(Dp,nDmax,npts)
+      endif
+!-----------------------------------------------------------------------
+      if(centro.eq.1)then
+        ndef = 0
+        do k=1,nDmax
+        temp=epsdot*((3.0**0.5+3.0)*Dp(k,1)/6.0+
+     +               (3.0**0.5-3.0)*Dp(k,2)/6.0)    ! D11
+        if(temp.ge.0d0)then
+          ndef=ndef+1
+        endif
+        enddo
+      else
+        ndef = nDmax
+      endif
+!-----------------------------------------------------------------------
+      return
+      end subroutine deformationPoints

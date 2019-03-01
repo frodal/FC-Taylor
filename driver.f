@@ -76,7 +76,8 @@
      +  80*(npts-2)**2 + 80*(npts-2) + 32
       endif
 !-----------------------------------------------------------------------
-      allocate(Dij(nDmax,6))
+      call deformationPoints(nDmax,ndef,planestress,centro,npts,epsdot)
+      allocate(Dij(ndef,6))
 !-----------------------------------------------------------------------
       call deformation(Dij,nDmax,ndef,planestress,centro,npts,epsdot)
 !-----------------------------------------------------------------------
