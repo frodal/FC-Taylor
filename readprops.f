@@ -124,7 +124,7 @@
       write(6,*) '|                                                  |'
       write(6,*) '|               FC-Taylor program                  |'
       write(6,*) '|                                                  |'
-      write(6,*) '|             by Bjørn Håkon Frodal                |'
+      write(6,*) '|             by Bjorn Hakon Frodal                |'
       write(6,*) '|             bjorn.h.frodal@ntnu.no               |'
       write(6,*) '|                                                  |'
       write(6,*) '|                Copyright 2019                    |'
