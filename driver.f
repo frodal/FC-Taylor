@@ -3,6 +3,8 @@
 !     Remember to increase the Stack size with -Fn where n is the 
 !     number of bytes, e.g., 
 !     ifort -openmp -F1000000000 driver.f
+!     Note that lines starting with !$ are compiler directives
+!     for using OpenMP, i.e., multi-threading
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !-----umat subroutine
@@ -90,7 +92,7 @@
 !-----------------------------------------------------------------------
       DT     = wp/(epsdot*props(6)*1.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
 !-----------------------------------------------------------------------
-!     Write to start date and time
+!     Write the start date and time
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       call DATE_AND_TIME(DATE1,TIME1)
@@ -236,7 +238,7 @@
       enddo
       close(2)
 !-----------------------------------------------------------------------
-!     Write to finish date and time
+!     Write the finish date and time
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       call DATE_AND_TIME(DATE1,TIME1)

@@ -104,18 +104,36 @@
       props(15) = dummy(11)
       props(16) = dummy(12)
       if(npts.lt.2)then
-        write(6,*) 'npts must be greater or equal to 2'
+        write(6,*) 'Error! npts must be greater or equal to 2'
         stop
       endif
-!      props(201)= planestress
-!      props(202)= centro
-!      props(203)= npts
-!      props(204)= epsdot
-!      props(205)= wp
+      if(epsdot.le.0.d0)then
+        write(6,*) 'Warning! epsdot should be greater than zero'
+        write(6,*) 'Using epsdot = 1.d-3'
+        epsdot = 1.d-3
+      endif
+      if(wp.le.0.d0)then
+        write(6,*) 'Warning! Wp should be greater than zero'
+        write(6,*) 'Using Wp = 2.d-1'
+        wp = 2.d-1
+      endif
 !-----------------------------------------------------------------------
 !         Write information
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
+      write(6,*) '|                                                  |'
+      write(6,*) '|               FC-Taylor program                  |'
+      write(6,*) '|                                                  |'
+      write(6,*) '|             by Bjørn Håkon Frodal                |'
+      write(6,*) '|             bjorn.h.frodal@ntnu.no               |'
+      write(6,*) '|                                                  |'
+      write(6,*) '|                Copyright 2019                    |'
+      write(6,*) '|  Norwegian University of Science and Technology, |'
+      write(6,*) '|     Department of Structural Engineering,        |'
+      write(6,*) '|     Structural Impact Laboratory (SIMLab),       |'
+      write(6,*) '|              Trondheim, Norway.                  |'
+      write(6,*) '|                                                  |'
+      write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
       write(6,*) '|                     INPUT                        |'
       write(6,*) '|                                                  |'
@@ -146,6 +164,9 @@
       else
         write(6,*) 'Centro-symmetry not used'
       endif
+!-----------------------------------------------------------------------
+!   The following code is compiled if OpenMP is used
+!-----------------------------------------------------------------------
 !$    if(tmpcpu.eq.0) then
 !$      ncpus = OMP_get_num_procs()
 !$    elseif(tmpcpu.lt.0) then
