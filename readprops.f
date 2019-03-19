@@ -133,6 +133,8 @@
       write(6,*) '|     Structural Impact Laboratory (SIMLab),       |'
       write(6,*) '|              Trondheim, Norway.                  |'
       write(6,*) '|                                                  |'
+      write(6,*) '|                 Version 0.1.0                    |'
+      write(6,*) '|                                                  |'
       write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
       write(6,*) '|                     INPUT                        |'
