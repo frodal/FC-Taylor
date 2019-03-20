@@ -1,3 +1,12 @@
+!     For gfortran, compile the program with -fopenmp 
+!     For ifort, compile the program with -openmp
+!     Remember to increase the Stack size with -Fn where n is the 
+!     number of bytes, e.g., 
+!     ifort -openmp -F1000000000 driver.f
+!     Note that lines starting with !$ are compiler directives
+!     for using OpenMP, i.e., multi-threading
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !-----umat subroutine
       include '../SIMLab/scmm-hypo/Hypo.f'
       include './readprops.f'
@@ -7,20 +16,22 @@
 !     Driver program
 !-----------------------------------------------------------------------
       program driver
+!-----------------------------------------------------------------------
       implicit none
+!-----------------------------------------------------------------------
       real*8, allocatable :: ang(:,:), STRESSOLD(:,:), STRESSNEW(:,:),
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
-      integer nDmax,nprops
-      integer k,ITER,ndef,i,km,planestress,centro,npts
+      integer nDmax,nprops, iComplete
+      integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock
       parameter(nprops=16,NSTATEV=28)
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
       real*8 strain(6),epsdot,wp
       real*8 domega32,domega13,domega21
       CHARACTER*12 DATE1,TIME1
-c
+!-----------------------------------------------------------------------
       real*8 printDelay,currentTime,printTime
       real*8 DT
       real*8 PROPS(nprops)
@@ -35,8 +46,10 @@ c
 !-----------------------------------------------------------------------
 !     Define material properties
 !-----------------------------------------------------------------------
-      call readprops(props,nprops,planestress,centro,npts,epsdot,wp)			! Read material properties and stuff...
+      call readprops(props,nprops,planestress,centro,npts,epsdot,wp,
+     &               ncpus)     ! Read material properties and stuff...
       call readeulerlength(nblock)
+!-----------------------------------------------------------------------
       allocate(ang(nblock,4))
       allocate(STRESSOLD(nblock,6))
       allocate(STRESSNEW(nblock,6))
@@ -45,7 +58,9 @@ c
       allocate(defgradNew(nblock,9))
       allocate(defgradOld(nblock,9))
       allocate(Dissipation(nblock))
+!-----------------------------------------------------------------------
       call readeuler(ang,nblock)	! Read Euler angles and weights
+!-----------------------------------------------------------------------
       totweight = zero
       do i=1,nblock
         totweight = totweight + ang(i,4)
@@ -62,16 +77,22 @@ c
         nDmax = 10*(npts-2)**4 + 40*(npts-2)**3 +
      +  80*(npts-2)**2 + 80*(npts-2) + 32
       endif
-      allocate(Dij(nDmax,6))
+!-----------------------------------------------------------------------
+      call deformationPoints(nDmax,ndef,planestress,centro,npts,epsdot)
+      allocate(Dij(ndef,6))
+!-----------------------------------------------------------------------
       call deformation(Dij,nDmax,ndef,planestress,centro,npts,epsdot)
+!-----------------------------------------------------------------------
       allocate(sigma(ndef,7))
+!-----------------------------------------------------------------------
       sigma = zero
-c
+      iComplete = 0
+!-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
-c
+!-----------------------------------------------------------------------
       DT     = wp/(epsdot*props(6)*1.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
 !-----------------------------------------------------------------------
-!     Write to start date and time
+!     Write the start date and time
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       call DATE_AND_TIME(DATE1,TIME1)
@@ -83,14 +104,17 @@ c
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
+!$    call OMP_set_num_threads(ncpus)
+!$    call kmp_set_stacksize(1000000000)
+!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
+!$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
       work = zero
-c
       STRESSOLD = zero
-c
+!-----------------------------------------------------------------------
       do i=1,nblock
         STATEOLD(i,1) = ang(i,1)
         STATEOLD(i,2) = ang(i,2)
@@ -101,7 +125,7 @@ c
             STATEOLD(i,k) = zero
         enddo
       enddo
-c
+!-----------------------------------------------------------------------
       do i=1,nblock
         defgradOld(i,1) = one
         defgradOld(i,2) = one
@@ -171,17 +195,18 @@ c
 !-----------------------------------------------------------------------
 !     Write to window if enough time has passed
 !-----------------------------------------------------------------------
+!$OMP CRITICAL
         call cpu_time(currentTime)
-        if((currentTime.ge.(printTime+printDelay)).or.
-     .      (km.eq.ndef))then
-            printTime = printTime+printDelay
+        if((currentTime.ge.(printTime+printDelay*real(ncpus))).or.
+     .      (iComplete+1.eq.ndef))then
+            printTime = printTime+printDelay*real(ncpus)
             write(6,*) 'Deformation points completed: ',
-     .                  km, ' of ', ndef
+     .                  iComplete+1, ' of ', ndef
         endif
-!        write(6,*) iter
 !-----------------------------------------------------------------------
 !     Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
+        iComplete = iComplete+1
         do i=1,nblock
             sigma(km,1) = sigma(km,1)+STRESSNEW(i,1)*ang(i,4)
             sigma(km,2) = sigma(km,2)+STRESSNEW(i,2)*ang(i,4)
@@ -194,35 +219,51 @@ c
         sigma(km,2) = sigma(km,2)-sigma(km,3)	! Yielding is not dependent upon hydrostatic stress!
         sigma(km,3) = sigma(km,3)-sigma(km,3)
         sigma(km,7) = work
+!$OMP END CRITICAL
       elseif (ITER.ge.NITER) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
         stop
       endif
       enddo
+!$OMP END PARALLEL DO
 !-----------------------------------------------------------------------
 !     Write the result to file
 !-----------------------------------------------------------------------
       open (unit = 2, file = ".\Output\output.txt")
-      WRITE(2,*) 'S11, S22, S33, S12, S23, S31, wp'
+      write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       do km=1,ndef
         write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +              sigma(km,5),sigma(km,6), sigma(km,7)
       enddo
       close(2)
 !-----------------------------------------------------------------------
-!     Write to finish date and time
+!     Write the finish date and time
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
-      CALL DATE_AND_TIME(DATE1,TIME1)
+      call DATE_AND_TIME(DATE1,TIME1)
       write(6,*)'Finished: ',DATE1(7:8),'.',DATE1(5:6),'.',
      &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
+!     Deallocate allocated memory
+!-----------------------------------------------------------------------
+      if(allocated(ang)) deallocate(ang)
+      if(allocated(STRESSOLD)) deallocate(STRESSOLD)
+      if(allocated(STRESSNEW)) deallocate(STRESSNEW)
+      if(allocated(STATEOLD)) deallocate(STATEOLD)
+      if(allocated(STATENEW)) deallocate(STATENEW)
+      if(allocated(defgradNew)) deallocate(defgradNew)
+      if(allocated(defgradOld)) deallocate(defgradOld)
+      if(allocated(Dissipation)) deallocate(Dissipation)
+      if(allocated(Dij)) deallocate(Dij)
+      if(allocated(sigma)) deallocate(sigma)
+!-----------------------------------------------------------------------
 !     END PROGRAM
 !-----------------------------------------------------------------------
       stop
-   98 FORMAT(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
+   98 format(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
      +              ',',es15.6e3,',',es15.6e3,',',es15.6e3)
       end
+!-----------------------------------------------------------------------
