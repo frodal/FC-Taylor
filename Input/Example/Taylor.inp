@@ -7,5 +7,5 @@
 **    C11,      C12,      C44,   g0_dot,        m,   tau0_c,        q,    hflag,   th1/h0, tau1/t_s,    th2/a,     tau2
  106430.0,  60350.0,  28210.0,     0.01,    0.005,  46.7301,      1.4,        1,    14.63,    12.91,   112.36,    27.94
 *DEF
-** planestress, centro,  npts,   epsdot,       wp,    ncpus
-        1,        1,       12,    0.001,      0.2,        1
+** planestress, centro,  npts,   epsdot,      wpc,    ncpus
+        1,        1,       12,    0.001,      0.2,        4
