@@ -14,7 +14,7 @@ er=inf;
 s0=1;
 for i=1:length(s11)
     if (sqrt(s22(i)^2+s33(i)^2+s12(i)^2+s23(i)^2+s31(i)^2)<er)
-        s0=s11(i);
+        s0=abs(s11(i));
         er=sqrt(s22(i)^2+s33(i)^2+2*s12(i)^2+2*s23(i)^2+2*s31(i)^2);    % "distance" from s11 axis
     end
 end
@@ -25,14 +25,6 @@ s33=s33/s0;
 s23=s23/s0;
 s31=s31/s0;
 s12=s12/s0;
-
-% in case of centro symmetry
-s11=[s11;-s11];
-s22=[s22;-s22];
-s33=[s33;-s33];
-s23=[s23;-s23];
-s31=[s31;-s31];
-s12=[s12;-s12];
 
 %% Plotting
 %% 2D

@@ -232,10 +232,20 @@
 !-----------------------------------------------------------------------
       open (unit = 2, file = ".\Output\output.txt")
       write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
-      do km=1,ndef
-        write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
-     +              sigma(km,5),sigma(km,6), sigma(km,7)
-      enddo
+      if (centro.eq.1)then
+        do km=1,ndef
+          write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
+     +                sigma(km,5),sigma(km,6), sigma(km,7)
+          write(2,98) -sigma(km,1),-sigma(km,2),-sigma(km,3),
+     +                -sigma(km,4),-sigma(km,5),-sigma(km,6), 
+     +                 sigma(km,7)
+        enddo
+      else
+        do km=1,ndef
+          write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
+     +                sigma(km,5),sigma(km,6), sigma(km,7)
+        enddo
+      endif
       close(2)
 !-----------------------------------------------------------------------
 !     Write the finish date and time
