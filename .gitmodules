@@ -1,0 +1,3 @@
+[submodule "Dependencies/SCMM-hypo"]
+	path = Dependencies/SCMM-hypo
+	url = https://github.com/frodal/SCMM-hypo.git
