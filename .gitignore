@@ -41,6 +41,9 @@
 ##                              Visual Studio ignore files                             ##
 #########################################################################################
 
+*.db3
+*.u2d
+
 # User-specific files
 *.rsuser
 *.suo
