@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "FC-Taylor", "FC-Taylor.vfproj", "{2BBC7433-92E0-4B39-BA80-A9F347F8A766}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BBC7433-92E0-4B39-BA80-A9F347F8A766}.Debug|x86.ActiveCfg = Debug|Win32
+		{2BBC7433-92E0-4B39-BA80-A9F347F8A766}.Debug|x86.Build.0 = Debug|Win32
+		{2BBC7433-92E0-4B39-BA80-A9F347F8A766}.Release|x86.ActiveCfg = Release|Win32
+		{2BBC7433-92E0-4B39-BA80-A9F347F8A766}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2777E2FC-1C7C-47B4-9D36-F4C51AB83868}
+	EndGlobalSection
+EndGlobal
