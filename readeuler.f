@@ -160,3 +160,46 @@
       return
       end subroutine readeulerlength
 !-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!                         SUBROUTINE readuniqueeulerlength
+!-----------------------------------------------------------------------
+! Reads Euler angles length
+! 
+!-----------------------------------------------------------------------
+      subroutine readuniqueeulerlength(NuniqueAng,Nang)
+!-----------------------------------------------------------------------
+      implicit none
+!-----------------------------------------------------------------------
+      integer, intent(out) :: NuniqueAng,Nang
+!     Local variables
+      real*8, allocatable :: ang(:,:)
+      integer i,j,unique
+!-----------------------------------------------------------------------
+!         Load euler angles
+!-----------------------------------------------------------------------
+      call readeulerlength(Nang)
+      allocate(ang(Nang,4))
+      call readeuler(ang,Nang)
+!-----------------------------------------------------------------------
+!         Find how many of the angles are unique
+!-----------------------------------------------------------------------
+      NuniqueAng = 1
+      if(Nang.lt.2)then
+          NuniqueAng = Nang
+      else
+          do i=2,Nang
+              unique = 1
+              do j=1,i-1
+                  if(ang(i,1).eq.ang(j,1)) unique = 0
+              enddo
+              if(unique.eq.1) NuniqueAng = NuniqueAng + 1
+          enddo
+      endif
+!-----------------------------------------------------------------------
+!     Deallocate allocated memory
+!-----------------------------------------------------------------------
+      if(allocated(ang)) deallocate(ang)
+!-----------------------------------------------------------------------
+      return
+      end subroutine readuniqueeulerlength
+!-----------------------------------------------------------------------

@@ -26,7 +26,7 @@
      .                  sigma(:,:)
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
-      integer NITER,NSTATEV,nblock
+      integer NITER,NSTATEV,nblock,NuniqueAng
       parameter(nprops=16,NSTATEV=28)
       real*8 deps11,deps22,deps33,deps12,deps23,deps31
       real*8 strain(6),epsdot,wp
@@ -49,7 +49,7 @@
 !-----------------------------------------------------------------------
       call readprops(props,nprops,planestress,centro,npts,epsdot,wp,
      &               ncpus)     ! Read material properties and stuff...
-      call readeulerlength(nblock)
+      call readuniqueeulerlength(NuniqueAng,nblock)
 !-----------------------------------------------------------------------
       allocate(ang(nblock,4))
       allocate(STRESSOLD(nblock,6))
