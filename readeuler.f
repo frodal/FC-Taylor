@@ -69,20 +69,6 @@
       close(unit=16)
       k=k-1
 !-----------------------------------------------------------------------
-!         Write information
-!-----------------------------------------------------------------------
-      write(6,*) '----------------------------------------------------'
-      if (k.gt.nangmax) then
-        write(6,*) '!! Error'
-        write(6,*) 'Too many orientations given:     ',k
-        write(6,*) 'Please use less then or equal to:',nangmax
-        stop
-      else
-      write(6,*) 'Euler Angles read successfully'
-      write(6,*) 'Number of orientations read: ',k
-      endif
-      write(6,*) '----------------------------------------------------'
-!-----------------------------------------------------------------------
       return
       end subroutine readeuler
 !-----------------------------------------------------------------------
@@ -163,7 +149,7 @@
 !-----------------------------------------------------------------------
 !                         SUBROUTINE readuniqueeulerlength
 !-----------------------------------------------------------------------
-! Reads Euler angles length
+! Reads the unique number of Euler angles
 ! 
 !-----------------------------------------------------------------------
       subroutine readuniqueeulerlength(NuniqueAng,Nang)
@@ -190,7 +176,11 @@
           do i=2,Nang
               unique = 1
               do j=1,i-1
-                  if(ang(i,1).eq.ang(j,1)) unique = 0
+                  if((ang(i,1).eq.ang(j,1)).and.
+     &               (ang(i,2).eq.ang(j,2)).and.
+     &               (ang(i,3).eq.ang(j,3)))then 
+                      unique = 0
+                  endif
               enddo
               if(unique.eq.1) NuniqueAng = NuniqueAng + 1
           enddo
@@ -202,4 +192,73 @@
 !-----------------------------------------------------------------------
       return
       end subroutine readuniqueeulerlength
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!                         SUBROUTINE readuniqueeuler
+!-----------------------------------------------------------------------
+! Reads the unique Euler angles
+! 
+!-----------------------------------------------------------------------
+      subroutine readuniqueeuler(uniqueAng,NuniqueAng,Nang)
+!-----------------------------------------------------------------------
+      implicit none
+!-----------------------------------------------------------------------
+      integer, intent(in) :: NuniqueAng,Nang
+      real*8, intent(inout) :: uniqueAng(NuniqueAng,4)
+!     Local variables
+      real*8 ang(Nang,4)
+      integer i,j,k,unique
+!-----------------------------------------------------------------------
+!         Load euler angles
+!-----------------------------------------------------------------------
+      call readeuler(ang,Nang)
+!-----------------------------------------------------------------------
+!         Write information
+!-----------------------------------------------------------------------
+      write(6,*) '----------------------------------------------------'
+      write(6,*) 'Euler Angles read successfully'
+      write(6,*) 'Number of orientations read: ',Nang
+      write(6,*) 'Number of unique orientations: ',NuniqueAng
+      write(6,*) '----------------------------------------------------'
+!-----------------------------------------------------------------------
+      if(NuniqueAng.eq.Nang)then
+          uniqueAng = ang
+      else
+!-----------------------------------------------------------------------
+!         Find the unique angles and accumulate the weight
+!-----------------------------------------------------------------------
+          k = 1
+          uniqueAng(1,1) = ang(1,1)
+          uniqueAng(1,2) = ang(1,2)
+          uniqueAng(1,3) = ang(1,3)
+          uniqueAng(1,4) = ang(1,4)
+          do i=2,Nang
+              unique = 1
+              do j=1,i-1
+                  if((ang(i,1).eq.ang(j,1)).and.
+     &               (ang(i,2).eq.ang(j,2)).and.
+     &               (ang(i,3).eq.ang(j,3)))then 
+                      unique = 0
+                  endif
+              enddo
+              if(unique.eq.1)then
+                  k = k + 1
+                  uniqueAng(k,1) = ang(i,1)
+                  uniqueAng(k,2) = ang(i,2)
+                  uniqueAng(k,3) = ang(i,3)
+                  uniqueAng(k,4) = ang(i,4)
+              else
+                  do j=1,k
+                      if((ang(i,1).eq.uniqueAng(j,1)).and.
+     &                   (ang(i,2).eq.uniqueAng(j,2)).and.
+     &                   (ang(i,3).eq.uniqueAng(j,3)))then 
+                          uniqueAng(j,4) = uniqueAng(j,4) + ang(i,4)
+                      endif
+                  enddo
+              endif
+          enddo
+      endif
+!-----------------------------------------------------------------------
+      return
+      end subroutine readuniqueeuler
 !-----------------------------------------------------------------------

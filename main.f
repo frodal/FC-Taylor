@@ -26,11 +26,9 @@
      .                  sigma(:,:)
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
-      integer NITER,NSTATEV,nblock,NuniqueAng
+      integer NITER,NSTATEV,nblock,Nang
       parameter(nprops=16,NSTATEV=28)
-      real*8 deps11,deps22,deps33,deps12,deps23,deps31
-      real*8 strain(6),epsdot,wp
-      real*8 domega32,domega13,domega21
+      real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
 !-----------------------------------------------------------------------
       real*8 printDelay,currentTime,printTime
@@ -49,7 +47,7 @@
 !-----------------------------------------------------------------------
       call readprops(props,nprops,planestress,centro,npts,epsdot,wp,
      &               ncpus)     ! Read material properties and stuff...
-      call readuniqueeulerlength(NuniqueAng,nblock)
+      call readuniqueeulerlength(nblock,Nang)
 !-----------------------------------------------------------------------
       allocate(ang(nblock,4))
       allocate(STRESSOLD(nblock,6))
@@ -60,7 +58,8 @@
       allocate(defgradOld(nblock,9))
       allocate(Dissipation(nblock))
 !-----------------------------------------------------------------------
-      call readeuler(ang,nblock)	! Read Euler angles and weights
+      ! Read Euler angles and weights
+      call readuniqueeuler(ang,nblock,Nang)
 !-----------------------------------------------------------------------
       totweight = zero
       do i=1,nblock
@@ -91,7 +90,8 @@
 !-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
 !-----------------------------------------------------------------------
-      DT     = wp/(epsdot*props(6)*1.d3) ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
+      ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
+      DT     = wp/(epsdot*props(6)*1.d3)
 !-----------------------------------------------------------------------
 !     Write the start date and time
 !-----------------------------------------------------------------------
@@ -216,8 +216,10 @@
             sigma(km,5) = sigma(km,5)+STRESSNEW(i,5)*ang(i,4)
             sigma(km,6) = sigma(km,6)+STRESSNEW(i,6)*ang(i,4)
         enddo
-        sigma(km,1) = sigma(km,1)-sigma(km,3)	! Superpose a hydrostatic stress so that s33=0
-        sigma(km,2) = sigma(km,2)-sigma(km,3)	! Yielding is not dependent upon hydrostatic stress!
+        ! Superpose a hydrostatic stress so that s33=0
+        ! Yielding is not dependent upon hydrostatic stress!
+        sigma(km,1) = sigma(km,1)-sigma(km,3)
+        sigma(km,2) = sigma(km,2)-sigma(km,3)
         sigma(km,3) = sigma(km,3)-sigma(km,3)
         sigma(km,7) = work
 !$OMP END CRITICAL
