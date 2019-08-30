@@ -179,6 +179,7 @@
 !-----------------------------------------------------------------------
 !        CALL UMAT
 !-----------------------------------------------------------------------
+         !DIR$ FORCEINLINE RECURSIVE
          CALL Hypo(stressNew,stateNew,defgradNew,
      +               stressOld,stateOld,defgradOld,dt,props,
      +               nblock,3,3,nstatev,nprops,Dissipation)
