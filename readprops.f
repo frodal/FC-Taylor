@@ -133,7 +133,7 @@
       write(6,*) '|     Structural Impact Laboratory (SIMLab),       |'
       write(6,*) '|              Trondheim, Norway.                  |'
       write(6,*) '|                                                  |'
-      write(6,*) '|                 Version 0.1.0                    |'
+      write(6,*) '|                 Version 0.1.1                    |'
       write(6,*) '|                                                  |'
       write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
@@ -162,9 +162,9 @@
         write(6,*) 'Stress space dimension: 3D'
       endif
       if(centro.eq.1)then
-        write(6,*) 'Centro-symmetry used'
+        write(6,*) 'Centrosymmetry used'
       else
-        write(6,*) 'Centro-symmetry not used'
+        write(6,*) 'Centrosymmetry not used'
       endif
 !-----------------------------------------------------------------------
 !   The following code is compiled if OpenMP is used

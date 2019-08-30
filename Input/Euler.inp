@@ -1,9 +1,10 @@
 ** 
 ** 
-** Euler angles file for AA6082.25 
+** Euler angles file
 ** 
 ** 
 *EULER 
+**phi1,    PHI,   phi2,  weight
  51.07,  28.75, 344.14,    7.50 
  33.18,  43.11,   5.45,    4.50 
  44.53,  32.55, 349.77,    6.50 
