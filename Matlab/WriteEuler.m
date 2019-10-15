@@ -19,6 +19,7 @@ fprintf(ID{1},'%s \n','** Euler angles file for AA6060');
 fprintf(ID{1},'%s \n','**');
 fprintf(ID{1},'%s \n','**');
 fprintf(ID{1},'%s \n','*EULER');
+fprintf(ID{1},'%s \n','**phi1,    PHI,   phi2,  weight');
 for i=1:length(phi1)
     fprintf(ID{1},'%6.2f, %6.2f, %6.2f, %7.2f \n',phi1(i),PHI(i),phi2(i),Area{1}(i));
 end
@@ -38,6 +39,7 @@ fprintf(ID{2},'%s \n','** Euler angles file for AA6082.25');
 fprintf(ID{2},'%s \n','**');
 fprintf(ID{2},'%s \n','**');
 fprintf(ID{2},'%s \n','*EULER');
+fprintf(ID{1},'%s \n','**phi1,    PHI,   phi2,  weight');
 for i=1:length(phi1)
     fprintf(ID{2},'%6.2f, %6.2f, %6.2f, %7.2f \n',phi1(i),PHI(i),phi2(i),Area{2}(i));
 end
@@ -57,6 +59,7 @@ fprintf(ID{3},'%s \n','** Euler angles file for AA6082.50');
 fprintf(ID{3},'%s \n','**');
 fprintf(ID{3},'%s \n','**');
 fprintf(ID{3},'%s \n','*EULER');
+fprintf(ID{1},'%s \n','**phi1,    PHI,   phi2,  weight');
 for i=1:length(phi1)
     fprintf(ID{3},'%6.2f, %6.2f, %6.2f, %7.2f \n',phi1(i),PHI(i),phi2(i),Area{3}(i));
 end

@@ -174,6 +174,8 @@
 !$      ncpus = OMP_get_num_procs()
 !$    elseif(tmpcpu.lt.0) then
 !$      ncpus = 1
+!$    elseif(tmpcpu.gt.(OMP_get_num_procs())) then
+!$      ncpus = OMP_get_num_procs()
 !$    else
 !$      ncpus = tmpcpu
 !$    endif
