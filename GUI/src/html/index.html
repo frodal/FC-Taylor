@@ -6,96 +6,161 @@
     <link rel="stylesheet" href="../../Dependencies/Bootstrap-4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/roller.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   </head>
   <body>
     <div class="container" id="main">
-        <h1>FC-Taylor program</h1>
-        <p class="lead">
-            Calibrate a yield surface of an FCC material
-        </p>
-        <h3>Input</h3>
-        <p>
-            Select a file containing grain orientations and weights
-            <br>
-            <button class="btn btn-secondary" id="SelectProgramBtn">Select</button>
-        </p>
-        <p>
-            Selected file: 
-            <div id="FilePath" class="text-light bg-dark"></div>
-        </p>
-        <h4>Material input</h4>
-        <form>
-            Elasticity parameters:
-            <div class="form-row">
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="c11">
+        <div class="titleSection">
+            <h1>FC-Taylor program</h1>
+            <p class="lead">
+                Calibrate a yield surface of an FCC material
+            </p>
+        </div>
+        <div id="textureInput">
+            <h4>Texture input</h4>
+            <p>
+                Select a file containing grain orientations and weights
+                <br>
+                <button class="btn btn-secondary" id="SelectFileBtn">Select</button>
+            </p>
+            <p>
+                Selected file: 
+                <div id="FilePath" class="text-light bg-dark"></div>
+            </p>
+        </div>
+        <div id="materialInput">
+            <h4>Material input</h4>
+            <form>
+                <!-- Elasticity parameters: -->
+                <div class="form-row">
+                    <div class="col">
+                        \(\hat{c}_{11}\)
+                        <input type="text" class="form-control" placeholder="c11" value="106430" id="c11">
+                    </div>
+                    <div class="col">
+                        \(\hat{c}_{12}\)
+                        <input type="text" class="form-control" placeholder="c12" value="60350" id="c12">
+                    </div>
+                    <div class="col">
+                        \(\hat{c}_{44}\)
+                        <input type="text" class="form-control" placeholder="c44" value="28210" id="c44">
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="c12">
+            </form>
+            <form>
+                <!-- Constitutive parameters: -->
+                <div class="form-row">
+                    <div class="col">
+                        Reference slip rate, \(\dot{\gamma}_{0}\)
+                        <input type="text" class="form-control" placeholder="Reference slip rate" value="0.01" id="g0">
+                    </div>
+                    <div class="col">
+                        Instantaneous strain rate sensitivity, \(m\)
+                        <input type="text" class="form-control" placeholder="Instantaneous strain rate sensitivity" value="0.005" id="m">
+                    </div>
+                    <div class="col">
+                        Initial critical resolved shear stress, \(\tau_{c0}\)
+                        <input type="text" class="form-control" placeholder="Initial critical resolved shear stress" value="72.2" id="tau0">
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="c44">
+            </form>
+            <form>
+                <!-- Hardening parameters: -->
+                <div class="form-row">
+                    <div class="col">
+                        Hardening model
+                        <select class="form-control" id="hardeningModel">
+                            <option selected>Voce hardening</option>
+                            <option>Kalidindi hardening</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        Latent hardening coefficient, \(q\)
+                        <input type="text" class="form-control" placeholder="Latent hardening coefficient" value="1.4" id="q">
+                    </div>
                 </div>
-            </div>
-        </form>
-        <form>
-            Constitutive parameters:
-            <div class="form-row">
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="Reference slip rate">
+            </form>
+            <form id="VoceParameters">
+                <div class="form-row">
+                    <div class="col">
+                        \(\theta_{1}\)
+                        <input type="text" class="form-control" placeholder="" value="81.5" id="theta1">
+                    </div>
+                    <div class="col">
+                        \(\tau_{1}\)
+                        <input type="text" class="form-control" placeholder="" value="16.5" id="tau1">
+                    </div>
+                    <div class="col">
+                        \(\theta_{2}\)
+                        <input type="text" class="form-control" placeholder="" value="0.0" id="theta2">
+                    </div>
+                    <div class="col">
+                        \(\tau_{2}\)
+                        <input type="text" class="form-control" placeholder="" value="0.0" id="tau2">
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="Instantaneous strain rate sensitivity">
+            </form>
+            <form id="KalidindiParameters" hidden>
+                <div class="form-row">
+                    <div class="col">
+                        \(h_{0}\)
+                        <input type="text" class="form-control" placeholder="411.25" id="h0">
+                    </div>
+                    <div class="col">
+                        \(\tau_{s}\)
+                        <input type="text" class="form-control" placeholder="88.7" id="taus">
+                    </div>
+                    <div class="col">
+                        \(a\)
+                        <input type="text" class="form-control" placeholder="1.354" id="a">
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="Initial critical resolved shear stress">
+            </form>
+        </div>
+        <div id="otherInput">
+            <h4>Other input</h4>
+            <form>
+                <div class="form-row">
+                    <div class="col">
+                        Imposed strain rate, \(\dot{\varepsilon}\)
+                        <input type="text" class="form-control" placeholder="Imposed strain rate" value="0.001" id="epsdot">
+                    </div>
+                    <div class="col">
+                        Plastic work to extract stress points, \(w_{c}^{p}\)
+                        <input type="text" class="form-control" placeholder="" value="0.3" id="wcp">
+                    </div>
+                    <div class="col">
+                        Resolution of the strain rate grid, \(n_{pts}\)
+                        <input type="text" class="form-control" placeholder="" value="20" id="npts">
+                    </div>
                 </div>
-            </div>
-        </form>
-        <form>
-            Hardening parameters:
-            <div class="form-row">
-                <div class="col">
-                    <select class="form-control">
-                        <option selected>Voce hardening</option>
-                        <option>Kalidindi hardening</option>
-                    </select>
+            </form>
+            <form>
+                <div class="form-row">
+                    <div class="col">
+                        <br>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="planeStress" checked id="planeStress">
+                            <label class="form-check-label" for="planeStress">Plane stress</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <br>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="centrosymmetry" checked id="centro">
+                            <label class="form-check-label" for="centrosymmetry">Centrosymmetry</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        Number of cores, \(n_{cpu}\)
+                        <select class="form-control" id="ncpu">
+                            <option selected>1</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="Latent hardening coefficient">
-                </div>
-            </div>
-        </form>
-        <form>
-            <div class="form-row">
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-            </div>
-        </form>
-        <form>
-            <div class="form-row">
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control" placeholder="">
-                </div>
-            </div>
-        </form>
-        <h4>Other input</h4>
+            </form>
+        </div>
         <h4>Run program</h4>
         <p>
             <div class="btn-container">

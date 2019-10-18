@@ -17,6 +17,14 @@ form
 {
     padding: 5px 0;
 }
+.titleSection
+{
+    padding: 0 0 5em 0;
+}
+#textureInput, #materialInput, #otherInput
+{
+    padding: 0 0 3em 0;
+}
 button 
 {
     -webkit-app-region: no-drag;
