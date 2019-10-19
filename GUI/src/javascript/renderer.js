@@ -6,6 +6,7 @@ const {ipcRenderer} = require('electron');
 const {execFile} = require('child_process');
 var path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -14,6 +15,8 @@ const runMsg = document.getElementById('running');
 const outArea = document.getElementById('OutputData');
 
 let exePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
+let inputPath = path.join(path.dirname(exePath),'Input');
+let outputPath = path.join(path.dirname(exePath),'Output');
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -52,12 +55,91 @@ const a = document.getElementById('a');
 
 // Other input
 const epsdot = document.getElementById('epsdot');
-const wcp = document.getElementById('wcp');
+const wpc = document.getElementById('wpc');
 const npts = document.getElementById('npts');
 
 const planeStress = document.getElementById('planeStress');
-const centro = document.getElementById('centro');
+const centro = document.getElementById('centrosymmetry');
 const ncpu = document.getElementById('ncpu');
+
+////////////////////////////////////////////////////////////////////////////////////
+//                                  Save input                                    //
+////////////////////////////////////////////////////////////////////////////////////
+function SetupWorkingDir()
+{
+    if(!fs.existsSync(inputPath))
+    {
+        fs.mkdirSync(inputPath);
+    }
+    if(!fs.existsSync(outputPath))
+    {
+        fs.mkdirSync(outputPath);
+    }
+}
+function SaveInput()
+{
+    SetupWorkingDir();
+    let data = '';
+    if(hardeningModel.selectedIndex===0)
+    {
+        data = `*PROPS
+${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${theta1.value}, ${tau1.value}, ${theta2.value}, ${tau2.value}
+*DEF
+${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${npts.value}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
+    }else
+    {
+        data = `*PROPS
+${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${h0.value}, ${taus.value}, ${a.value}, 0.0
+*DEF
+${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${npts.value}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
+    }
+    fs.writeFileSync(path.join(inputPath,'Taylor.inp'),data);
+}
+// Check the input from the user
+function SafeInput()
+{
+    if(hardeningModel.selectedIndex===0)
+    {
+        return isPositiveNumber(c11.value)     && isPositiveNumber(c12.value) 
+            && isPositiveNumber(c44.value)     && isPositiveNumber(g0.value) 
+            && isPositiveNumber(m.value)       && isPositiveNumber(tau0.value) 
+            && isPositiveNumber(q.value)       && isNonNegativeNumber(theta1.value) 
+            && isNonNegativeNumber(tau1.value) && isNonNegativeNumber(theta2.value) 
+            && isNonNegativeNumber(tau2.value) && isPositiveNumber(npts.value) 
+            && isPositiveNumber(epsdot.value)  && isPositiveNumber(wpc.value);
+    }else
+    {
+        return isPositiveNumber(c11.value)  && isPositiveNumber(c12.value) 
+            && isPositiveNumber(c44.value)  && isPositiveNumber(g0.value) 
+            && isPositiveNumber(m.value)    && isPositiveNumber(tau0.value) 
+            && isPositiveNumber(q.value)    && isNonNegativeNumber(h0.value) 
+            && isPositiveNumber(taus.value) && isPositiveNumber(a.value) 
+            && isPositiveNumber(npts.value) && isPositiveNumber(epsdot.value) 
+            && isPositiveNumber(wpc.value);
+    }
+}
+function isPositiveNumber(num)
+{
+    return isNumber(num) && parseFloat(num)>0;
+}
+function isNonNegativeNumber(num)
+{
+    return isNumber(num) && parseFloat(num)>=0;
+}
+function isNumber(num)
+{
+    return !isNaN(parseFloat(num)) && isFinite(num);
+}
+
+// Testing stuff
+if(SafeInput())
+{
+    SaveInput();
+}else
+{
+    // TODO: Display an error dialog
+    console.log('Unsafe input provided!');
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                            Handle multi-threading                              //
@@ -90,6 +172,7 @@ selectFileBtn.addEventListener('click', (event)=>
 // Sets the executable filepath received from the main process (main.js)
 ipcRenderer.on('SelectedFile', (event, path)=>
 {
+    SetupWorkingDir();
     filePathArea.innerHTML = `${path.toString()}`;
     texFile = path.toString();
 });
