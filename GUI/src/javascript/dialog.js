@@ -14,6 +14,20 @@ ipcMain.on('open-file-dialog', (event)=>
   });
 });
 
+// Open save file dialog to save file
+ipcMain.on('save-file-dialog', (event)=>
+{
+  dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), 
+      {}, 
+      (files)=>
+  {
+      if(files)
+      {
+          event.sender.send('SaveFile', files);
+      }
+  });
+});
+
 // Opens an error dialog message
 ipcMain.on('open-error-dialog', (event)=>
 {
@@ -51,6 +65,19 @@ ipcMain.on('open-isRunning-dialog', (event)=>
         type:"info",
         title:"Warning",
         message:"Please terminate the running application before starting a new one",
+        buttons:['Ok']
+    };
+    dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+})
+
+// Opens a warning dialog message
+ipcMain.on('check-input-dialog', (event)=>
+{
+    const options = 
+    {
+        type:"info",
+        title:"Warning",
+        message:"Please check your input!\nMake sure that the supplied input values are positive or non negative numbers!\nAnd that the selected texture file is compatible with the program!",
         buttons:['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);

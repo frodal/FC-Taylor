@@ -10,6 +10,7 @@ const fs = require('fs');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
+const saveResultBtn = document.getElementById('SaveResultBtn');
 const roller = document.getElementById('lds-roller');
 const runMsg = document.getElementById('running');
 const outArea = document.getElementById('OutputData');
@@ -131,16 +132,6 @@ function isNumber(num)
     return !isNaN(parseFloat(num)) && isFinite(num);
 }
 
-// Testing stuff
-if(SafeInput())
-{
-    SaveInput();
-}else
-{
-    // TODO: Display an error dialog
-    console.log('Unsafe input provided!');
-}
-
 ////////////////////////////////////////////////////////////////////////////////////
 //                            Handle multi-threading                              //
 ////////////////////////////////////////////////////////////////////////////////////
@@ -170,11 +161,15 @@ selectFileBtn.addEventListener('click', (event)=>
     ipcRenderer.send('open-file-dialog');
 });
 // Sets the executable filepath received from the main process (main.js)
-ipcRenderer.on('SelectedFile', (event, path)=>
+ipcRenderer.on('SelectedFile', (event, newPath)=>
 {
-    SetupWorkingDir();
-    filePathArea.innerHTML = `${path.toString()}`;
-    texFile = path.toString();
+    if(newPath.toString()!=='')
+    {
+        SetupWorkingDir();
+        texFile = newPath.toString();
+        filePathArea.innerHTML = `${texFile}`;
+        fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
+    }
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -182,10 +177,14 @@ ipcRenderer.on('SelectedFile', (event, path)=>
 ////////////////////////////////////////////////////////////////////////////////////
 // Sets start program button callback
 startProgramBtn.addEventListener('click', (event) => {
+    // Delete old output file
+    DeleteOutput();
     if (subProcess !== null) // Check if a subprocess is already running
     {
         ipcRenderer.send('open-isRunning-dialog');
-    } else {
+    } else if(SafeInput() && texFile !== ''){
+        // Saving input from user to file
+        SaveInput();
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
@@ -212,6 +211,7 @@ startProgramBtn.addEventListener('click', (event) => {
                 terminateProgramBtn.disabled = true;
                 roller.classList.remove('lds-roller');
                 runMsg.innerHTML = '';
+                UpdateEnableSave();
             });
             // Standard output callback
             subProcess.stdout.on('data', function (data) {
@@ -236,6 +236,9 @@ startProgramBtn.addEventListener('click', (event) => {
             ipcRenderer.send('open-error-dialog');
             outArea.innerHTML = `${err.toString()}`;
         }
+    }else
+    {
+        ipcRenderer.send('check-input-dialog');
     }
 });
 
@@ -253,3 +256,28 @@ terminateProgramBtn.addEventListener('click', (event)=>
         ipcRenderer.send('open-successfulTermination-dialog');
     }
 });
+
+////////////////////////////////////////////////////////////////////////////////////
+//                                 Save results                                   //
+////////////////////////////////////////////////////////////////////////////////////
+saveResultBtn.addEventListener('click', (event) =>
+{
+    ipcRenderer.send('save-file-dialog');
+});
+ipcRenderer.on('SaveFile', (event, savePath)=>
+{
+    if(savePath.toString()!=='')
+    {
+        fs.copyFileSync(path.join(outputPath,'output.txt'),savePath.toString());
+    }
+});
+function UpdateEnableSave()
+{
+        saveResultBtn.disabled = !fs.existsSync(path.join(outputPath,'output.txt'));
+}
+function DeleteOutput()
+{
+    let tempFilePath = path.join(outputPath,'output.txt');
+    if(fs.existsSync(tempFilePath))
+        fs.unlinkSync(tempFilePath);
+}
