@@ -31,7 +31,9 @@
     "setup-win64": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-x64/ --dest=../GUIbinaries/installer-x64/",
     "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64"
   },
-  "dependencies": {},
+  "dependencies": {
+    "mathjax": "^3.0.0"
+  },
   "devDependencies": {
     "electron": "^6.0.12",
     "electron-installer-windows": "^2.0.0",
