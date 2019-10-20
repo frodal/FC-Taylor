@@ -50,7 +50,7 @@ const template = [
     submenu: [
       {
         label: 'Report Issue',
-        click () { shell.openExternal('https://github.com/frodal/GUIwrapper/issues') }
+        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
       },
       {
         label: 'View License',
@@ -71,14 +71,14 @@ const template = [
       },
       {
         label: 'Learn More',
-        click () { shell.openExternal('https://github.com/frodal/GUIwrapper#gui-wrapper') }
+        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
       },
       {
         type: 'separator'
       },
       {
         label: 'Check for Updates',
-        click () { shell.openExternal('https://github.com/frodal/GUIwrapper/releases/latest') }
+        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
       },
       {
         type: 'separator'
