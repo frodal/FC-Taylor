@@ -31,12 +31,7 @@ ipcMain.on('save-file-dialog', (event)=>
 // Opens an error dialog message
 ipcMain.on('open-error-dialog', (event)=>
 {
-    dialog.showErrorBox('Error', 'Could not execute the selected program!\nPlease select a valid executable program');
-});
-// Opens an error dialog message
-ipcMain.on('open-errorEXE-dialog', (event)=>
-{
-    dialog.showErrorBox('Error', 'Could not execute the selected program!');
+    dialog.showErrorBox('Error', 'Could not execute the FC-Taylor program!');
 });
 // Opens an error dialog message
 ipcMain.on('open-errorKilled-dialog', (event)=>
@@ -45,39 +40,13 @@ ipcMain.on('open-errorKilled-dialog', (event)=>
 });
 
 // Opens a warning dialog message
-ipcMain.on('open-warning-dialog', (event)=>
-{
-    const options = 
-    {
-        type:"info",
-        title:"Warning",
-        message:"Please select an executable file first!",
-        buttons:['Ok']
-    };
-    dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
-});
-
-// Opens a warning dialog message
-ipcMain.on('open-isRunning-dialog', (event)=>
-{
-    const options = 
-    {
-        type:"info",
-        title:"Warning",
-        message:"Please terminate the running application before starting a new one",
-        buttons:['Ok']
-    };
-    dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
-})
-
-// Opens a warning dialog message
 ipcMain.on('check-input-dialog', (event)=>
 {
     const options = 
     {
         type:"info",
         title:"Warning",
-        message:"Please check your input!\nMake sure that the supplied input values are positive or non negative numbers!\nAnd that the selected texture file is compatible with the program!",
+        message:"Please check your input!\nMake sure that the supplied input values are positive or non negative numbers!\n",
         buttons:['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
