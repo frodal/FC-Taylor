@@ -79,7 +79,6 @@ function SetupWorkingDir()
 }
 function SaveInput()
 {
-    SetupWorkingDir();
     let data = '';
     if(hardeningModel.selectedIndex===0)
     {
@@ -169,6 +168,7 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
         texFile = newPath.toString();
         filePathArea.innerHTML = `${texFile}`;
         fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
+        startProgramBtn.disabled = false;
     }
 });
 
@@ -179,10 +179,7 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
 startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
-    if (subProcess !== null) // Check if a subprocess is already running
-    {
-        ipcRenderer.send('open-isRunning-dialog');
-    } else if(SafeInput() && texFile !== ''){
+    if(SafeInput()){
         // Saving input from user to file
         SaveInput();
         // Clear output data field
@@ -198,7 +195,7 @@ startProgramBtn.addEventListener('click', (event) => {
         {
             subProcess = execFile(exePath, exeCommandArgs, options, function (err, data) {
                 if (err !== null && !subProcess.killed) {
-                    ipcRenderer.send('open-errorEXE-dialog');
+                    ipcRenderer.send('open-error-dialog');
                 } else if (killedDueToError) {
                     ipcRenderer.send('open-errorKilled-dialog')
                 } else {
