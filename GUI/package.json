@@ -29,7 +29,10 @@
     "setup": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer/",
     "setup-win32": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer-ia32/",
     "setup-win64": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-x64/ --dest=../GUIbinaries/installer-x64/",
-    "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64"
+    "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64",
+    "gen-icons":"npm run gen-icon-win && npm run gen-icon-mac",
+    "gen-icon-win":"icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/win --ico name=icon --report",
+    "gen-icon-mac":"icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
   },
   "dependencies": {
     "mathjax": "^3.0.0"
@@ -37,6 +40,7 @@
   "devDependencies": {
     "electron": "^6.0.12",
     "electron-installer-windows": "^2.0.0",
-    "electron-packager": "^14.0.6"
+    "electron-packager": "^14.0.6",
+    "icon-gen": "^2.0.0"
   }
 }
