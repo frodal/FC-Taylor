@@ -1,3 +1,6 @@
 [submodule "Dependencies/SCMM-hypo"]
 	path = Dependencies/SCMM-hypo
 	url = https://github.com/frodal/SCMM-hypo.git
+[submodule "GUI/Dependencies/Montserrat"]
+	path = GUI/Dependencies/Montserrat
+	url = https://github.com/JulietaUla/Montserrat.git
