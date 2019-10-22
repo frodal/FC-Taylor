@@ -3,9 +3,9 @@
 !     For ifort, compile the program with -openmp
 !     Remember to increase the Stack size with -Fn where n is the 
 !     number of bytes, e.g., 
-!     ifort -openmp -F1000000000 main.f
+!     ifort -openmp -F1000000000 main.f -o ./GUI/Core/FC-Taylor.exe -O3
 !     Note that lines starting with !$ are compiler directives
-!     for using OpenMP, i.e., multi-threading
+!     for using, e.g., OpenMP, i.e., multi-threading
 !-----------------------------------------------------------------------
 !     Subroutines
 !-----------------------------------------------------------------------
@@ -227,7 +227,8 @@
       elseif (ITER.ge.NITER) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
-        stop
+        call sleep(1)
+        error stop 'Error code: 11'
       endif
       enddo
 !$OMP END PARALLEL DO
