@@ -194,10 +194,10 @@ startProgramBtn.addEventListener('click', (event) => {
         try // Try to execute the program and sets a callback for when the program terminates
         {
             subProcess = execFile(exePath, exeCommandArgs, options, function (err, data) {
-                if (err !== null && !subProcess.killed) {
+                if (err !== null && !(subProcess.killed || killedDueToError)) {
                     ipcRenderer.send('open-error-dialog');
                 } else if (killedDueToError) {
-                    ipcRenderer.send('open-errorKilled-dialog')
+                    ipcRenderer.send('open-errorKilled-dialog',parseInt(err.toString().split('Error code:')[1]));
                 } else {
                     ipcRenderer.send('open-successfulTermination-dialog');
                 }

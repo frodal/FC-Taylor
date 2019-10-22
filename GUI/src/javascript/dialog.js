@@ -34,10 +34,21 @@ ipcMain.on('open-error-dialog', (event)=>
     dialog.showErrorBox('Error', 'Could not execute the FC-Taylor program!\nPlease report this issue by going to help and Report Issue.');
 });
 // Opens an error dialog message
-ipcMain.on('open-errorKilled-dialog', (event)=>
+ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
 {
-    dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.');
+    if(errorCode)
+    {
+        dialog.showErrorBox('Error', parseError(errorCode));
+    }else
+    {
+        dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.');
+    }
 });
+
+function parseError(errorCode)
+{
+    return 'An error occured while executing the program!\nError code: '+errorCode;
+}
 
 // Opens a warning dialog message
 ipcMain.on('check-input-dialog', (event)=>
