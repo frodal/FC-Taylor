@@ -34,15 +34,15 @@
                 <!-- Elasticity parameters: -->
                 <div class="form-row">
                     <div class="col">
-                        \(\hat{c}_{11}\)
+                        \(\hat{c}_{11} > 0\)
                         <input type="text" class="form-control" value="106430" id="c11">
                     </div>
                     <div class="col">
-                        \(\hat{c}_{12}\)
+                        \(\hat{c}_{12} > 0\)
                         <input type="text" class="form-control" value="60350" id="c12">
                     </div>
                     <div class="col">
-                        \(\hat{c}_{44}\)
+                        \(\hat{c}_{44} > 0\)
                         <input type="text" class="form-control" value="28210" id="c44">
                     </div>
                 </div>
@@ -51,15 +51,15 @@
                 <!-- Constitutive parameters: -->
                 <div class="form-row">
                     <div class="col">
-                        Reference slip rate, \(\dot{\gamma}_{0}\)
+                        Reference slip rate, \(\dot{\gamma}_{0} > 0\)
                         <input type="text" class="form-control" value="0.01" id="g0">
                     </div>
                     <div class="col">
-                        Instantaneous strain rate sensitivity, \(m\)
+                        Instantaneous strain rate sensitivity, \(m > 0\)
                         <input type="text" class="form-control" value="0.005" id="m">
                     </div>
                     <div class="col">
-                        Initial critical resolved shear stress, \(\tau_{c0}\)
+                        Initial critical resolved shear stress, \(\tau_{c0} > 0\)
                         <input type="text" class="form-control" value="72.2" id="tau0">
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                         </select>
                     </div>
                     <div class="col">
-                        Latent hardening coefficient, \(q\)
+                        Latent hardening coefficient, \(q > 0\)
                         <input type="text" class="form-control" value="1.4" id="q">
                     </div>
                 </div>
@@ -83,19 +83,19 @@
             <form id="VoceParameters">
                 <div class="form-row">
                     <div class="col">
-                        \(\theta_{1}\)
+                        \(\theta_{1} \ge 0\)
                         <input type="text" class="form-control" value="81.5" id="theta1">
                     </div>
                     <div class="col">
-                        \(\tau_{1}\)
+                        \(\tau_{1} \ge 0\)
                         <input type="text" class="form-control" value="16.5" id="tau1">
                     </div>
                     <div class="col">
-                        \(\theta_{2}\)
+                        \(\theta_{2} \ge 0\)
                         <input type="text" class="form-control" value="0.0" id="theta2">
                     </div>
                     <div class="col">
-                        \(\tau_{2}\)
+                        \(\tau_{2} \ge 0\)
                         <input type="text" class="form-control" value="0.0" id="tau2">
                     </div>
                 </div>
@@ -103,15 +103,15 @@
             <form id="KalidindiParameters" hidden>
                 <div class="form-row">
                     <div class="col">
-                        \(h_{0}\)
+                        \(h_{0} \ge 0\)
                         <input type="text" class="form-control" value="411.25" id="h0">
                     </div>
                     <div class="col">
-                        \(\tau_{s}\)
+                        \(\tau_{s}  > 0\)
                         <input type="text" class="form-control" value="88.7" id="taus">
                     </div>
                     <div class="col">
-                        \(a\)
+                        \(a  > 0\)
                         <input type="text" class="form-control" value="1.354" id="a">
                     </div>
                 </div>
@@ -122,15 +122,15 @@
             <form>
                 <div class="form-row">
                     <div class="col">
-                        Imposed strain rate, \(\dot{\varepsilon}\)
+                        Imposed strain rate, \(\dot{\varepsilon} > 0\)
                         <input type="text" class="form-control" value="0.001" id="epsdot">
                     </div>
                     <div class="col">
-                        Plastic work to extract stress points, \(w_{c}^{p}\)
+                        Plastic work to extract stress points, \(w_{c}^{p} > 0\)
                         <input type="text" class="form-control" value="0.3" id="wpc">
                     </div>
                     <div class="col">
-                        Resolution of the strain rate grid, \(n_{pts}\)
+                        Resolution of the strain rate grid, \(n_{pts} \ge 2\)
                         <input type="text" class="form-control" value="20" id="npts">
                     </div>
                 </div>

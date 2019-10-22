@@ -105,17 +105,17 @@ function SafeInput()
             && isPositiveNumber(m.value)       && isPositiveNumber(tau0.value) 
             && isPositiveNumber(q.value)       && isNonNegativeNumber(theta1.value) 
             && isNonNegativeNumber(tau1.value) && isNonNegativeNumber(theta2.value) 
-            && isNonNegativeNumber(tau2.value) && isPositiveNumber(npts.value) 
+            && isNonNegativeNumber(tau2.value) && (isNumber(npts.value) && parseFloat(npts.value)>=2)
             && isPositiveNumber(epsdot.value)  && isPositiveNumber(wpc.value);
     }else
     {
-        return isPositiveNumber(c11.value)  && isPositiveNumber(c12.value) 
-            && isPositiveNumber(c44.value)  && isPositiveNumber(g0.value) 
-            && isPositiveNumber(m.value)    && isPositiveNumber(tau0.value) 
-            && isPositiveNumber(q.value)    && isNonNegativeNumber(h0.value) 
-            && isPositiveNumber(taus.value) && isPositiveNumber(a.value) 
-            && isPositiveNumber(npts.value) && isPositiveNumber(epsdot.value) 
-            && isPositiveNumber(wpc.value);
+        return isPositiveNumber(c11.value)    && isPositiveNumber(c12.value) 
+            && isPositiveNumber(c44.value)    && isPositiveNumber(g0.value) 
+            && isPositiveNumber(m.value)      && isPositiveNumber(tau0.value) 
+            && isPositiveNumber(q.value)      && isNonNegativeNumber(h0.value) 
+            && isPositiveNumber(taus.value)   && isPositiveNumber(a.value) 
+            && (isNumber(npts.value)          && parseFloat(npts.value)>=2) 
+            && isPositiveNumber(epsdot.value) && isPositiveNumber(wpc.value);
     }
 }
 function isPositiveNumber(num)
