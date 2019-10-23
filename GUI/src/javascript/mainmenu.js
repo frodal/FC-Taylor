@@ -50,7 +50,7 @@ const template = [
     submenu: [
       {
         label: 'Report Issue',
-        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
+        click () { shell.openExternal('https://gitreports.com/issue/frodal/FC-Taylor') }
       },
       {
         label: 'View License',
@@ -71,14 +71,14 @@ const template = [
       },
       {
         label: 'Learn More',
-        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
+        click () { shell.openExternal('http://folk.ntnu.no/frodal/Projects.html') }
       },
       {
         type: 'separator'
       },
       {
         label: 'Check for Updates',
-        click () { shell.openExternal('mailto:bjorn.h.frodal@ntnu.no') }
+        click () { shell.openExternal('http://folk.ntnu.no/frodal/Projects.html') }
       },
       {
         type: 'separator'
