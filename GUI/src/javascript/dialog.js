@@ -31,7 +31,7 @@ ipcMain.on('save-file-dialog', (event)=>
 // Opens an error dialog message
 ipcMain.on('open-error-dialog', (event)=>
 {
-    dialog.showErrorBox('Error', 'Could not execute the FC-Taylor program!\nPlease report this issue by going to help and Report Issue.');
+    dialog.showErrorBox('Error', 'Could not execute the FC-Taylor program!\nPlease report this issue by going to help and Report Issue.\nError code: 1');
 });
 // Opens an error dialog message
 ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
@@ -41,13 +41,46 @@ ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
         dialog.showErrorBox('Error', parseError(errorCode));
     }else
     {
-        dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.');
+        dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
     }
 });
 
 function parseError(errorCode)
 {
-    return 'An error occured while executing the program!\nError code: '+errorCode;
+    let msg = 'An error occured while executing the program!\nError code: '+errorCode;
+    switch(errorCode)
+    {
+        case 11:
+            msg += '\nMaximum iterations reached, please check your input values.';
+            break;
+        case 12:
+            msg += '\nFC-Taylor core did not receive any material input.';
+            break;
+        case 13:
+            msg += '\nUnknown keyword used for material input.';
+            break;
+        case 14:
+            msg += '\nThe resolution of the strain rate grid must be an integer larger or equal to 2.';
+            break;
+        case 15:
+            msg += '\nFC-Taylor core did not receive any texture input.';
+            break;
+        case 16:
+            msg += '\nUnknown keyword used for texture input.';
+            break;
+        case 17:
+            msg += '\nThe weight of a grain must be positive, your texture input contains grain weights that are less than or equal to zero.';
+            break;
+        case 18:
+            msg += '\nThe number of grain orientations read from the texture file is zero.\nPlease make sure that the texture file has the correct format and keyword.';
+            break;
+        case 19:
+            msg += '\nThe work-hardening model specified is not supported by FC-Taylor core.';
+            break;
+        default:
+            msg += '\nUnknown error, please report this issue by going to help and Report Issue.';
+    }
+    return msg;
 }
 
 // Opens a warning dialog message
