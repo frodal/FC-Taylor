@@ -9,6 +9,6 @@ if %ERRORLEVEL% neq 0 (
   exit
 )
 pushd %~dp0\GUI\
-call npm run build-win32
-call npm run setup
+call npm run build-win64
+call npm run setup-win64
 popd
