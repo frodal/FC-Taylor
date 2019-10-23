@@ -15,9 +15,11 @@ const roller = document.getElementById('lds-roller');
 const runMsg = document.getElementById('running');
 const outArea = document.getElementById('OutputData');
 
-let exePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
-let inputPath = path.join(path.dirname(exePath),'Input');
-let outputPath = path.join(path.dirname(exePath),'Output');
+let corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
+let workDir = path.join(__dirname,'../../../core-temp')
+let exePath = path.join(workDir,'FC-Taylor.exe');
+let inputPath = path.join(workDir,'Input');
+let outputPath = path.join(workDir,'Output');
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -68,6 +70,10 @@ const ncpu = document.getElementById('ncpu');
 ////////////////////////////////////////////////////////////////////////////////////
 function SetupWorkingDir()
 {
+    if(!fs.existsSync(workDir))
+    {
+        fs.mkdirSync(workDir);
+    }
     if(!fs.existsSync(inputPath))
     {
         fs.mkdirSync(inputPath);
@@ -76,6 +82,7 @@ function SetupWorkingDir()
     {
         fs.mkdirSync(outputPath);
     }
+    fs.copyFileSync(corePath,exePath);
 }
 function SaveInput()
 {
@@ -185,13 +192,14 @@ startProgramBtn.addEventListener('click', (event) => {
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
         options = { cwd: path.dirname(exePath) };
-        // disable start button and enable terminate button when program is running
+        // disable start button when program is running
         startProgramBtn.disabled = true;
+        // Saving input from user to file
+        SaveInput();
+        // Enable terminate button when program is running
         terminateProgramBtn.disabled = false;
         roller.classList.add('lds-roller');
         runMsg.innerHTML = 'Running';
-        // Saving input from user to file
-        SaveInput();
         try // Try to execute the program and sets a callback for when the program terminates
         {
             subProcess = execFile(exePath, exeCommandArgs, options, function (err, data) {
@@ -279,3 +287,7 @@ function DeleteOutput()
     if(fs.existsSync(tempFilePath))
         fs.unlinkSync(tempFilePath);
 }
+////////////////////////////////////////////////////////////////////////////////////
+//                                   On close                                     //
+////////////////////////////////////////////////////////////////////////////////////
+ipcRenderer.send('core-temp', workDir)
