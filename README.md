@@ -4,7 +4,7 @@ Full constraint (FC) Taylor program useful for generating discrete yield surface
 
 ## Compiling
 
-For gfortran, compile the program with `-fopenmp`. For ifort, compile the program with `-openmp`. Remember to increase the Stack size with `-Fn` where `n` is the number of bytes, e.g., `ifort -openmp -F1000000000 main.f`. Note that lines starting with !$ are compiler directives to use OpenMP, i.e., multi-threading.
+For gfortran, compile the program with `-fopenmp`. For ifort, compile the program with `-openmp`. Remember to increase the Stack size with `-Fn` where `n` is the number of bytes, e.g., `ifort -openmp -F1000000000 main.f`. Note that lines starting with !$ are compiler directives to use OpenMP, i.e., multi-threading. To circumvent issues with memory (the stack size) and OpenMP the program should be compiled as an x64 executable.
 
 ## Usage
 
