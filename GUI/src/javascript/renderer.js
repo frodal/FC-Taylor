@@ -94,6 +94,7 @@ ${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}
 ${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${npts.value}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
     }
     fs.writeFileSync(path.join(inputPath,'Taylor.inp'),data);
+    fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
 }
 // Check the input from the user
 function SafeInput()
@@ -167,7 +168,6 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
         SetupWorkingDir();
         texFile = newPath.toString();
         filePathArea.innerHTML = `${texFile}`;
-        fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
         startProgramBtn.disabled = false;
     }
 });
@@ -179,9 +179,8 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
 startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
+    UpdateEnableSave();
     if(SafeInput()){
-        // Saving input from user to file
-        SaveInput();
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
@@ -191,13 +190,15 @@ startProgramBtn.addEventListener('click', (event) => {
         terminateProgramBtn.disabled = false;
         roller.classList.add('lds-roller');
         runMsg.innerHTML = 'Running';
+        // Saving input from user to file
+        SaveInput();
         try // Try to execute the program and sets a callback for when the program terminates
         {
             subProcess = execFile(exePath, exeCommandArgs, options, function (err, data) {
-                if (err !== null && !subProcess.killed) {
+                if (err !== null && !(subProcess.killed || killedDueToError)) {
                     ipcRenderer.send('open-error-dialog');
                 } else if (killedDueToError) {
-                    ipcRenderer.send('open-errorKilled-dialog')
+                    ipcRenderer.send('open-errorKilled-dialog',parseInt(err.toString().split('Error code:')[1]));
                 } else {
                     ipcRenderer.send('open-successfulTermination-dialog');
                 }
