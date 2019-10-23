@@ -17,7 +17,7 @@ const outArea = document.getElementById('OutputData');
 
 let corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 let workDir = path.join(__dirname,'../../../core-temp')
-let exePath = path.join(workDir,'FC-Taylor.exe');
+let exePath = path.join(workDir,'fc-taylor.exe');
 let inputPath = path.join(workDir,'Input');
 let outputPath = path.join(workDir,'Output');
 let exeCommandArgs = [''];
