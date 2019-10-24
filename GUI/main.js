@@ -2,7 +2,7 @@
 if (require('electron-squirrel-startup')) return;
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron');
-var path = require('path');
+const path = require('path');
 const fs = require('fs-extra');
 
 // Keep a global reference of the window object, if you don't, the window will
