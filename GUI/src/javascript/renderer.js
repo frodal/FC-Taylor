@@ -4,7 +4,7 @@
 
 const {ipcRenderer} = require('electron');
 const {execFile} = require('child_process');
-var path = require('path');
+const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
@@ -15,11 +15,11 @@ const roller = document.getElementById('lds-roller');
 const runMsg = document.getElementById('running');
 const outArea = document.getElementById('OutputData');
 
-let corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
-let workDir = path.join(__dirname,'../../../core-temp')
-let exePath = path.join(workDir,'fc-taylor.exe');
-let inputPath = path.join(workDir,'Input');
-let outputPath = path.join(workDir,'Output');
+const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
+const workDir = path.join(__dirname,'../../../core-temp')
+const exePath = path.join(workDir,'fc-taylor.exe');
+const inputPath = path.join(workDir,'Input');
+const outputPath = path.join(workDir,'Output');
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -82,7 +82,10 @@ function SetupWorkingDir()
     {
         fs.mkdirSync(outputPath);
     }
-    fs.copyFileSync(corePath,exePath);
+    if(!fs.existsSync(exePath) && fs.existsSync(corePath))
+    {
+        fs.copyFileSync(corePath,exePath);
+    }
 }
 function SaveInput()
 {
