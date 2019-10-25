@@ -21,6 +21,12 @@ form
 {
     padding: 0 0 5em 0;
 }
+.topnav
+{
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
 #textureInput, #materialInput, #otherInput
 {
     padding: 0 0 3em 0;
