@@ -29,6 +29,68 @@
 
             <div id="home" class="tabcontent">
                 <h4>Home</h4>
+                <p>
+                    This program uses the full-constraint (FC) Taylor homogenization approach to calculate the discrete yield surface of an FCC polycrystal. 
+                    The Yld2004-18p yield surface can be fitted to the discrete points calculated. 
+                </p>
+                <h5>How to</h5>
+                <p>
+                    <ul>
+                        <li>
+                            Select a file containing information about the crystallographic texture of the material under the "Texture" tab. 
+                        </li>
+                        <li>
+                            Input your material parameters under the "Material" tab. 
+                        </li>
+                        <li>
+                            Setup and start the FC-Taylor job under the "Job" tab. 
+                        </li>
+                        <li>
+                            Monitor the progress under the "Monitor" tab. 
+                        </li>
+                        <li>
+                            When the job has finished, you can save the discrete yield surface data points under the "Job" tab by pressing "Save results". 
+                        </li>
+                    </ul>
+                </p>
+                <h5>Calibration and visualization</h5>
+                <p>
+                    The discrete yield surface data points can be used to calibrate the Yld2004-18p yield surface for the material.
+                </p>
+                <p>
+                    When the job has finished, you can do the following:
+                    <ul>
+                        <li>
+                            Go to the "Calibrate" tab and press "Start calibration" to calibrate the Yld2004-18p yield surface.
+                        </li>
+                        <li>
+                            Go to the "Visualize" tab to plot the discrete yield surface points and the calibrated yield surface.
+                        </li>
+                    </ul>
+                </p>
+                <h5>Texture format</h5>
+                <p>
+                    The texture file should contain the keyword <span class="text-light bg-dark textfile">*Euler</span> at the top of the file, 
+                    followed by lines containing Euler angles (in degrees) and an orientation weight separated by commas
+                    , i.e., <span class="text-light bg-dark textfile">phi1, PHI, phi2, weight</span>. 
+                    Lines starting with <span class="text-light bg-dark textfile">**</span> are treated as commented lines and thus not read.
+                </p>
+                <p>
+                    A typical texture file can look like this:
+                </p>
+                <div class="text-light bg-dark textfile">*EULER
+** This is a commented line
+**phi1,    PHI,   phi2,  weight - This is also a commented line 
+ 51.07,  28.75, 344.14,    7.500
+ 33.18,  43.11,   5.45,    4.500
+ 44.53,  32.55, 349.77,    6.500
+ 39.81,  38.04, 354.51,    5.000
+ 29.26,  41.79,   7.10,    2.000
+223.19,  38.99, 167.21,    3.500
+231.21,  35.43, 159.54,    8.500
+ 45.01,  31.46, 352.26,    0.420
+123.45,  32.27, 198.15,    4.000
+227.21,  43.44, 170.03,    1.500</div>
             </div>
 
             <div id="textureInput" class="tabcontent">
@@ -41,7 +103,7 @@
                 </p>
                 <p>
                     Selected file:
-                    <div id="FilePath" class="text-light bg-dark"></div>
+                    <div id="FilePath" class="text-light bg-dark textfile"></div>
                 </p>
             </div>
 
@@ -202,7 +264,7 @@
             <div id="outputSection" class="tabcontent">
                 <h4>Output:</h4>
                 <p>
-                    <div id="OutputData" class="text-light bg-dark"></div>
+                    <div id="OutputData" class="text-light bg-dark textfile"></div>
                 </p>
             </div>
 
