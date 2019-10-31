@@ -1,5 +1,9 @@
 /* Import Montserrat font */
 @import url("../../Dependencies/Montserrat/fonts/webfonts/Montserrat.css");
+html 
+{
+    overflow-y: scroll;
+}
 /* Main content area */
 #main 
 {
@@ -13,14 +17,40 @@ body
     -webkit-app-region: drag;
     -webkit-user-select: none;
 }
+h4
+{
+    margin-bottom: 1em;
+}
 form
 {
     padding: 5px 0;
 }
 .titleSection
 {
-    padding: 0 0 5em 0;
+    padding: 0 0 2em 0;
 }
+.topnav
+{
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+    padding: 2px 0 2px 0;
+}
+.topnav button
+{
+    margin: 2px;
+}
+.content
+{
+    padding: 3em 0 2em 0;
+}
+.tabcontent
+{
+    animation:opac 0.8s
+}
+@keyframes opac{from{opacity:0} to{opacity:1}}
 #textureInput, #materialInput, #otherInput
 {
     padding: 0 0 3em 0;
@@ -33,12 +63,13 @@ input
 {
     -webkit-app-region: no-drag;
 }
-#OutputData, #FilePath
+.textfile
 {
     font-family: monospace;
     -webkit-app-region: no-drag;
     -webkit-user-select: text;
     white-space: pre;
+    width: fit-content;
 }
 .btn-container
 {
