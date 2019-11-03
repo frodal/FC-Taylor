@@ -11,11 +11,16 @@ const fs = require('fs');
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
 const saveResultBtn = document.getElementById('SaveResultBtn');
+const saveCalibrationBtn = document.getElementById('SaveCalibrationBtn');
+const calibrateYsBtn = document.getElementById('CalibrateYS');
 const roller = document.getElementById('lds-roller');
+const calibRoller = document.getElementById('lds-roller-calibration');
 const runMsg = document.getElementById('running');
+const calibMsg = document.getElementById('calibrating');
 const outArea = document.getElementById('OutputData');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
+const calibratePath = path.join(__dirname,'../../calibrate/dist/fc-taylor-calibrate/fc-taylor-calibrate.exe');
 const workDir = path.join(__dirname,'../../../core-temp')
 const exePath = path.join(workDir,'fc-taylor.exe');
 const inputPath = path.join(workDir,'Input');
@@ -24,6 +29,7 @@ let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
 let killedDueToError = false;
+let isCalibrating = false;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                     Input                                      //
@@ -189,12 +195,12 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
 startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
-    UpdateEnableSave();
+    UpdateEnableSaveAndCalibrate();
     if(SafeInput()){
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
-        options = { cwd: path.dirname(exePath) };
+        let options = { cwd: path.dirname(exePath) };
         // disable start button when program is running
         startProgramBtn.disabled = true;
         // Saving input from user to file
@@ -220,7 +226,7 @@ startProgramBtn.addEventListener('click', (event) => {
                 terminateProgramBtn.disabled = true;
                 roller.classList.remove('lds-roller');
                 runMsg.innerHTML = '';
-                UpdateEnableSave();
+                UpdateEnableSaveAndCalibrate();
             });
             // Standard output callback
             subProcess.stdout.on('data', function (data) {
@@ -280,9 +286,12 @@ ipcRenderer.on('SaveFile', (event, savePath)=>
         fs.copyFileSync(path.join(outputPath,'output.txt'),savePath.toString());
     }
 });
-function UpdateEnableSave()
+function UpdateEnableSaveAndCalibrate()
 {
-        saveResultBtn.disabled = !fs.existsSync(path.join(outputPath,'output.txt'));
+    let isDisabled = !fs.existsSync(path.join(outputPath,'output.txt'));
+    saveResultBtn.disabled = isDisabled
+    calibrateYsBtn.disabled = isDisabled
+    saveCalibrationBtn.disabled = true;
 }
 function DeleteOutput()
 {
@@ -294,3 +303,53 @@ function DeleteOutput()
 //                                   On close                                     //
 ////////////////////////////////////////////////////////////////////////////////////
 ipcRenderer.send('core-temp', workDir)
+////////////////////////////////////////////////////////////////////////////////////
+//                           Calibrate yield surface                              //
+////////////////////////////////////////////////////////////////////////////////////
+calibrateYsBtn.addEventListener('click',(event)=>
+{
+    let outfilePath = path.join(outputPath, 'output.txt');
+    // Sets the current working directory of the selected program to be its own directory
+    let options = { cwd: path.dirname(outfilePath) };
+    // disable start button when program is running
+    startProgramBtn.disabled = true;
+    calibrateYsBtn.disabled = true;
+    saveCalibrationBtn.disabled = true;
+    // Show calibrating roller
+    calibRoller.classList.add('lds-roller');
+    calibMsg.innerHTML = 'Calibrating';
+    try // Try to execute the program and sets a callback for when the program terminates
+    {
+        execFile(calibratePath, [outfilePath,'--space','2D'], options, function (err, data) {
+            startProgramBtn.disabled = false;
+            calibrateYsBtn.disabled = false;
+            saveCalibrationBtn.disabled = false;
+            // Hide calibrating roller
+            calibRoller.classList.remove('lds-roller');
+            calibMsg.innerHTML = '';
+            ipcRenderer.send('open-successfulCalibration-dialog');
+        });
+    }
+    catch (err) // Catches the error if the file selected can't be executed correctly
+    {
+        startProgramBtn.disabled = false;
+        calibrateYsBtn.disabled = false;
+        // Hide calibrating roller
+        calibRoller.classList.remove('lds-roller');
+        calibMsg.innerHTML = '';
+    }
+});
+////////////////////////////////////////////////////////////////////////////////////
+//                               Save calibration                                 //
+////////////////////////////////////////////////////////////////////////////////////
+saveCalibrationBtn.addEventListener('click', (event) =>
+{
+    ipcRenderer.send('save-calibration-dialog');
+});
+ipcRenderer.on('SaveCalibration', (event, savePath)=>
+{
+    if(savePath.toString()!=='')
+    {
+        fs.copyFileSync(path.join(outputPath,'CalibratedParameters.dat'),savePath.toString());
+    }
+});
