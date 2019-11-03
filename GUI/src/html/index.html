@@ -273,7 +273,21 @@
                 <p>
                     Calibrate the Yld2004-18p yield surface to the calculated data points
                 </p>
-                <button class="btn btn-secondary" id="CalibrateYS" disabled>Start calibration</button>
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="CalibrateYS" disabled>Start calibration</button>
+                    <button class="btn btn-secondary" id="SaveCalibrationBtn" disabled>Save parameters</button>
+                    <span id="calibrating"></span>
+                    <div id="lds-roller-calibration">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
             </div>
 
             <div id="visualizeSection" class="tabcontent">

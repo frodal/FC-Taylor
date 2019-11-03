@@ -27,6 +27,19 @@ ipcMain.on('save-file-dialog', (event)=>
       }
   });
 });
+// Open save file dialog to save calibrated parameters file
+ipcMain.on('save-calibration-dialog', (event)=>
+{
+  dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), 
+      {}, 
+      (files)=>
+  {
+      if(files)
+      {
+          event.sender.send('SaveCalibration', files);
+      }
+  });
+});
 
 // Opens an error dialog message
 ipcMain.on('open-error-dialog', (event)=>
@@ -103,7 +116,19 @@ ipcMain.on('open-successfulTermination-dialog', (event)=>
     {
         type:"info",
         title:"Success",
-        message:"Application terminated successfully",
+        message:"Job ended successfully",
+        buttons:['Ok']
+    };
+    dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+})
+// Opens a success dialog message
+ipcMain.on('open-successfulCalibration-dialog', (event)=>
+{
+    const options = 
+    {
+        type:"info",
+        title:"Success",
+        message:"Calibration ended successfully",
         buttons:['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
