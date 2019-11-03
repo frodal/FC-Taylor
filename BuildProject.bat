@@ -8,6 +8,18 @@ if %ERRORLEVEL% neq 0 (
   pause
   exit
 )
+pushd %~dp0\GUI\calibrate\
+call pyinstaller YieldCalibrationPython.py -y
+if %ERRORLEVEL% neq 0 (
+  popd
+  echo.
+  echo Could not build the Python calibration script!
+  echo The program was therefore not built!
+  echo.
+  pause
+  exit
+)
+popd
 pushd %~dp0\GUI\
 call npm run build-win64
 call npm run setup-win64
