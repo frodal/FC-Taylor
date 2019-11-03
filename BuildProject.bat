@@ -9,7 +9,7 @@ if %ERRORLEVEL% neq 0 (
   exit
 )
 pushd %~dp0\GUI\calibrate\
-call pyinstaller YieldCalibrationPython.py -y
+call pyinstaller fc-taylor-calibrate.py -y
 if %ERRORLEVEL% neq 0 (
   popd
   echo.

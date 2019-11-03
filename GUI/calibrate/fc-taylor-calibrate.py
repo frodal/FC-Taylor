@@ -219,7 +219,7 @@ def Normalize(s11,s22,s33,s12,s23,s31):
     return s11, s22, s33, s12, s23, s31
 
 def SaveResult(c,folder):
-    with open(Path.joinpath(folder,'CalibratedValues.dat'), 'w') as file:
+    with open(Path.joinpath(folder,'CalibratedParameters.dat'), 'w') as file:
         file.write('%12.8f\n' % 1.0)
         file.write('%12.8f\n' % 1.0)
         N = len(c)
