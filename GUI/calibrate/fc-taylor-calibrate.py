@@ -346,13 +346,16 @@ def main():
     elif spaceInput == '3D':
         choise = Space.fixed3D
 
+    c0 = GetInitial(choise)
     # Loading CP-FEM data
     s11, s22, s33, s12, s23, s31 = LoadTests(fileName)
     # Normalize data by the yield stress
     s11, s22, s33, s12, s23, s31 = Normalize(s11,s22,s33,s12,s23,s31)
 
-    # c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise)
-    c = OptimizeLS(s11, s22, s33, s12, s23, s31, choise)
+    if len(c0)>len(s11):
+        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise)
+    else:
+        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choise)
     # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise)
 
     # Writes the parameters to a file
