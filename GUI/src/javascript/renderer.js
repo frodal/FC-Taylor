@@ -333,7 +333,7 @@ calibrateYsBtn.addEventListener('click',(event)=>
     catch (err) // Catches the error if the file selected can't be executed correctly
     {
         startProgramBtn.disabled = false;
-        calibrateYsBtn.disabled = false;
+        calibrateYsBtn.disabled = true;
         // Hide calibrating roller
         calibRoller.classList.remove('lds-roller');
         calibMsg.innerHTML = '';
