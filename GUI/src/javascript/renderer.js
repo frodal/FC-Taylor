@@ -7,6 +7,8 @@ const {execFile} = require('child_process');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const Plotly = require('plotly.js-dist');
+const csv = require('csv-parser');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -29,7 +31,6 @@ let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
 let killedDueToError = false;
-let isCalibrating = false;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                     Input                                      //
@@ -323,17 +324,23 @@ calibrateYsBtn.addEventListener('click',(event)=>
         execFile(calibratePath, [outfilePath,'--space','2D'], options, function (err, data) {
             startProgramBtn.disabled = false;
             calibrateYsBtn.disabled = false;
-            saveCalibrationBtn.disabled = false;
+            if(err)
+            {
+                saveCalibrationBtn.disabled = true;
+            }else{
+                saveCalibrationBtn.disabled = false;
+                ipcRenderer.send('open-successfulCalibration-dialog');
+            }
             // Hide calibrating roller
             calibRoller.classList.remove('lds-roller');
             calibMsg.innerHTML = '';
-            ipcRenderer.send('open-successfulCalibration-dialog');
         });
     }
     catch (err) // Catches the error if the file selected can't be executed correctly
     {
         startProgramBtn.disabled = false;
-        calibrateYsBtn.disabled = true;
+        calibrateYsBtn.disabled = false;
+        saveCalibrationBtn.disabled = true;
         // Hide calibrating roller
         calibRoller.classList.remove('lds-roller');
         calibMsg.innerHTML = '';
@@ -353,3 +360,87 @@ ipcRenderer.on('SaveCalibration', (event, savePath)=>
         fs.copyFileSync(path.join(outputPath,'CalibratedParameters.dat'),savePath.toString());
     }
 });
+////////////////////////////////////////////////////////////////////////////////////
+//                                   Plotting                                     //
+////////////////////////////////////////////////////////////////////////////////////
+const plotBtn = document.getElementById('PlotBtn');
+plotBtn.addEventListener('click',()=>
+{
+    loadDiscreteYS();
+});
+
+function plotScatter(target,x,y)
+{
+    const layout =
+    {
+        margin: {
+            t: 50,
+            l: 50,
+            b: 50,
+            r: 50
+        },
+        height: 400,
+        width: 400,
+        xaxis: {
+            title: 'RD',
+            range: [-1.5, 1.5],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        yaxis: {
+            title: 'TD',
+            range: [-1.5, 1.5],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        hovermode: 'closest'
+    };
+    const trace =
+    {
+        x: x,
+        y: y,
+        mode: 'markers',
+        name: 'points',
+        marker: {
+            color: 'rgb(0,0,0)',
+            size: 5
+        },
+        type: 'scatter'
+    };
+    const data = [trace];
+    const config = {
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
+        toImageButtonOptions: {
+            format: 'svg', // one of png, svg, jpeg, webp
+            filename: 'FC-Taylor-plot',
+            height: 500,
+            width: 500,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        }
+    };
+    
+    Plotly.react(target, data, layout, config);
+}
+
+function loadDiscreteYS()
+{
+    let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [], s0 = 201.2055;
+    // TODO: find s0 from data
+    fs.createReadStream(path.join(outputPath, 'output.txt'))
+        .pipe(csv())
+        .on('data', (data) => {
+            s11.push(data[" S11"]/s0);
+            s22.push(data[" S22"]/s0);
+            // s33.push(data[" S33"]);
+            s12.push(data[" S12"]/s0);
+            // s23.push(data[" S23"]);
+            // s31.push(data[" S31"]);
+        })
+        .on('end', () => {
+            plotScatter('plot-window-1',s11,s22)
+    });
+}
+
