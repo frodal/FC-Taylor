@@ -444,3 +444,43 @@ function loadDiscreteYS()
     });
 }
 
+function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
+{
+    // YLD2004-18p yield surface f=(phi/4)^(1/m)-sigma_y
+
+    // Deviatoric stress
+    let x = sx - (sx + sy + sz) / 3;
+    let y = sy - (sx + sy + sz) / 3;
+    let z = sz - (sx + sy + sz) / 3;
+
+    // Stress tensor quantities of s'
+    let x1 = -c[0] * y - c[1] * z;
+    let y1 = -c[2] * x - c[3] * z;
+    let z1 = -c[4] * x - c[5] * y;
+    let xy1 = c[6] * sxy;
+    let yz1 = c[7] * syz;
+    let xz1 = c[8] * sxz;
+
+    // Stress tensor quantities of s''
+    let x2 = -c[9] * y - c[10] * z;
+    let y2 = -c[11] * x - c[12] * z;
+    let z2 = -c[13] * x - c[14] * y;
+    let xy2 = c[15] * sxy;
+    let yz2 = c[16] * syz;
+    let xz2 = c[17] * sxz;
+
+    // Calculate eigenvalues of s' and s''
+    let s1 = eig([x1, xy1, xz1; xy1, y1, yz1; xz1, yz1, z1]);
+    let s2 = eig([x2, xy2, xz2; xy2, y2, yz2; xz2, yz2, z2]);
+
+    // Calculate phi
+    let phi = 0;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            phi += abs(s1(i) - s2(j)).^ c[18];
+        }
+    }
+
+    // Evaluate f
+    f = (phi / 4).^ (1. / c[18]) - 1;
+}
