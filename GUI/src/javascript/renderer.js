@@ -449,9 +449,9 @@ function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
     // YLD2004-18p yield surface f=(phi/4)^(1/m)-sigma_y
 
     // Deviatoric stress
-    let x = sx - (sx + sy + sz) / 3;
-    let y = sy - (sx + sy + sz) / 3;
-    let z = sz - (sx + sy + sz) / 3;
+    let x = sx - (sx + sy + sz) / 3.0;
+    let y = sy - (sx + sy + sz) / 3.0;
+    let z = sz - (sx + sy + sz) / 3.0;
 
     // Stress tensor quantities of s'
     let x1 = -c[0] * y - c[1] * z;
@@ -474,13 +474,13 @@ function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
     let s2 = eig([x2, xy2, xz2; xy2, y2, yz2; xz2, yz2, z2]);
 
     // Calculate phi
-    let phi = 0;
+    let phi = 0.0;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            phi += abs(s1(i) - s2(j)).^ c[18];
+            phi += Math.pow(Math.abs(s1(i) - s2(j)), c[18]);
         }
     }
 
     // Evaluate f
-    f = (phi / 4).^ (1. / c[18]) - 1;
+    f = Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
 }
