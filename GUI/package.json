@@ -41,6 +41,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^8.1.0",
     "mathjax": "^3.0.0",
+    "ml-matrix": "^6.4.1",
     "plotly.js-dist": "^1.51.1"
   },
   "devDependencies": {

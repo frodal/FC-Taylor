@@ -9,6 +9,7 @@ const os = require('os');
 const fs = require('fs');
 const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
+const matrix =require('ml-matrix');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -153,7 +154,7 @@ function isNumber(num)
 //                            Handle multi-threading                              //
 ////////////////////////////////////////////////////////////////////////////////////
 // Set up options to select the number of cores to use
-for(let i = 1; i < os.cpus().length; i++)
+for(let i = 1; i < os.cpus().length; ++i)
 {
     var option = document.createElement('option');
     option.text = (i+1).toString();
@@ -367,6 +368,7 @@ const plotBtn = document.getElementById('PlotBtn');
 plotBtn.addEventListener('click',()=>
 {
     loadDiscreteYS();
+    loadCalibratedYSparams();
 });
 
 function plotScatter(target,x,y)
@@ -425,6 +427,81 @@ function plotScatter(target,x,y)
     Plotly.react(target, data, layout, config);
 }
 
+function plotContour(target,c)
+{
+    // find max shear stress
+    let sxyMax = findMaxShear(c);
+    // will create contours at these levels of shear stress
+    let sxy = [];
+    for(let i = 0; i < sxyMax; i+=0.1)
+    {
+        sxy.push(i);
+    }
+    // Setting up variables
+    let l = linspace(0,2*Math.PI,360);
+    let s = linspace(0,2,1000);
+    let temp1 = 1000, temp2 = 1000, n = 0;
+
+    let x = new Array(sxy.length), z = new Array(sxy.length);
+    for(let k = 0; k < sxy.length; ++k)
+    {
+        x[k] = new Array(l.length);
+        z[k] = new Array(l.length);
+    }
+
+    // finding the yieldsurface, f = 0
+    for(let k = 0; k < sxy.length; ++k)
+    {
+        for(let i = 0; i < l.length; ++i)
+        {
+            temp1 = 1000;
+            n = 0;
+            for(let j = 0; j < s.length; ++j)
+            {
+                temp2 = Math.abs(yieldfunction(s[j]*Math.cos(l[i]),s[j]*Math.sin(l[j]),0,sxy[k],0,0,c));
+                if(temp2 < temp1)
+                {
+                    n = j;
+                    temp1 = temp2;
+                }
+            }
+            x[k][i] = s[n]*Math.cos([l[i]]);
+            z[k][i] = s[n]*Math.sin([l[i]]);
+        }
+    }
+    console.log(x);
+}
+
+function findMaxShear(c)
+{
+    // find maks shear stress
+    let sxy = linspace(0.3,1.1,1000);
+    let temp1 = 1000;
+    let temp2 = 1000;
+    let n = 0;
+    for(let i = 0; i < 1000; ++i)
+    {
+        temp2 = Math.abs(yieldfunction(0,0,0,sxy[i],0,0,c));
+        if(temp2 < temp1)
+        {
+            n = i;
+            temp1 = temp2;
+        }
+    }
+    return sxy[n];
+}
+
+function linspace(startValue, endValue, cardinality)
+{
+    var arr = new Array(cardinality);
+    var step = (endValue - startValue) / (cardinality - 1);
+    for (var i = 0; i < cardinality; ++i) 
+    {
+        arr[i] = startValue + (step * i);
+    }
+    return arr;
+}
+
 function loadDiscreteYS()
 {
     let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [], s0 = 201.2055;
@@ -441,6 +518,19 @@ function loadDiscreteYS()
         })
         .on('end', () => {
             plotScatter('plot-window-1',s11,s22)
+    });
+}
+
+function loadCalibratedYSparams()
+{
+    let c = [];
+    fs.createReadStream(path.join(outputPath, 'CalibratedParameters.dat'))
+        .pipe(csv())
+        .on('data', (data) => {
+            c.push(parseFloat(data['parameters']));
+        })
+        .on('end', () => {
+            plotContour('plot-window-2',c)
     });
 }
 
@@ -470,17 +560,21 @@ function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
     let xz2 = c[17] * sxz;
 
     // Calculate eigenvalues of s' and s''
-    let s1 = eig([x1, xy1, xz1; xy1, y1, yz1; xz1, yz1, z1]);
-    let s2 = eig([x2, xy2, xz2; xy2, y2, yz2; xz2, yz2, z2]);
+    let A = new matrix.Matrix([[x1, xy1, xz1], [xy1, y1, yz1], [xz1, yz1, z1]]);
+    let B = new matrix.Matrix([[x2, xy2, xz2], [xy2, y2, yz2], [xz2, yz2, z2]]);
+    let eigA = new matrix.EigenvalueDecomposition(A);
+    let eigB = new matrix.EigenvalueDecomposition(B);
+    let s1 = eigA.realEigenvalues;
+    let s2 = eigB.realEigenvalues;
 
     // Calculate phi
     let phi = 0.0;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            phi += Math.pow(Math.abs(s1(i) - s2(j)), c[18]);
+    for (let i = 0; i < 3; ++i) {
+        for (let j = 0; j < 3; ++j) {
+            phi += Math.pow(Math.abs(s1[i] - s2[j]), c[18]);
         }
     }
 
     // Evaluate f
-    f = Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
+    return Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
 }
