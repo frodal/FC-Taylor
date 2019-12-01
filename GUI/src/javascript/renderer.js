@@ -9,7 +9,7 @@ const os = require('os');
 const fs = require('fs');
 const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
-const matrix =require('ml-matrix');
+const matrix = require('ml-matrix');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -397,6 +397,7 @@ function plotScatter(target,x,y)
             showgrid: true,
             zeroline: false
         },
+        showlegend: false,
         hovermode: 'closest'
     };
     const trace =
@@ -427,6 +428,206 @@ function plotScatter(target,x,y)
     Plotly.react(target, data, layout, config);
 }
 
+function plotYS(target,x,y,sxy,sxyMax)
+{
+    const layout =
+    {
+        margin: {
+            t: 50,
+            l: 50,
+            b: 50,
+            r: 50
+        },
+        height: 400,
+        width: 400,
+        xaxis: {
+            title: 'RD',
+            range: [-1.5, 1.5],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        yaxis: {
+            title: 'TD',
+            range: [-1.5, 1.5],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        showlegend: false,
+        hovermode: 'closest'
+    };
+    const config = {
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
+        toImageButtonOptions: {
+            format: 'svg', // one of png, svg, jpeg, webp
+            filename: 'FC-Taylor-plot',
+            height: 500,
+            width: 500,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        }
+    };
+    let data = [];
+    for(let k = 0; k < x.length; ++k)
+    {
+        const trace =
+        {
+            x: x[k],
+            y: y[k],
+            mode: 'lines',
+            name: `Sxy = ${sxy[k]}`,
+            line: {
+                color: 'rgb(0,0,0)',
+            },
+            type: 'scatter'
+        };
+        data.push(trace);
+    }
+    
+    Plotly.react(target, data, layout, config);
+}
+
+function plotLankford(target,angle,Rvalue)
+{
+    const layout =
+    {
+        margin: {
+            t: 50,
+            l: 50,
+            b: 50,
+            r: 50
+        },
+        height: 400,
+        width: 400,
+        xaxis: {
+            title: 'Tensile direction',
+            range: [0, 90],
+            dtick: 15,
+            showgrid: true,
+            zeroline: false
+        },
+        yaxis: {
+            title: 'Lankford coefficient',
+            range: [0, 4],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        showlegend: false,
+        hovermode: 'closest'
+    };
+    const config = {
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
+        toImageButtonOptions: {
+            format: 'svg', // one of png, svg, jpeg, webp
+            filename: 'FC-Taylor-plot',
+            height: 500,
+            width: 500,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        }
+    };
+    const trace =
+    {
+        x: angle,
+        y: Rvalue,
+        mode: 'lines',
+        name: 'Lankford coefficient',
+        line: {
+            color: 'rgb(0,0,0)',
+        },
+        type: 'scatter'
+    };
+    const data = [trace];
+    Plotly.react(target, data, layout, config);
+}
+
+function plotNormStress(target,angle,normStress)
+{
+    const layout =
+    {
+        margin: {
+            t: 50,
+            l: 50,
+            b: 50,
+            r: 50
+        },
+        height: 400,
+        width: 400,
+        xaxis: {
+            title: 'Tensile direction',
+            range: [0, 90],
+            dtick: 15,
+            showgrid: true,
+            zeroline: false
+        },
+        yaxis: {
+            title: 'Normalized yield stress',
+            range: [0, 2],
+            dtick: 0.5,
+            showgrid: true,
+            zeroline: false
+        },
+        showlegend: false,
+        hovermode: 'closest'
+    };
+    
+    const config = {
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
+        toImageButtonOptions: {
+            format: 'svg', // one of png, svg, jpeg, webp
+            filename: 'FC-Taylor-plot',
+            height: 500,
+            width: 500,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        }
+    };
+    const trace =
+    {
+        x: angle,
+        y: normStress,
+        mode: 'lines',
+        name: `Normalized yield stress`,
+        line: {
+            color: 'rgb(0,0,0)',
+        },
+        type: 'scatter'
+    };
+    const data = [trace];
+    
+    Plotly.react(target, data, layout, config);
+}
+
+function CalcRandR(angle,c)
+{
+    let normStress = new Array(angle.length);
+    let Rvalue = new Array(angle.length);
+
+    for(let k = 0; k < angle.length; ++k)
+    {
+        let ang = angle[k]*Math.PI/180.0;
+        // Normalized yield stress
+        normStress[k] = Phi(Math.pow(Math.cos(ang),2)-1/3, Math.pow(Math.sin(ang),2)-1/3, -1/3, Math.sin(ang)*Math.cos(ang),0,0,c);
+        // Lankford coefficient
+        let dfds = yieldgradient(normStress[k]*(Math.pow(Math.cos(ang),2)), normStress[k]*(Math.pow(Math.sin(ang),2)),0,normStress[k]*(Math.sin(ang)*Math.cos(ang)),0,0,c);
+        let Q = new matrix.Matrix([[Math.cos(ang),-Math.sin(ang),0], [Math.sin(ang),Math.cos(ang),0], [0,0,1]]);
+        let df = Q.transpose().mul(dfds.mul(Q));
+        Rvalue[k] = df.data[2,2]/df.data[3,3];
+    }
+
+    return [normStress, Rvalue];
+}
+
+function plotRandR(target1,target2,c)
+{
+    let angle = linspace(0,90,1001);
+    let [normStress, Rvalue] = CalcRandR(angle,c);
+    plotNormStress(target1,angle,normStress);
+    plotLankford(target2,angle,Rvalue);
+}
+
 function plotContour(target,c)
 {
     // find max shear stress
@@ -438,7 +639,7 @@ function plotContour(target,c)
         sxy.push(i);
     }
     // Setting up variables
-    let l = linspace(0,2*Math.PI,360);
+    let l = linspace(0,2*Math.PI,36);
     let s = linspace(0,2,1000);
     let temp1 = 1000, temp2 = 1000, n = 0;
 
@@ -458,7 +659,7 @@ function plotContour(target,c)
             n = 0;
             for(let j = 0; j < s.length; ++j)
             {
-                temp2 = Math.abs(yieldfunction(s[j]*Math.cos(l[i]),s[j]*Math.sin(l[j]),0,sxy[k],0,0,c));
+                temp2 = Math.abs(yieldfunction(s[j]*Math.cos(l[i]),s[j]*Math.sin(l[i]),0,sxy[k],0,0,c));
                 if(temp2 < temp1)
                 {
                     n = j;
@@ -469,7 +670,7 @@ function plotContour(target,c)
             z[k][i] = s[n]*Math.sin([l[i]]);
         }
     }
-    console.log(x);
+    plotYS('plot-window-2',x,z,sxy,sxyMax);
 }
 
 function findMaxShear(c)
@@ -530,6 +731,7 @@ function loadCalibratedYSparams()
             c.push(parseFloat(data['parameters']));
         })
         .on('end', () => {
+            plotRandR('plot-window-3','plot-window-4',c)
             plotContour('plot-window-2',c)
     });
 }
@@ -543,6 +745,14 @@ function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
     let y = sy - (sx + sy + sz) / 3.0;
     let z = sz - (sx + sy + sz) / 3.0;
 
+    let phi = calcPhi(x,y,z,sxy,syz,sxz,c)
+
+    // Evaluate f
+    return Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
+}
+
+function calcPhi(x,y,z,sxy,syz,sxz,c)
+{
     // Stress tensor quantities of s'
     let x1 = -c[0] * y - c[1] * z;
     let y1 = -c[2] * x - c[3] * z;
@@ -574,7 +784,27 @@ function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
             phi += Math.pow(Math.abs(s1[i] - s2[j]), c[18]);
         }
     }
+    return phi;
+}
 
-    // Evaluate f
-    return Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
+function Phi(x,y,z,sxy,syz,sxz,c)
+{
+    let phi = calcPhi(x,y,z,sxy,syz,sxz,c)
+
+    return 1.0/(Math.pow(phi/4.0, 1.0/c[18]));
+}
+
+function yieldgradient(sx,sy,sz,sxy,syz,sxz,c)
+{
+    let h=1e-5;
+    
+    let dfds11=(yieldfunction(sx+h,sy,sz,sxy,syz,sxz,c)-yieldfunction(sx-h,sy,sz,sxy,syz,sxz,c))/(2*h);
+    let dfds22=(yieldfunction(sx,sy+h,sz,sxy,syz,sxz,c)-yieldfunction(sx,sy-h,sz,sxy,syz,sxz,c))/(2*h);
+    let dfds33=(yieldfunction(sx,sy,sz+h,sxy,syz,sxz,c)-yieldfunction(sx,sy,sz-h,sxy,syz,sxz,c))/(2*h);
+    let dfds12=(yieldfunction(sx,sy,sz,sxy+0.5*h,syz,sxz,c)-yieldfunction(sx,sy,sz,sxy-0.5*h,syz,sxz,c))/(2*h);
+    let dfds23=(yieldfunction(sx,sy,sz,sxy,syz+0.5*h,sxz,c)-yieldfunction(sx,sy,sz,sxy,syz-0.5*h,sxz,c))/(2*h);
+    let dfds31=(yieldfunction(sx,sy,sz,sxy,syz,sxz+0.5*h,c)-yieldfunction(sx,sy,sz,sxy,syz,sxz-0.5*h,c))/(2*h);
+    
+    return new matrix.Matrix([[dfds11,dfds12,dfds31], [dfds12,dfds22,dfds23], [dfds31,dfds23,dfds33]]);
+
 }
