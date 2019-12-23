@@ -294,6 +294,7 @@ function UpdateEnableSaveAndCalibrate()
     saveResultBtn.disabled = isDisabled
     calibrateYsBtn.disabled = isDisabled
     saveCalibrationBtn.disabled = true;
+    loadDiscreteYS();
 }
 function DeleteOutput()
 {
@@ -331,6 +332,7 @@ calibrateYsBtn.addEventListener('click',(event)=>
             }else{
                 saveCalibrationBtn.disabled = false;
                 ipcRenderer.send('open-successfulCalibration-dialog');
+                loadCalibratedYSparams();
             }
             // Hide calibrating roller
             calibRoller.classList.remove('lds-roller');
@@ -364,14 +366,7 @@ ipcRenderer.on('SaveCalibration', (event, savePath)=>
 ////////////////////////////////////////////////////////////////////////////////////
 //                                   Plotting                                     //
 ////////////////////////////////////////////////////////////////////////////////////
-const plotBtn = document.getElementById('PlotBtn');
-plotBtn.addEventListener('click',()=>
-{
-    loadDiscreteYS();
-    loadCalibratedYSparams();
-});
-
-function plotScatter(target,x,y)
+async function plotScatter(target,x,y)
 {
     const layout =
     {
@@ -424,11 +419,11 @@ function plotScatter(target,x,y)
             scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
         }
     };
-    
+    await setImmediatePromise();
     Plotly.react(target, data, layout, config);
 }
 
-function plotYS(target,x,y,sxy,sxyMax)
+async function plotYS(target,x,y,sxy,sxyMax)
 {
     const layout =
     {
@@ -488,8 +483,14 @@ function plotYS(target,x,y,sxy,sxyMax)
     Plotly.react(target, data, layout, config);
 }
 
-function plotLankford(target,angle,Rvalue)
+async function plotLankford(target,angle,Rvalue)
 {
+    let max = Rvalue.reduce(function(a, b) {
+        return Math.max(a, b);
+    });
+    let offset = 0.2;
+    let dy = FindDelta(((1+offset)*max-0)/6);
+
     const layout =
     {
         margin: {
@@ -509,8 +510,8 @@ function plotLankford(target,angle,Rvalue)
         },
         yaxis: {
             title: 'Lankford coefficient',
-            range: [0, 4],
-            dtick: 0.5,
+            range: [0, (1+offset)*max],
+            dtick: dy,
             showgrid: true,
             zeroline: false
         },
@@ -543,8 +544,26 @@ function plotLankford(target,angle,Rvalue)
     Plotly.react(target, data, layout, config);
 }
 
-function plotNormStress(target,angle,normStress)
+function FindDelta(value)
 {
+    if(Math.floor(value)==0)
+    {
+        return 0.1*FindDelta(value*10);
+    }
+    return Math.floor(value)
+}
+
+async function plotNormStress(target,angle,normStress)
+{
+    let max = normStress.reduce(function(a, b) {
+        return Math.max(a, b);
+    });
+    let min = normStress.reduce(function(a, b) {
+        return Math.min(a, b);
+    });
+    let offset = 0.2;
+    let dy = FindDelta(((1+offset)*max-(1-offset)*min)/6);
+    
     const layout =
     {
         margin: {
@@ -564,8 +583,8 @@ function plotNormStress(target,angle,normStress)
         },
         yaxis: {
             title: 'Normalized yield stress',
-            range: [0, 2],
-            dtick: 0.5,
+            range: [(1-offset)*min, (1+offset)*max],
+            dtick: dy,
             showgrid: true,
             zeroline: false
         },
@@ -600,11 +619,11 @@ function plotNormStress(target,angle,normStress)
     Plotly.react(target, data, layout, config);
 }
 
-function CalcRandR(angle,c)
+async function CalcRandR(angle,c)
 {
     let normStress = new Array(angle.length);
     let Rvalue = new Array(angle.length);
-
+    
     for(let k = 0; k < angle.length; ++k)
     {
         let ang = angle[k]*Math.PI/180.0;
@@ -613,22 +632,25 @@ function CalcRandR(angle,c)
         // Lankford coefficient
         let dfds = yieldgradient(normStress[k]*(Math.pow(Math.cos(ang),2)), normStress[k]*(Math.pow(Math.sin(ang),2)),0,normStress[k]*(Math.sin(ang)*Math.cos(ang)),0,0,c);
         let Q = new matrix.Matrix([[Math.cos(ang),-Math.sin(ang),0], [Math.sin(ang),Math.cos(ang),0], [0,0,1]]);
-        let df = Q.transpose().mul(dfds.mul(Q));
-        Rvalue[k] = df.data[2,2]/df.data[3,3];
+        let df = Q.transpose().mmul(dfds.mmul(Q));
+        Rvalue[k] = df.data[1][1]/df.data[2][2];
+
+        if( k % 10 === 0)
+            await setImmediatePromise();
     }
 
     return [normStress, Rvalue];
 }
 
-function plotRandR(target1,target2,c)
+async function plotRandR(target1,target2,c)
 {
     let angle = linspace(0,90,1001);
-    let [normStress, Rvalue] = CalcRandR(angle,c);
+    let [normStress, Rvalue] = await CalcRandR(angle,c);
     plotNormStress(target1,angle,normStress);
     plotLankford(target2,angle,Rvalue);
 }
 
-function plotContour(target,c)
+async function plotContour(target,c)
 {
     // find max shear stress
     let sxyMax = findMaxShear(c);
@@ -639,9 +661,7 @@ function plotContour(target,c)
         sxy.push(i);
     }
     // Setting up variables
-    let l = linspace(0,2*Math.PI,36);
-    let s = linspace(0,2,1000);
-    let temp1 = 1000, temp2 = 1000, n = 0;
+    let l = linspace(0,2*Math.PI,360);
 
     let x = new Array(sxy.length), z = new Array(sxy.length);
     for(let k = 0; k < sxy.length; ++k)
@@ -650,27 +670,45 @@ function plotContour(target,c)
         z[k] = new Array(l.length);
     }
 
+    await setImmediatePromise();
+
     // finding the yieldsurface, f = 0
     for(let k = 0; k < sxy.length; ++k)
     {
         for(let i = 0; i < l.length; ++i)
         {
-            temp1 = 1000;
-            n = 0;
-            for(let j = 0; j < s.length; ++j)
-            {
-                temp2 = Math.abs(yieldfunction(s[j]*Math.cos(l[i]),s[j]*Math.sin(l[i]),0,sxy[k],0,0,c));
-                if(temp2 < temp1)
-                {
-                    n = j;
-                    temp1 = temp2;
-                }
-            }
-            x[k][i] = s[n]*Math.cos([l[i]]);
-            z[k][i] = s[n]*Math.sin([l[i]]);
+            let s = domainReduce(0, 2, 10, l[i], sxy[k], c)
+            x[k][i] = s*Math.cos([l[i]]);
+            z[k][i] = s*Math.sin([l[i]]);
+
+            if( i % 10 === 0)
+                await setImmediatePromise()
         }
     }
+
     plotYS('plot-window-2',x,z,sxy,sxyMax);
+}
+
+function domainReduce(min, max, N, lode, sxy, c)
+{
+    let s = linspace(min,max,N);
+    let temp1 = 1000, temp2 = 1000;
+    for (let j = 0; j < s.length; ++j) 
+    {
+        temp2 = Math.abs(yieldfunction(s[j] * Math.cos(lode), s[j] * Math.sin(lode), 0, sxy, 0, 0, c));
+        if (temp2 < temp1) 
+        {
+            n = j;
+            temp1 = temp2;
+        }
+    }
+
+    if(temp1<1e-4)
+    {
+        return s[n];
+    }
+    
+    return domainReduce(s[n]-(s[2]-s[1]), s[n]+(s[2]-s[1]), N, lode, sxy, c)
 }
 
 function findMaxShear(c)
@@ -705,35 +743,43 @@ function linspace(startValue, endValue, cardinality)
 
 function loadDiscreteYS()
 {
-    let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [], s0 = 201.2055;
-    // TODO: find s0 from data
-    fs.createReadStream(path.join(outputPath, 'output.txt'))
-        .pipe(csv())
-        .on('data', (data) => {
-            s11.push(data[" S11"]/s0);
-            s22.push(data[" S22"]/s0);
-            // s33.push(data[" S33"]);
-            s12.push(data[" S12"]/s0);
-            // s23.push(data[" S23"]);
-            // s31.push(data[" S31"]);
-        })
-        .on('end', () => {
-            plotScatter('plot-window-1',s11,s22)
-    });
+    let filePath = path.join(outputPath, 'output.txt')
+    if (fs.existsSync(filePath)) 
+    {
+        let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [], s0 = 201.2055;
+        // TODO: find s0 from data
+        fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (data) => {
+                s11.push(data[" S11"] / s0);
+                s22.push(data[" S22"] / s0);
+                // s33.push(data[" S33"]);
+                s12.push(data[" S12"] / s0);
+                // s23.push(data[" S23"]);
+                // s31.push(data[" S31"]);
+            })
+            .on('end', () => {
+                plotScatter('plot-window-1', s11, s22);
+            });
+    }
 }
 
-function loadCalibratedYSparams()
+async function loadCalibratedYSparams()
 {
-    let c = [];
-    fs.createReadStream(path.join(outputPath, 'CalibratedParameters.dat'))
-        .pipe(csv())
-        .on('data', (data) => {
-            c.push(parseFloat(data['parameters']));
-        })
-        .on('end', () => {
-            plotRandR('plot-window-3','plot-window-4',c)
-            plotContour('plot-window-2',c)
-    });
+    let paramPath = path.join(outputPath, 'CalibratedParameters.dat')
+    if (fs.existsSync(paramPath)) 
+    {
+        let c = [];
+        fs.createReadStream(paramPath)
+            .pipe(csv())
+            .on('data', (data) => {
+                c.push(parseFloat(data['parameters']));
+            })
+            .on('end', () => {
+                plotRandR('plot-window-3', 'plot-window-4', c);
+                plotContour('plot-window-2', c);
+            });
+    }
 }
 
 function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
@@ -807,4 +853,11 @@ function yieldgradient(sx,sy,sz,sxy,syz,sxz,c)
     
     return new matrix.Matrix([[dfds11,dfds12,dfds31], [dfds12,dfds22,dfds23], [dfds31,dfds23,dfds33]]);
 
+}
+
+// Function to call so that the event loop is not blocked, i.e., cycle the event loop
+function setImmediatePromise() {
+    return new Promise((resolve) => {
+        setImmediate(() => resolve());
+    });
 }
