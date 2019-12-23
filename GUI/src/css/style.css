@@ -81,6 +81,13 @@ input
 {
     margin-right: 6px;
 }
+.plot-container
+{
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 10px;
+    padding-top: 10px;
+}
 /* Scroll bar*/
 ::-webkit-scrollbar
 {

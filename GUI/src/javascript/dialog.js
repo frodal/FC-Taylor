@@ -57,6 +57,10 @@ ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
         dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
     }
 });
+ipcMain.on('open-errorCalibration-dialog', (event)=>
+{
+    dialog.showErrorBox('Error', 'An error occured during calibration!\nPlease report this issue by going to help and Report Issue.\nError code: 3');
+});
 
 function parseError(errorCode)
 {
