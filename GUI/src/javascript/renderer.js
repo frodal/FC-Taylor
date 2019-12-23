@@ -25,7 +25,6 @@ const outArea = document.getElementById('OutputData');
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname,'../../calibrate/dist/fc-taylor-calibrate/fc-taylor-calibrate.exe');
 const workDir = path.join(__dirname,'../../../core-temp')
-const exePath = path.join(workDir,'fc-taylor.exe');
 const inputPath = path.join(workDir,'Input');
 const outputPath = path.join(workDir,'Output');
 let exeCommandArgs = [''];
@@ -89,10 +88,6 @@ function SetupWorkingDir()
     if(!fs.existsSync(outputPath))
     {
         fs.mkdirSync(outputPath);
-    }
-    if(!fs.existsSync(exePath) && fs.existsSync(corePath))
-    {
-        fs.copyFileSync(corePath,exePath);
     }
 }
 function SaveInput()
@@ -202,7 +197,7 @@ startProgramBtn.addEventListener('click', (event) => {
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
-        let options = { cwd: path.dirname(exePath) };
+        let options = { cwd: workDir };
         // disable start button when program is running
         startProgramBtn.disabled = true;
         // Saving input from user to file
@@ -213,7 +208,7 @@ startProgramBtn.addEventListener('click', (event) => {
         runMsg.innerHTML = 'Running';
         try // Try to execute the program and sets a callback for when the program terminates
         {
-            subProcess = execFile(exePath, exeCommandArgs, options, function (err, data) {
+            subProcess = execFile(corePath, exeCommandArgs, options, function (err, data) {
                 if (err !== null && !(subProcess.killed || killedDueToError)) {
                     ipcRenderer.send('open-error-dialog');
                 } else if (killedDueToError) {
