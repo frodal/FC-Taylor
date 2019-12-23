@@ -746,22 +746,49 @@ function loadDiscreteYS()
     let filePath = path.join(outputPath, 'output.txt')
     if (fs.existsSync(filePath)) 
     {
-        let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [], s0 = 201.2055;
-        // TODO: find s0 from data
+        let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
         fs.createReadStream(filePath)
             .pipe(csv())
             .on('data', (data) => {
-                s11.push(data[" S11"] / s0);
-                s22.push(data[" S22"] / s0);
-                // s33.push(data[" S33"]);
-                s12.push(data[" S12"] / s0);
-                // s23.push(data[" S23"]);
-                // s31.push(data[" S31"]);
+                s11.push(data[" S11"]);
+                s22.push(data[" S22"]);
+                s33.push(data[" S33"]);
+                s12.push(data[" S12"]);
+                s23.push(data[" S23"]);
+                s31.push(data[" S31"]);
             })
             .on('end', () => {
+                [s11, s22, s33, s12, s23, s31] = Normalize(s11, s22, s33, s12, s23, s31);
                 plotScatter('plot-window-1', s11, s22);
             });
     }
+}
+
+function Normalize(s11, s22, s33, s12, s23, s31)
+{
+    // Normalizing the yield stress based on s11=1 at s22=0, s33=0
+    let k = 0;
+    let er = Infinity;
+    for (let i = 0; i < s11.length; ++i)
+    {
+        let temp = Math.pow(s22[i], 2) + Math.pow(s33[i], 2) + 2 * Math.pow(s12[i], 2) + 2 * Math.pow(s23[i], 2) + 2 * Math.pow(s31[i], 2);
+        if (temp < er)
+        {
+            k = i;
+            er = temp;
+        }
+    }
+    let s0 = Math.sqrt(0.5*Math.pow(s11[k]-s22[k],2)+0.5*Math.pow(s22[k]-s33[k],2)+0.5*Math.pow(s33[k]-s11[k],2)+3*Math.pow(s12[k],2)+3*Math.pow(s23[k],2)+3*Math.pow(s31[k],2));
+    for (let i = 0; i < s11.length; ++i) 
+    {
+        s11[i] /= s0;
+        s22[i] /= s0;
+        s33[i] /= s0;
+        s12[i] /= s0;
+        s23[i] /= s0;
+        s31[i] /= s0;
+    }
+    return [s11, s22, s33, s12, s23, s31];
 }
 
 async function loadCalibratedYSparams()

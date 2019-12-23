@@ -202,13 +202,15 @@ def GetInitial(choise):
     return c0
 
 def Normalize(s11,s22,s33,s12,s23,s31):
-    er=np.inf
-    s0=1.0
+    k = 0
+    er = np.inf
     for i in range(s11.size):
         estimate = np.sqrt(s22[i]**2+s33[i]**2+2*s12[i]**2+2*s23[i]**2+2*s31[i]**2)
         if (estimate<er):
-            s0=abs(s11[i])
+            k=i
             er=estimate
+
+    s0 = np.sqrt(0.5*(s11[k]-s22[k])**2+0.5*(s22[k]-s33[k])**2+0.5*(s33[k]-s11[k])**2+3*(s12[k])**2+3*(s23[k])**2+3*(s31[k])**2)
 
     s11=s11/s0
     s22=s22/s0
