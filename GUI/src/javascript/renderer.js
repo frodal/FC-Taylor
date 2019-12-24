@@ -71,6 +71,7 @@ const npts = document.getElementById('npts');
 const planeStress = document.getElementById('planeStress');
 const centro = document.getElementById('centrosymmetry');
 const ncpu = document.getElementById('ncpu');
+const nStressPoints = document.getElementById('nStressPoints');
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
@@ -98,13 +99,13 @@ function SaveInput()
         data = `*PROPS
 ${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${theta1.value}, ${tau1.value}, ${theta2.value}, ${tau2.value}
 *DEF
-${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${npts.value}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
+${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value)}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
     }else
     {
         data = `*PROPS
 ${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${h0.value}, ${taus.value}, ${a.value}, 0.0
 *DEF
-${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${npts.value}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
+${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value)}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
     }
     fs.writeFileSync(path.join(inputPath,'Taylor.inp'),data);
     fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
@@ -119,7 +120,7 @@ function SafeInput()
             && isPositiveNumber(m.value)       && isPositiveNumber(tau0.value) 
             && isPositiveNumber(q.value)       && isNonNegativeNumber(theta1.value) 
             && isNonNegativeNumber(tau1.value) && isNonNegativeNumber(theta2.value) 
-            && isNonNegativeNumber(tau2.value) && (isNumber(npts.value) && parseFloat(npts.value)>=2)
+            && isNonNegativeNumber(tau2.value) && (isNumber(npts.value) && parseInt(npts.value)>=2)
             && isPositiveNumber(epsdot.value)  && isPositiveNumber(wpc.value);
     }else
     {
@@ -128,7 +129,7 @@ function SafeInput()
             && isPositiveNumber(m.value)      && isPositiveNumber(tau0.value) 
             && isPositiveNumber(q.value)      && isNonNegativeNumber(h0.value) 
             && isPositiveNumber(taus.value)   && isPositiveNumber(a.value) 
-            && (isNumber(npts.value)          && parseFloat(npts.value)>=2) 
+            && (isNumber(npts.value)          && parseInt(npts.value)>=2) 
             && isPositiveNumber(epsdot.value) && isPositiveNumber(wpc.value);
     }
 }
@@ -164,6 +165,39 @@ hardeningModel.addEventListener('change', (event)=>
     VoceForm.hidden = hardeningModel.selectedIndex !== 0;
     KalidindiForm.hidden = hardeningModel.selectedIndex !== 1;
 });
+
+////////////////////////////////////////////////////////////////////////////////////
+//                      Number of generated stress points                         //
+////////////////////////////////////////////////////////////////////////////////////
+planeStress.addEventListener('change', (event)=>
+{
+    UpdateNstressPoints();
+});
+npts.addEventListener('change',(event)=>
+{
+    UpdateNstressPoints();
+});
+npts.addEventListener('input',(event)=>
+{
+    UpdateNstressPoints();
+});
+function UpdateNstressPoints()
+{
+    if(planeStress.checked && (isNumber(npts.value) && parseInt(npts.value)>=2))
+    {
+        let NptsTemp = parseInt(npts.value);
+        let Nsigma = 6*Math.pow(NptsTemp-2,2)+12*(NptsTemp-2)+8;
+        nStressPoints.innerHTML = `${Nsigma}`;
+    }else if(isNumber(npts.value) && parseInt(npts.value)>=2)
+    {
+        let NptsTemp = parseInt(npts.value);
+        let Nsigma = 10*Math.pow(NptsTemp-2,4)+40*Math.pow(NptsTemp-2,3)+80*Math.pow(NptsTemp-2,2)+80*(NptsTemp-2)+32;
+        nStressPoints.innerHTML = `${Nsigma}`;
+    }else
+    {
+        nStressPoints.innerHTML = "0";
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 Select File                                    //
