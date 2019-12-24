@@ -154,8 +154,10 @@ for(let i = 1; i < os.cpus().length; ++i)
 {
     var option = document.createElement('option');
     option.text = (i+1).toString();
+    option.selected = true;
     ncpu.add(option);
 }
+ncpu.selectedIndex = Math.max((os.cpus().length-1)-2,0);
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                            Change hardening model                              //
