@@ -21,6 +21,21 @@ h4
 {
     margin-bottom: 1em;
 }
+h6
+{
+    margin-top: 1em;
+}
+td 
+{
+    padding: 0.2em;
+    text-align: right;
+}
+#calibratedParameters
+{
+    font-family: Courier, monospace;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: text;
+}
 form
 {
     padding: 5px 0;

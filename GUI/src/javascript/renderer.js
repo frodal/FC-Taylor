@@ -73,6 +73,8 @@ const centro = document.getElementById('centrosymmetry');
 const ncpu = document.getElementById('ncpu');
 const nStressPoints = document.getElementById('nStressPoints');
 
+const calibratedParametersTable = document.getElementById('calibratedParameters');
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
 ////////////////////////////////////////////////////////////////////////////////////
@@ -326,6 +328,8 @@ function UpdateEnableSaveAndCalibrate()
     calibrateYsBtn.disabled = isDisabled
     saveCalibrationBtn.disabled = true;
     loadDiscreteYS();
+    if (isDisabled)
+        ClearDisplayCalibratedParameters();
 }
 function DeleteOutput()
 {
@@ -349,6 +353,7 @@ calibrateYsBtn.addEventListener('click',(event)=>
     startProgramBtn.disabled = true;
     calibrateYsBtn.disabled = true;
     saveCalibrationBtn.disabled = true;
+    ClearDisplayCalibratedParameters();
     // Show calibrating roller
     calibRoller.classList.add('lds-roller');
     calibMsg.innerHTML = 'Calibrating';
@@ -832,13 +837,27 @@ async function loadCalibratedYSparams()
         fs.createReadStream(paramPath)
             .pipe(csv())
             .on('data', (data) => {
-                c.push(parseFloat(data['parameters']));
+                c.push(parseFloat(data['values']));
             })
             .on('end', () => {
+                DisplayCalibratedParameters(c);
                 plotRandR('plot-window-3', 'plot-window-4', c);
                 plotContour('plot-window-2', c);
             });
     }
+}
+function DisplayCalibratedParameters(c)
+{
+    for(let i=0; i < c.length; ++i)
+    {
+        calibratedParametersTable.rows[i].cells[2].innerHTML = parseFloat(c[i]).toFixed(4);
+    }
+}
+
+function ClearDisplayCalibratedParameters()
+{
+    let c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
+    DisplayCalibratedParameters(c);
 }
 
 function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
