@@ -221,39 +221,58 @@ def Normalize(s11,s22,s33,s12,s23,s31):
     return s11, s22, s33, s12, s23, s31
 
 def SaveResult(c,folder):
+    parameterName = [r'\hat{c}^{\prime}_{12}',
+                     r'\hat{c}^{\prime}_{13}',
+                     r'\hat{c}^{\prime}_{21}',
+                     r'\hat{c}^{\prime}_{23}',
+                     r'\hat{c}^{\prime}_{31}',
+                     r'\hat{c}^{\prime}_{32}',
+                     r'\hat{c}^{\prime}_{44}',
+                     r'\hat{c}^{\prime}_{55}',
+                     r'\hat{c}^{\prime}_{66}',
+                     r'\hat{c}^{\prime \prime}_{12}',
+                     r'\hat{c}^{\prime \prime}_{13}',
+                     r'\hat{c}^{\prime \prime}_{21}',
+                     r'\hat{c}^{\prime \prime}_{23}',
+                     r'\hat{c}^{\prime \prime}_{31}',
+                     r'\hat{c}^{\prime \prime}_{32}',
+                     r'\hat{c}^{\prime \prime}_{44}',
+                     r'\hat{c}^{\prime \prime}_{55}',
+                     r'\hat{c}^{\prime \prime}_{66}',
+                     r'a']
     with open(Path.joinpath(folder,'CalibratedParameters.dat'), 'w') as file:
-        file.write('parameters\n')
-        file.write('%12.8f\n' % 1.0)
-        file.write('%12.8f\n' % 1.0)
+        file.write('%30s,%s\n' % ('parameters','values'))
+        file.write('%30s, %12.8f\n' % (parameterName[0],1.0))
+        file.write('%30s, %12.8f\n' % (parameterName[1],1.0))
         N = len(c)
         if N==17:
             for i in range(N-1):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f' % c[N-1])
+                file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
+            file.write('%30s, %12.8f' % (parameterName[18],c[N-1]))
         elif N==16:
             for i in range(N):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f' % 8.0)
+                file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
+            file.write('%30s, %12.8f' % (parameterName[18],8.0))
         elif N==13:
             for i in range(5):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f\n' % 1.0)
+                file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
+            file.write('%30s, %12.8f\n' % (parameterName[7],1.0))
+            file.write('%30s, %12.8f\n' % (parameterName[8],1.0))
             for i in range(5,N-1):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f' % c[N-1])
+                file.write('%30s, %12.8f\n' % (parameterName[i+4],c[i]))
+            file.write('%30s, %12.8f\n' % (parameterName[16],1.0))
+            file.write('%30s, %12.8f\n' % (parameterName[17],1.0))
+            file.write('%30s, %12.8f' % (parameterName[18],c[N-1]))
         elif N==12:
             for i in range(5):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f\n' % 1.0)
+                file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
+            file.write('%30s, %12.8f\n' % (parameterName[7],1.0))
+            file.write('%30s, %12.8f\n' % (parameterName[8],1.0))
             for i in range(5,N):
-                file.write('%12.8f\n' % c[i])
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f\n' % 1.0)
-            file.write('%12.8f' % 8.0)
+                file.write('%30s, %12.8f\n' % (parameterName[i+4],c[i]))
+            file.write('%30s, %12.8f\n' % (parameterName[16],1.0))
+            file.write('%30s, %12.8f\n' % (parameterName[17],1.0))
+            file.write('%30s, %12.8f' % (parameterName[18],8.0))
 
 def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise):
     # Basinhopping input
