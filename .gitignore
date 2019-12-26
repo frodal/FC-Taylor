@@ -45,9 +45,9 @@ GUIbinaries/
 core-temp/
 
 # Calibrate
-GUI/Calibrate/*
-!GUI/Calibrate/*.py
-!GUI/Calibrate/requirements.txt
+src/calibrate/*
+!src/calibrate/*.py
+!src/calibrate/requirements.txt
 #########################################################################################
 ##                              Visual Studio ignore files                             ##
 #########################################################################################

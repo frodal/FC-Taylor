@@ -8,11 +8,12 @@ if %ERRORLEVEL% neq 0 (
   pause
   exit
 )
-pushd %~dp0\GUI\calibrate\
+pushd %~dp0\src\calibrate\
 call pyinstaller --additional-hooks-dir=./ ^
                  --onefile --noconfirm --clean ^
                  --log-level=INFO ^
-                 --distpath=./dist/fc-taylor-calibrate ^
+                 --distpath=../../GUI/Core ^
+                 --name=FC-Taylor-Calibrate ^
                  fc-taylor-calibrate.py
 if %ERRORLEVEL% neq 0 (
   popd

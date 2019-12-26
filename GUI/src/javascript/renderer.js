@@ -23,7 +23,7 @@ const calibMsg = document.getElementById('calibrating');
 const outArea = document.getElementById('OutputData');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
-const calibratePath = path.join(__dirname,'../../calibrate/dist/fc-taylor-calibrate/fc-taylor-calibrate.exe');
+const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
 const workDir = path.join(__dirname,'../../../core-temp')
 const inputPath = path.join(workDir,'Input');
 const outputPath = path.join(workDir,'Output');
