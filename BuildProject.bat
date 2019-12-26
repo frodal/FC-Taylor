@@ -9,7 +9,11 @@ if %ERRORLEVEL% neq 0 (
   exit
 )
 pushd %~dp0\GUI\calibrate\
-call pyinstaller fc-taylor-calibrate.py -y
+call pyinstaller --additional-hooks-dir=./ ^
+                 --onefile --noconfirm --clean ^
+                 --log-level=INFO ^
+                 --distpath=./dist/fc-taylor-calibrate ^
+                 fc-taylor-calibrate.py
 if %ERRORLEVEL% neq 0 (
   popd
   echo.
