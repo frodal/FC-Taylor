@@ -583,7 +583,7 @@ async function plotLankford(target,angle,Rvalue)
 
 function FindDelta(value)
 {
-    if(Math.floor(value)==0)
+    if(Math.floor(value)===0)
     {
         return 0.1*FindDelta(value*10);
     }
