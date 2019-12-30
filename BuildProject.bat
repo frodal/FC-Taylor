@@ -8,7 +8,7 @@ if %ERRORLEVEL% neq 0 (
   pause
   exit
 )
-pushd %~dp0\src\calibrate\
+pushd %~dp0\src\python\
 call pyinstaller --additional-hooks-dir=./ ^
                  --onefile --noconfirm --clean ^
                  --log-level=INFO ^
