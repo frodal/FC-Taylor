@@ -74,6 +74,7 @@ const ncpu = document.getElementById('ncpu');
 const nStressPoints = document.getElementById('nStressPoints');
 
 const calibratedParametersTable = document.getElementById('calibratedParameters');
+let isPlaneStress = true;
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
@@ -111,6 +112,7 @@ ${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value
     }
     fs.writeFileSync(path.join(inputPath,'Taylor.inp'),data);
     fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
+    isPlaneStress = planeStress.checked;
 }
 // Check the input from the user
 function SafeInput()
@@ -359,7 +361,7 @@ calibrateYsBtn.addEventListener('click',(event)=>
     calibMsg.innerHTML = 'Calibrating';
     try // Try to execute the program and sets a callback for when the program terminates
     {
-        execFile(calibratePath, [outfilePath,'--space','2D'], options, function (err, data) {
+        execFile(calibratePath, [outfilePath,'--space',isPlaneStress ? '2D' : '3D'], options, function (err, data) {
             startProgramBtn.disabled = false;
             calibrateYsBtn.disabled = false;
             if(err)
