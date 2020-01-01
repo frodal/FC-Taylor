@@ -8,11 +8,11 @@
     "Plastic anisotropy",
     "Discrete yield surface"
   ],
-  "main": "./main.js",
+  "main": "./src/javascript/main.js",
   "version": "0.3.0",
   "author": "Bjørn Håkon Frodal",
   "license": "UNLICENSED",
-  "copyright": "Copyright (c) 2019 Bjørn Håkon Frodal",
+  "copyright": "Copyright (c) 2019-2020 Bjørn Håkon Frodal",
   "homepage": "http://folk.ntnu.no/frodal/Projects.html",
   "private": true,
   "repository": {
