@@ -14,6 +14,7 @@ call pyinstaller --additional-hooks-dir=./ ^
                  --log-level=INFO ^
                  --distpath=../../GUI/Core ^
                  --name=FC-Taylor-Calibrate ^
+                 --icon=../../GUI/assets/icons/win/icon.ico ^
                  fc-taylor-calibrate.py
 if %ERRORLEVEL% neq 0 (
   popd

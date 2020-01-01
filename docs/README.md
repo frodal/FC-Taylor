@@ -17,7 +17,7 @@ To build the FC-Taylor application follow these simple steps.
 5. Install [Python](https://www.python.org)
 6. Install the required python packages by running the command `pip install -r ./src/python/requirements.txt` in the project directory
 7. Install the required Node.js modules by running the command `npm install` in the `GUI` directory
-8. Using the command line with the Intel Visual Fortran compiler for Intel x64 with the Visual Studio environement run the `BuildProject.bat` file to compile and build the application
+8. Using the command line with the Intel Visual Fortran compiler for Intel x64 with the Visual Studio environement run the `BuildProjectWindows.bat` file to compile and build the application for Windows x64
 
 ### Compiling the Fortran Source
 
