@@ -9,7 +9,7 @@
 !-----------------------------------------------------------------------
 !     Subroutines
 !-----------------------------------------------------------------------
-      include './Dependencies/SCMM-hypo/Hypo.f'
+      include '../../Dependencies/SCMM-hypo/Hypo.f'
       include './readprops.f'
       include './readeuler.f'
       include './deformation.f'

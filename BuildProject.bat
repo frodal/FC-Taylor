@@ -1,5 +1,5 @@
 @echo off
-call ifort -openmp -F1000000000 main.f -o ./GUI/Core/FC-Taylor.exe -O3
+call ifort -openmp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
 if %ERRORLEVEL% neq 0 (
   echo.
   echo Could not compile the Fortran source!
