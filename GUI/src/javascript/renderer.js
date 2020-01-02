@@ -747,7 +747,7 @@ function domainReduce(min, max, N, lode, sxy, c)
         return s[n];
     }
     
-    return domainReduce(s[n]-(s[2]-s[1]), s[n]+(s[2]-s[1]), N, lode, sxy, c)
+    return domainReduce(Math.max(s[n]-(s[1]-s[0]),0), s[n]+(s[1]-s[0]), N, lode, sxy, c)
 }
 
 function findMaxShear(c)
