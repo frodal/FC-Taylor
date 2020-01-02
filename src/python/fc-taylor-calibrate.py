@@ -328,7 +328,7 @@ def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise):
 
 def OptimizeLS(s11, s22, s33, s12, s23, s31, choise):
     # input
-    solver='lm'	# Minimizer to be used ('SLSQP','BFGS',...)
+    solver='lm'	# Minimizer to be used
     ##################################################################
 
     c0 = GetInitial(choise)
