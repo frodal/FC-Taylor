@@ -9,8 +9,7 @@ if %ERRORLEVEL% neq 0 (
   exit
 )
 pushd %~dp0\src\python\
-call pyinstaller --additional-hooks-dir=./ ^
-                 --onefile --noconfirm --clean ^
+call pyinstaller --onefile --noconfirm --clean ^
                  --log-level=INFO ^
                  --distpath=../../GUI/Core ^
                  --name=FC-Taylor-Calibrate ^
