@@ -15,7 +15,7 @@ To build the FC-Taylor application follow these simple steps.
 3. Install [Intel Parallel Studio XE](https://software.intel.com/en-us/fortran-compilers) with the Intel Visual Fortran compiler
 4. Install [Node.js](https://nodejs.org)
 5. Install [Python](https://www.python.org)
-6. Using the command line with the Intel Visual Fortran compiler for Intel x64 with the Visual Studio environement run the `BuildProjectWindows.bat` file to compile and build the application for Windows x64
+6. Run the `BuildProjectWindows.bat` script, by double-clicking it or using the command line, to compile and build the application for Windows x64
 
 ### Compiling the Fortran Source
 

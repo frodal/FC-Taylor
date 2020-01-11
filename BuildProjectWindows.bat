@@ -1,5 +1,7 @@
 @echo off
 
+if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
+
 if not exist GUI\Core mkdir GUI\Core
 
 call ifort -openmp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
@@ -48,3 +50,9 @@ call npm run setup-win64
 popd
 
 del GUI\LICENSE.md
+
+echo.
+echo The application was built!
+echo See the GUIbinaries\ folder
+echo.
+pause
