@@ -39,10 +39,10 @@
 *.app
 
 # GUI
-GUI/Core/*
-!GUI/Core/*.md
+GUI/Core/
 GUIbinaries/
 core-temp/
+GUI/LICENSE.md
 
 # Calibrate
 src/python/*
