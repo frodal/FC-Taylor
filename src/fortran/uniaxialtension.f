@@ -1,3 +1,4 @@
+      include './inverse.f'
 !-----------------------------------------------------------------------
 !                         SUBROUTINE uniaxialTension
 !-----------------------------------------------------------------------
@@ -17,15 +18,16 @@
       real*8 work, stressold(nblock,6), stateold(nblock,nstatev),
      .       defgradold(nblock,9), defgradNew(nblock,9), 
      .       stressNew(nblock,6), stateNew(nblock,nstatev),
-     .       Dissipation(nblock), D(6)
-      real*8 zero, one
+     .       Dissipation(nblock), D(6), ddsdde(6,6), ddedds(6,6)
+      real*8 zero, half, one, two
       integer i, k, iter
-      parameter(zero=0.d0, one=1.d0)
+      parameter(zero=0.d0, half=5.d-1, one=1.d0, two=2.d0)
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
       work = zero
       stressold = zero
+      sigma = zero
 !-----------------------------------------------------------------------
       do i=1,nblock
         stateold(i,1) = ang(i,1)
@@ -50,9 +52,9 @@
         defgradOld(i,9) = zero
       enddo
 !-----------------------------------------------------------------------
-      D(1) = epsdot
-      D(2) = zero
-      D(3) = zero
+      D(1) = epsdot/sqrt(one+half)
+      D(2) = -half*epsdot/sqrt(one+half)
+      D(3) = -half*epsdot/sqrt(one+half)
       D(4) = zero
       D(5) = zero
       D(6) = zero
@@ -65,18 +67,25 @@
 !-----------------------------------------------------------------------
 !        CALL Taylor
 !-----------------------------------------------------------------------
-!DIR$ FORCEINLINE RECURSIVE
-        call Taylor(nblock,nstatev,nprops,
-     .              ang,props,dt,D,stressOld,stateOld
-     .              defgradOld,stressNew,stateNew,defgradNew,sigma)
-!DIR$ FORCEINLINE RECURSIVE
         call TaylorCTO(nblock,nstatev,nprops,
-     .                 ang,props,dt,D,stressOld,stateOld
+     .                 ang,props,dt,D,stressOld,stateOld,
      .                 defgradOld,ddsdde)
         call inverse(ddsdde,ddedds,6)
         do i=1,6
             D(i) = ddedds(i,1)
         enddo
+        D = epsdot*D/sqrt(D(1)**2+D(2)**2+D(3)**2+
+     .                    two*D(4)**2+two*D(5)**2+two*D(6)**2)
+        do i=1,6
+            D(i) = D(i)-(ddedds(i,2)*sigma(2)+
+     .                   ddedds(i,3)*sigma(3)+ddedds(i,4)*sigma(4)+
+     .                   ddedds(i,5)*sigma(5)+ddedds(i,6)*sigma(6))
+        enddo
+        D = epsdot*D/sqrt(D(1)**2+D(2)**2+D(3)**2+
+     .                    two*D(4)**2+two*D(5)**2+two*D(6)**2)
+        call Taylor(nblock,nstatev,nprops,
+     .              ang,props,dt,D,stressOld,stateOld,
+     .              defgradOld,stressNew,stateNew,defgradNew,sigma)
 !-----------------------------------------------------------------------
 !        UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
@@ -84,6 +93,7 @@
         stateOld   = stateNew
         defgradOld = defgradNew
         work = work+sigma(7)
+        sigma(7) = work
       enddo
       if (iter.ge.niter) then
         write(6,*) '!! Error'
@@ -102,12 +112,12 @@
 ! 
 !-----------------------------------------------------------------------
       subroutine Taylor(nblock,nstatev,nprops,
-     .                  ang,props,dt,D,stressOld,stateOld
+     .                  ang,props,dt,D,stressOld,stateOld,
      .                  defgradOld,stressNew,stateNew,defgradNew,sigma)
 !-----------------------------------------------------------------------
       implicit none
 !-----------------------------------------------------------------------
-      integer, intent(in) :: nblock, nstatev, nprops,
+      integer, intent(in) :: nblock, nstatev, nprops
       real*8, intent(in) :: ang(nblock,4), props(nprops), dt, D(6),
      .       stressOld(nblock,6), stateOld(nblock,nstatev),
      .       defgradOld(nblock,9)
@@ -178,3 +188,76 @@
 !-----------------------------------------------------------------------
       return
       end subroutine Taylor
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!                         SUBROUTINE TaylorCTO
+!-----------------------------------------------------------------------
+!  
+! 
+!-----------------------------------------------------------------------
+      subroutine TaylorCTO(nblock,nstatev,nprops,
+     .                     ang,props,dt,D,stressOld,stateOld,
+     .                     defgradOld,ddsdde)
+!-----------------------------------------------------------------------
+      implicit none
+!-----------------------------------------------------------------------
+      integer, intent(in) :: nblock, nstatev, nprops
+      real*8, intent(in) :: ang(nblock,4), props(nprops), dt, D(6),
+     .       stressOld(nblock,6), stateOld(nblock,nstatev),
+     .       defgradOld(nblock,9)
+      real*8, intent(out) :: ddsdde(6,6)
+!     Local variables
+      real*8 Dissipation(nblock), stressNew(nblock,6), 
+     .       stateNew(nblock,nstatev), defgradNew(nblock,9),
+     .       sigma(7), sigTGT(12,6), CTO(6,6), inc(12,6), del(6)
+      real*8 zero, one, pert, o2pert
+      integer i, j, k, kk
+      parameter(zero=0.d0, one=1.d0,pert=1e-6,o2pert=1.0/(2.0*pert))
+!-----------------------------------------------------------------------
+!     Initialize some variables
+!-----------------------------------------------------------------------
+      do i=1,6
+        do k=1,12
+          inc(k,i) = D(i)
+        enddo
+      enddo
+!-----------------------------------------------------------------------
+      kk = 1
+      do i=1,6
+        do k=1,2
+          inc(kk,i) = D(i)+pert*(-one)**real(k)
+          kk        = kk+1
+        enddo
+      enddo
+!-----------------------------------------------------------------------
+!     Consistent tangent operator
+!-----------------------------------------------------------------------
+      do i=1,12
+        do k=1,6
+          del(k) = inc(i,k)
+        enddo
+        call Taylor(nblock,nstatev,nprops,
+     .              ang,props,dt,del,stressOld,stateOld,
+     .              defgradOld,stressNew,stateNew,defgradNew,sigma)
+        do k=1,6
+          sigTGT(i,k) = sigma(k)
+        enddo
+      enddo
+!-----------------------------------------------------------------------
+      kk = 0
+      do i=1,12,2
+        kk = kk+1
+        do j=1,6
+          CTO(kk,j) = (sigTGT(i+1,j)-sigTGT(i,j))*o2pert
+        enddo
+      enddo
+!-----------------------------------------------------------------------
+      do i=1,6
+        do j=1,6
+          ddsdde(j,i) = CTO(i,j)
+        enddo
+      enddo
+!-----------------------------------------------------------------------
+      return
+      end subroutine TaylorCTO
+!-----------------------------------------------------------------------

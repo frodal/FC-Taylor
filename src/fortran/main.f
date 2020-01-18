@@ -13,6 +13,7 @@
       include './readprops.f'
       include './readeuler.f'
       include './deformation.f'
+      include './uniaxialtension.f'
 !-----------------------------------------------------------------------
 !     FC-Taylor program
 !-----------------------------------------------------------------------
@@ -24,6 +25,7 @@
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
+      real*8 sigmaUT(7)
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock,Nang
@@ -90,8 +92,8 @@
 !-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
 !-----------------------------------------------------------------------
-      ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
-      DT     = wp/(epsdot*props(6)*1.d3)
+      ! dt=(we+wp)/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
+      DT     = (9*props(6)**2/props(1)+wp)/(epsdot*props(6)*3.d3)
 !-----------------------------------------------------------------------
 !     Write the start date and time
 !-----------------------------------------------------------------------
@@ -102,6 +104,16 @@
      &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
+!-----------------------------------------------------------------------
+!     Calculates the uniaxial stress point along RD/ED
+!-----------------------------------------------------------------------
+      call uniaxialTension(nblock,nstatev,nprops,niter,
+     .                     ang,props,dt,wp,epsdot,sigmaUT)
+      ! Superpose a hydrostatic stress so that s33=0
+      ! Yielding is not dependent upon hydrostatic stress!
+      sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
+      sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
+      sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
 !-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
@@ -238,6 +250,10 @@
       open (unit = 2, file = ".\Output\output.txt")
       write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       if (centro.eq.1)then
+        write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
+     +              sigmaUT(5),sigmaUT(6), sigmaUT(7)
+        write(2,98) -sigmaUT(1),-sigmaUT(2),-sigmaUT(3),-sigmaUT(4),
+     +              -sigmaUT(5),-sigmaUT(6), sigmaUT(7)
         do km=1,ndef
           write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +                sigma(km,5),sigma(km,6), sigma(km,7)
@@ -246,6 +262,8 @@
      +                 sigma(km,7)
         enddo
       else
+        write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
+     +              sigmaUT(5),sigmaUT(6), sigmaUT(7)
         do km=1,ndef
           write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +                sigma(km,5),sigma(km,6), sigma(km,7)
