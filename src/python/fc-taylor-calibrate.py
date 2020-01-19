@@ -220,6 +220,20 @@ def Normalize(s11,s22,s33,s12,s23,s31):
     s31=s31/s0
     return s11, s22, s33, s12, s23, s31
 
+def Correct(c,s11,s22,s33,s12,s23,s31,choise):
+    # Calculate the normalized yield stress along RD/ED
+    YieldFunc = GetYS(GetInitial(choise))
+    normS = 1.0/(YieldFunc(1.0,0.0,0.0,0.0,0.0,0.0,c)+1.0)
+
+    # Correct the normalized yield points
+    s11 = s11/normS
+    s22 = s22/normS
+    s33 = s33/normS
+    s12 = s12/normS
+    s23 = s23/normS
+    s31 = s31/normS
+    return s11, s22, s33, s12, s23, s31
+
 def SaveResult(c,folder):
     parameterName = [r'\hat{c}^{\prime}_{12}',
                      r'\hat{c}^{\prime}_{13}',
@@ -348,6 +362,14 @@ def OptimizeLS(s11, s22, s33, s12, s23, s31, choise):
 
     return c
 
+def Calibrate(s11, s22, s33, s12, s23, s31, choise):
+    if len(GetInitial(choise))>len(s11):
+        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise)
+    else:
+        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choise)
+    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise)
+    return c
+
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Calibrate the Yld2004-18p yield surface from discrete yield surface data.')
@@ -368,17 +390,19 @@ def main():
     elif spaceInput == '3D':
         choise = Space.fixed3D
 
-    c0 = GetInitial(choise)
     # Loading CP-FEM data
     s11, s22, s33, s12, s23, s31 = LoadTests(fileName)
     # Normalize data by the yield stress
     s11, s22, s33, s12, s23, s31 = Normalize(s11,s22,s33,s12,s23,s31)
 
-    if len(c0)>len(s11):
-        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise)
-    else:
-        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choise)
-    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise)
+    # Initial calibration
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choise)
+
+    # Correct yield stress based on normalized yield stress along RD/ED, which should be 1
+    s11, s22, s33, s12, s23, s31 = Correct(c,s11,s22,s33,s12,s23,s31,choise)
+
+    # Final calibration
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choise)
 
     # Writes the parameters to a file
     SaveResult(c,fileName.parent)
