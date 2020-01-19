@@ -789,12 +789,12 @@ function loadDiscreteYS()
         fs.createReadStream(filePath)
             .pipe(csv())
             .on('data', (data) => {
-                s11.push(data[" S11"]);
-                s22.push(data[" S22"]);
-                s33.push(data[" S33"]);
-                s12.push(data[" S12"]);
-                s23.push(data[" S23"]);
-                s31.push(data[" S31"]);
+                s11.push(parseFloat(data[" S11"]));
+                s22.push(parseFloat(data[" S22"]));
+                s33.push(parseFloat(data[" S33"]));
+                s12.push(parseFloat(data[" S12"]));
+                s23.push(parseFloat(data[" S23"]));
+                s31.push(parseFloat(data[" S31"]));
             })
             .on('end', () => {
                 [s11, s22, s33, s12, s23, s31] = Normalize(s11, s22, s33, s12, s23, s31);
