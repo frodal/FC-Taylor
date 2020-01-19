@@ -44,7 +44,7 @@ ipcMain.on('save-calibration-dialog', (event)=>
 // Opens an error dialog message
 ipcMain.on('open-error-dialog', (event)=>
 {
-    dialog.showErrorBox('Error', 'Could not execute the FC-Taylor program!\nPlease report this issue by going to help and Report Issue.\nError code: 1');
+    dialog.showErrorBox('Error', 'Could not execute the FC-Taylor analysis!\nPlease report this issue by going to help and Report Issue.\nError code: 1');
 });
 // Opens an error dialog message
 ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
@@ -54,7 +54,7 @@ ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
         dialog.showErrorBox('Error', parseError(errorCode));
     }else
     {
-        dialog.showErrorBox('Error', 'An error occured while executing the program!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
+        dialog.showErrorBox('Error', 'An error occured while executing the analysis!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
     }
 });
 ipcMain.on('open-errorCalibration-dialog', (event)=>
@@ -64,7 +64,7 @@ ipcMain.on('open-errorCalibration-dialog', (event)=>
 
 function parseError(errorCode)
 {
-    let msg = 'An error occured while executing the program!\nError code: '+errorCode;
+    let msg = 'An error occured while executing the analysis!\nError code: '+errorCode;
     switch(errorCode)
     {
         case 11:
@@ -120,7 +120,7 @@ ipcMain.on('open-successfulTermination-dialog', (event)=>
     {
         type:"info",
         title:"Success",
-        message:"Job ended successfully",
+        message:"Analysis ended successfully",
         buttons:['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);

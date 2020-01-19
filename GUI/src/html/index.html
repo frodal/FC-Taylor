@@ -20,7 +20,7 @@
             <button class="btn btn-secondary" onclick="openPage('home', this)" id="defaultOpen">Home</button>
             <button class="btn btn-secondary" onclick="openPage('textureInput', this)">Texture</button>
             <button class="btn btn-secondary" onclick="openPage('materialInput', this)">Material</button>
-            <button class="btn btn-secondary" onclick="openPage('otherInput', this)">Job</button>
+            <button class="btn btn-secondary" onclick="openPage('otherInput', this)">Analysis</button>
             <button class="btn btn-secondary" onclick="openPage('outputSection', this)">Monitor</button>
             <button class="btn btn-secondary" onclick="openPage('calibrateSection', this)">Calibrate</button>
             <button class="btn btn-secondary" onclick="openPage('visualizeSection', this)">Visualize</button>
@@ -31,40 +31,36 @@
                 <h4>Home</h4>
                 <p>
                     This program uses the full-constraint (FC) Taylor homogenization approach to calculate the discrete yield surface of an FCC polycrystal. 
-                    The Yld2004-18p yield surface can be fitted to the discrete points calculated. 
+                    The discrete yield surface data can be used to calibrate the Yld2004-18p yield surface for the material.
                 </p>
                 <h5>How to</h5>
                 <p>
                     <ul>
                         <li>
-                            Select a file containing information about the crystallographic texture of the material under the "Texture" tab. 
+                            Select a file containing information about the crystallographic texture of the material under the "Texture" tab, see the "Texture format" section below for details. 
                         </li>
                         <li>
                             Input your material parameters under the "Material" tab. 
                         </li>
                         <li>
-                            Setup and start the FC-Taylor job under the "Job" tab. 
+                            Setup and start the FC-Taylor analysis under the "Analysis" tab. 
                         </li>
                         <li>
-                            Monitor the progress under the "Monitor" tab. 
+                            Monitor the progress of the analysis under the "Monitor" tab. 
                         </li>
                         <li>
-                            When the job has finished, you can save the discrete yield surface data points under the "Job" tab by pressing "Save results". 
-                        </li>
-                    </ul>
-                </p>
-                <h5>Calibration and visualization</h5>
-                <p>
-                    The discrete yield surface data points can be used to calibrate the Yld2004-18p yield surface for the material.
-                </p>
-                <p>
-                    When the job has finished, you can do the following:
-                    <ul>
-                        <li>
-                            Go to the "Calibrate" tab and press "Start calibration" to calibrate the Yld2004-18p yield surface.
-                        </li>
-                        <li>
-                            Go to the "Visualize" tab to plot the discrete yield surface points and the calibrated yield surface.
+                            Once the analysis has completed
+                            <ul>
+                                <li>
+                                    You can save the discrete yield surface data under the "Analysis" tab by pressing the "Save results" button. 
+                                </li>
+                                <li>
+                                    Go to the "Calibrate" tab and press the "Start calibration" button to calibrate the Yld2004-18p yield surface.
+                                </li>
+                                <li>
+                                    Go to the "Visualize" tab to view the plotted discrete yield surface points and the calibrated Yld2004-18p yield surface.
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </p>
@@ -198,7 +194,7 @@
             </div>
 
             <div id="otherInput" class="tabcontent">
-                <h4>Job input</h4>
+                <h4>Analysis input</h4>
                 <form>
                     <div class="form-row">
                         <div class="col">
@@ -240,7 +236,7 @@
                     </div>
                 </form>
 
-                <h4>Run program</h4>
+                <h4>Run analysis</h4>
                 <p>
                     Number of stress points to be generated \(N_{\sigma} = \) <span id="nStressPoints">2168</span id="nStressPoints">
                 </p>
