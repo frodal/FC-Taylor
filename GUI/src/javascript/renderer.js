@@ -21,6 +21,7 @@ const calibRoller = document.getElementById('lds-roller-calibration');
 const runMsg = document.getElementById('running');
 const calibMsg = document.getElementById('calibrating');
 const outArea = document.getElementById('OutputData');
+const darkSwitch = document.getElementById('darkSwitch');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
@@ -431,6 +432,9 @@ async function plotScatter(target,x,y)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'},
         showlegend: false,
         hovermode: 'closest'
     };
@@ -441,7 +445,7 @@ async function plotScatter(target,x,y)
         mode: 'markers',
         name: 'points',
         marker: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
             size: 5
         },
         type: 'scatter'
@@ -488,6 +492,9 @@ async function plotYS(target,x,y,sxy,sxyMax)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'},
         showlegend: false,
         hovermode: 'closest'
     };
@@ -512,7 +519,7 @@ async function plotYS(target,x,y,sxy,sxyMax)
             mode: 'lines',
             name: `Sxy = ${sxy[k]}`,
             line: {
-                color: 'rgb(0,0,0)',
+                color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
             },
             type: 'scatter'
         };
@@ -554,6 +561,9 @@ async function plotLankford(target,angle,Rvalue)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'},
         showlegend: false,
         hovermode: 'closest'
     };
@@ -575,7 +585,7 @@ async function plotLankford(target,angle,Rvalue)
         mode: 'lines',
         name: 'Lankford coefficient',
         line: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
         },
         type: 'scatter'
     };
@@ -627,6 +637,9 @@ async function plotNormStress(target,angle,normStress)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'},
         showlegend: false,
         hovermode: 'closest'
     };
@@ -649,7 +662,7 @@ async function plotNormStress(target,angle,normStress)
         mode: 'lines',
         name: `Normalized yield stress`,
         line: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
         },
         type: 'scatter'
     };
