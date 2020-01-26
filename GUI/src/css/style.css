@@ -52,6 +52,9 @@ form
     z-index: 10;
     background-color: white;
     padding: 2px 0 2px 0;
+    display: flex;
+    justify-content: left;
+    align-items: center; 
 }
 .topnav button
 {

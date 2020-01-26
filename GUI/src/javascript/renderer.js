@@ -21,6 +21,7 @@ const calibRoller = document.getElementById('lds-roller-calibration');
 const runMsg = document.getElementById('running');
 const calibMsg = document.getElementById('calibrating');
 const outArea = document.getElementById('OutputData');
+const darkSwitch = document.getElementById('darkSwitch');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
@@ -75,6 +76,12 @@ const nStressPoints = document.getElementById('nStressPoints');
 
 const calibratedParametersTable = document.getElementById('calibratedParameters');
 let isPlaneStress = true;
+
+// Plot variables
+let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
+let c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
+let normStress = [], Rvalue = [], angle = [];
+let s11Contour = [], s22Contour = [], s12Contour = [], s12Max = [];
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
@@ -431,6 +438,12 @@ async function plotScatter(target,x,y)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {
+            family: 'Montserrat',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
+        },
         showlegend: false,
         hovermode: 'closest'
     };
@@ -441,7 +454,7 @@ async function plotScatter(target,x,y)
         mode: 'markers',
         name: 'points',
         marker: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
             size: 5
         },
         type: 'scatter'
@@ -488,6 +501,12 @@ async function plotYS(target,x,y,sxy,sxyMax)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {
+            family: 'Montserrat',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
+        },
         showlegend: false,
         hovermode: 'closest'
     };
@@ -512,7 +531,7 @@ async function plotYS(target,x,y,sxy,sxyMax)
             mode: 'lines',
             name: `Sxy = ${sxy[k]}`,
             line: {
-                color: 'rgb(0,0,0)',
+                color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
             },
             type: 'scatter'
         };
@@ -554,6 +573,12 @@ async function plotLankford(target,angle,Rvalue)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {
+            family: 'Montserrat',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
+        },
         showlegend: false,
         hovermode: 'closest'
     };
@@ -575,7 +600,7 @@ async function plotLankford(target,angle,Rvalue)
         mode: 'lines',
         name: 'Lankford coefficient',
         line: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
         },
         type: 'scatter'
     };
@@ -627,6 +652,12 @@ async function plotNormStress(target,angle,normStress)
             showgrid: true,
             zeroline: false
         },
+        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
+        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
+        font: {
+            family: 'Montserrat',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
+        },
         showlegend: false,
         hovermode: 'closest'
     };
@@ -649,7 +680,7 @@ async function plotNormStress(target,angle,normStress)
         mode: 'lines',
         name: `Normalized yield stress`,
         line: {
-            color: 'rgb(0,0,0)',
+            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
         },
         type: 'scatter'
     };
@@ -683,8 +714,8 @@ async function CalcRandR(angle,c)
 
 async function plotRandR(target1,target2,c)
 {
-    let angle = linspace(0,90,1001);
-    let [normStress, Rvalue] = await CalcRandR(angle,c);
+    angle = linspace(0,90,1001);
+    [normStress, Rvalue] = await CalcRandR(angle,c);
     plotNormStress(target1,angle,normStress);
     plotLankford(target2,angle,Rvalue);
 }
@@ -724,7 +755,7 @@ async function plotContour(target,c)
                 await setImmediatePromise()
         }
     }
-
+    s11Contour = x, s22Contour = z, s12Contour = sxy, s12Max = sxyMax;
     plotYS('plot-window-2',x,z,sxy,sxyMax);
 }
 
@@ -785,7 +816,7 @@ function loadDiscreteYS()
     let filePath = path.join(outputPath, 'output.txt')
     if (fs.existsSync(filePath)) 
     {
-        let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
+        s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
         fs.createReadStream(filePath)
             .pipe(csv())
             .on('data', (data) => {
@@ -835,7 +866,7 @@ async function loadCalibratedYSparams()
     let paramPath = path.join(outputPath, 'CalibratedParameters.dat')
     if (fs.existsSync(paramPath)) 
     {
-        let c = [];
+        c = [];
         fs.createReadStream(paramPath)
             .pipe(csv())
             .on('data', (data) => {
@@ -858,7 +889,7 @@ function DisplayCalibratedParameters(c)
 
 function ClearDisplayCalibratedParameters()
 {
-    let c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
+    c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
     DisplayCalibratedParameters(c);
 }
 
@@ -941,3 +972,17 @@ function setImmediatePromise() {
         setImmediate(() => resolve());
     });
 }
+
+// Dark mode switch
+darkSwitch.addEventListener('change', (event)=>
+{
+    if(s11.length>0)
+        plotScatter('plot-window-1',s11,s22)
+    if(s11Contour.length>0)
+        plotYS('plot-window-2',s11Contour,s22Contour,s12Contour,s12Max);
+    if(angle.length>0)
+    {
+        plotNormStress('plot-window-3',angle,normStress);
+        plotLankford('plot-window-4',angle,Rvalue);
+    }
+});

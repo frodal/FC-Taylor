@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../../Dependencies/Bootstrap-4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/roller.css" />
+    <link rel="stylesheet" href="../css/dark-mode.css" />
     <script id="MathJax-script" async src="../../node_modules/mathjax/es5/tex-chtml.js"></script>
   </head>
   <body>
@@ -24,6 +25,10 @@
             <button class="btn btn-secondary" onclick="openPage('outputSection', this)">Monitor</button>
             <button class="btn btn-secondary" onclick="openPage('calibrateSection', this)">Calibrate</button>
             <button class="btn btn-secondary" onclick="openPage('visualizeSection', this)">Visualize</button>
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="darkSwitch" />
+                <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+            </div>
         </div>
         <div class="content">
 
@@ -332,5 +337,6 @@
       require('../javascript/renderer.js')
     </script>
     <script src="../javascript/opentabs.js" type="text/javascript"></script>
+    <script src="../../Dependencies/dark-mode-switch/dark-mode-switch.min.js"></script>
   </body>
 </html>
