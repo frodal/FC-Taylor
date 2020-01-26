@@ -66,9 +66,13 @@
   background: var(--dark-mode-text-color) !important;
 }
 
-/* Position dark mode button to the right */
-.custom-switch
+/* On screens that are 992px or greater */
+@media screen and (min-width: 992px) 
 {
-    position: absolute;
-    right: 0;
+    /* Position the dark mode button to the right */
+    .custom-switch
+    {
+        position: absolute;
+        right: 0;
+    }
 }
