@@ -28,7 +28,8 @@
       real*8 sigmaUT(7)
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
-      integer NITER,NSTATEV,nblock,Nang
+      integer NITER,NSTATEV,nblock,Nang, UTflag
+      integer OMP_get_thread_num
       parameter(nprops=16,NSTATEV=28)
       real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
@@ -43,7 +44,7 @@
 !-----------------------------------------------------------------------
 !     Define some parameters
 !-----------------------------------------------------------------------
-!
+      UTflag = 0
 !-----------------------------------------------------------------------
 !     Define material properties
 !-----------------------------------------------------------------------
@@ -105,16 +106,6 @@
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
-!     Calculates the uniaxial stress point along RD/ED
-!-----------------------------------------------------------------------
-      call uniaxialTension(nblock,nstatev,nprops,niter,
-     .                     ang,props,dt,wp,epsdot,sigmaUT)
-      ! Superpose a hydrostatic stress so that s33=0
-      ! Yielding is not dependent upon hydrostatic stress!
-      sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
-      sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
-      sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
-!-----------------------------------------------------------------------
 !     Loop over deformation points
 !-----------------------------------------------------------------------
 !$    call OMP_set_num_threads(ncpus)
@@ -122,6 +113,19 @@
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
 !$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
+!-----------------------------------------------------------------------
+!     Calculates the uniaxial stress point along RD
+!-----------------------------------------------------------------------
+      if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
+        UTflag = 1
+        call uniaxialTension(nblock,nstatev,nprops,niter,
+     .                       ang,props,dt,wp,epsdot,sigmaUT)
+        ! Superpose a hydrostatic stress so that s33=0
+        ! Yielding is not dependent upon hydrostatic stress!
+        sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
+        sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
+        sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
+      endif
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
