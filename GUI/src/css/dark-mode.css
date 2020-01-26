@@ -54,7 +54,7 @@
     border-color: var(--dark-mode-btn-color) !important;
     color: var(--dark-mode-text-color) !important;
 }
-[data-theme="dark"] .btn-secondary:hover
+[data-theme="dark"] .btn-secondary:hover:enabled
 {
     background-color: var(--dark-mode-input-color) !important;
     border-color: var(--dark-mode-input-color) !important;
