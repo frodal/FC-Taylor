@@ -507,6 +507,14 @@ async function plotYS(target,x,y,sxy,sxyMax)
             family: 'Montserrat',
             color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
         },
+        annotations: [
+            {
+              x: 0,
+              y: 0,
+              text: parseFloat(sxyMax).toFixed(2),
+              showarrow: false,
+            }
+          ],
         showlegend: false,
         hovermode: 'closest'
     };
