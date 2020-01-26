@@ -22,7 +22,6 @@
             <button class="btn btn-secondary" onclick="openPage('textureInput', this)">Texture</button>
             <button class="btn btn-secondary" onclick="openPage('materialInput', this)">Material</button>
             <button class="btn btn-secondary" onclick="openPage('otherInput', this)">Analysis</button>
-            <button class="btn btn-secondary" onclick="openPage('outputSection', this)">Monitor</button>
             <button class="btn btn-secondary" onclick="openPage('calibrateSection', this)">Calibrate</button>
             <button class="btn btn-secondary" onclick="openPage('visualizeSection', this)">Visualize</button>
             <div class="custom-control custom-switch">
@@ -48,10 +47,7 @@
                             Input your material parameters under the "Material" tab. 
                         </li>
                         <li>
-                            Setup and start the FC-Taylor analysis under the "Analysis" tab. 
-                        </li>
-                        <li>
-                            Monitor the progress of the analysis under the "Monitor" tab. 
+                            Setup, start and monitor the progress of the FC-Taylor analysis under the "Analysis" tab. 
                         </li>
                         <li>
                             Once the analysis has completed
@@ -263,10 +259,7 @@
                         </div>
                     </div>
                 </p>
-            </div>
-
-            <div id="outputSection" class="tabcontent">
-                <h4>Output:</h4>
+                <h4 style='margin-top: 1em;'>Analysis output:</h4>
                 <p>
                     <div id="OutputData" class="text-light bg-dark textfile"></div>
                 </p>
