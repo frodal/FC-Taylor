@@ -66,6 +66,16 @@
   background: var(--dark-mode-text-color) !important;
 }
 
+/* Set the scrollbar color in dark mode */
+[data-theme="dark"]::-webkit-scrollbar-thumb
+{
+	background-color: var(--dark-mode-btn-color);
+}
+[data-theme="dark"]::-webkit-scrollbar-thumb:hover 
+{
+    background: var(--dark-mode-input-color); 
+}
+
 /* On screens that are 992px or greater */
 @media screen and (min-width: 992px) 
 {
