@@ -25,7 +25,7 @@ const darkSwitch = document.getElementById('darkSwitch');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
-const workDir = path.join(__dirname,'../../../core-temp')
+const workDir = path.join(__dirname,'../../../core-temp-pid'+process.pid.toString())
 const inputPath = path.join(workDir,'Input');
 const outputPath = path.join(workDir,'Output');
 let exeCommandArgs = [''];
@@ -90,15 +90,15 @@ function SetupWorkingDir()
 {
     if(!fs.existsSync(workDir))
     {
-        fs.mkdirSync(workDir);
+        fs.mkdirSync(workDir, { recursive: true });
     }
     if(!fs.existsSync(inputPath))
     {
-        fs.mkdirSync(inputPath);
+        fs.mkdirSync(inputPath, { recursive: true });
     }
     if(!fs.existsSync(outputPath))
     {
-        fs.mkdirSync(outputPath);
+        fs.mkdirSync(outputPath, { recursive: true });
     }
 }
 function SaveInput()
