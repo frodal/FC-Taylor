@@ -2,7 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-const {ipcRenderer} = require('electron');
+const {remote, ipcRenderer} = require('electron');
 const {execFile} = require('child_process');
 const path = require('path');
 const os = require('os');
@@ -10,6 +10,8 @@ const fs = require('fs');
 const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
 const matrix = require('ml-matrix');
+const bent = require('bent')
+const getJSON = bent('json')
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -28,6 +30,7 @@ const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
 const workDir = path.join(__dirname,'../../../core-temp-pid'+process.pid.toString())
 const inputPath = path.join(workDir,'Input');
 const outputPath = path.join(workDir,'Output');
+const LicenseLocation = 'http://folk.ntnu.no/frodal/Cite/FC-Taylor.json';
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -82,6 +85,73 @@ let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
 let c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
 let normStress = [], Rvalue = [], angle = [];
 let s11Contour = [], s22Contour = [], s12Contour = [], s12Max = [];
+
+////////////////////////////////////////////////////////////////////////////////////
+//                                 Lisence check                                  //
+////////////////////////////////////////////////////////////////////////////////////
+let LicenseOK = false;
+
+function CheckLicense() 
+{
+    getJSON(LicenseLocation)
+        .then(value => {
+            ValidateLicense(value);
+            if (!LicenseOK) 
+            {
+                remote.dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributer.');
+                remote.app.quit();
+            }
+        }).catch(error => {
+            LicenseOK = false;
+            let choice = remote.dialog.showMessageBoxSync(remote.BrowserWindow.getFocusedWindow(),
+                {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Could not connect to the license server.\nPlease check your internet connection.',
+                    buttons: ['Try again', 'Quit'],
+                    cancelId: 1
+                });
+            if (choice === 0) 
+            {
+                CheckLicense();
+            } else 
+            {
+                remote.app.quit();
+            }
+        });
+}
+
+function ValidateLicense(value) 
+{
+    let newestVersion = value.version.split('.')
+    let currentVersion = remote.app.getVersion().split('.');
+    if (newestVersion.length !== currentVersion.length) 
+    {
+        LicenseOK = false;
+        return
+    }
+    for (let i = 0; i < currentVersion.length; ++i) 
+    {
+        newestVersion[i] = parseFloat(newestVersion[i])
+        currentVersion[i] = parseFloat(currentVersion[i])
+        if (newestVersion[i] > currentVersion[i]) 
+        {
+            LicenseOK = false;
+            return
+        }
+        else if (newestVersion[i] < currentVersion[i]) 
+        {
+            LicenseOK = true;
+            return
+        }
+    }
+    LicenseOK = true;
+}
+
+// Check license after 1 sec
+setTimeout(CheckLicense,1000);
+// Repetatly check license every 10 min
+setInterval(CheckLicense,600000);
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
@@ -240,6 +310,8 @@ startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
+    if(!LicenseOK)
+        return
     if(SafeInput()){
         // Clear output data field
         outArea.innerHTML = '';
@@ -355,6 +427,8 @@ ipcRenderer.send('core-temp', workDir)
 ////////////////////////////////////////////////////////////////////////////////////
 calibrateYsBtn.addEventListener('click',(event)=>
 {
+    if(!LicenseOK)
+        return
     let outfilePath = path.join(outputPath, 'output.txt');
     // Sets the current working directory of the selected program to be its own directory
     let options = { cwd: path.dirname(outfilePath) };

@@ -71,14 +71,14 @@ const template = [
       },
       {
         label: 'Learn More',
-        click () { shell.openExternal('http://folk.ntnu.no/frodal/Projects.html') }
+        click () { shell.openExternal('http://folk.ntnu.no/frodal/Cite/FC-Taylor.html') }
       },
       {
         type: 'separator'
       },
       {
         label: 'Check for Updates',
-        click () { shell.openExternal('http://folk.ntnu.no/frodal/Projects.html') }
+        click () { shell.openExternal('http://folk.ntnu.no/frodal/Cite/FC-Taylor.html') }
       },
       {
         type: 'separator'
