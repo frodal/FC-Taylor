@@ -41,13 +41,13 @@
     "csv-parser": "^2.3.2",
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^8.1.0",
-    "mathjax": "^3.0.0",
+    "mathjax": "^3.0.1",
     "ml-matrix": "^6.4.1",
     "plotly.js-dist": "^1.52.2"
   },
   "devDependencies": {
     "electron": "^6.1.9",
-    "electron-installer-windows": "^2.0.0",
+    "electron-installer-windows": "^3.0.0",
     "electron-packager": "^14.2.1",
     "icon-gen": "^2.0.0"
   }

@@ -41,7 +41,7 @@
 # GUI
 GUI/Core/
 GUIbinaries/
-core-temp/
+core-temp*/
 GUI/LICENSE.md
 
 # Calibrate
