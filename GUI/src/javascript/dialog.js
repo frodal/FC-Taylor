@@ -3,7 +3,10 @@ const { ipcMain, dialog, BrowserWindow } = require('electron');
 // Open file dialog to open file
 ipcMain.on('open-file-dialog', (event) => {
     dialog.showOpenDialog(BrowserWindow.getFocusedWindow(),
-        { properties: ['openFile'] }).then((files) => {
+        {
+            filters: [{ name: 'All files', extensions: ['*'] }],
+            properties: ['openFile']
+        }).then((files) => {
             if (!files.canceled) {
                 event.sender.send('SelectedFile', files.filePaths);
             }
@@ -13,7 +16,10 @@ ipcMain.on('open-file-dialog', (event) => {
 // Open save file dialog to save file
 ipcMain.on('save-file-dialog', (event) => {
     dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
-        {}).then((files) => {
+        {
+            filters: [{ name: 'csv', extensions: ['csv'] },
+            { name: 'All files', extensions: ['*'] }]
+        }).then((files) => {
             if (!files.canceled) {
                 event.sender.send('SaveFile', files.filePath);
             }
@@ -22,7 +28,10 @@ ipcMain.on('save-file-dialog', (event) => {
 // Open save file dialog to save calibrated parameters file
 ipcMain.on('save-calibration-dialog', (event) => {
     dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
-        {}).then((files) => {
+        {
+            filters: [{ name: 'csv', extensions: ['csv'] },
+            { name: 'All files', extensions: ['*'] }]
+        }).then((files) => {
             if (!files.canceled) {
                 event.sender.send('SaveCalibration', files.filePath);
             }
