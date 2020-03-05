@@ -1,72 +1,53 @@
-const {ipcMain, dialog, BrowserWindow} = require('electron');
+const { ipcMain, dialog, BrowserWindow } = require('electron');
 
 // Open file dialog to open file
-ipcMain.on('open-file-dialog', (event)=>
-{
-  dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), 
-      {properties: ['openFile']}, 
-      (files)=>
-  {
-      if(files)
-      {
-          event.sender.send('SelectedFile', files);
-      }
-  });
+ipcMain.on('open-file-dialog', (event) => {
+    dialog.showOpenDialog(BrowserWindow.getFocusedWindow(),
+        { properties: ['openFile'] }).then((files) => {
+            if (!files.canceled) {
+                event.sender.send('SelectedFile', files.filePaths);
+            }
+        });
 });
 
 // Open save file dialog to save file
-ipcMain.on('save-file-dialog', (event)=>
-{
-  dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), 
-      {}, 
-      (files)=>
-  {
-      if(files)
-      {
-          event.sender.send('SaveFile', files);
-      }
-  });
+ipcMain.on('save-file-dialog', (event) => {
+    dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
+        {}).then((files) => {
+            if (!files.canceled) {
+                event.sender.send('SaveFile', files.filePath);
+            }
+        });
 });
 // Open save file dialog to save calibrated parameters file
-ipcMain.on('save-calibration-dialog', (event)=>
-{
-  dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), 
-      {}, 
-      (files)=>
-  {
-      if(files)
-      {
-          event.sender.send('SaveCalibration', files);
-      }
-  });
+ipcMain.on('save-calibration-dialog', (event) => {
+    dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
+        {}).then((files) => {
+            if (!files.canceled) {
+                event.sender.send('SaveCalibration', files.filePath);
+            }
+        });
 });
 
 // Opens an error dialog message
-ipcMain.on('open-error-dialog', (event)=>
-{
+ipcMain.on('open-error-dialog', (event) => {
     dialog.showErrorBox('Error', 'Could not execute the FC-Taylor analysis!\nPlease report this issue by going to help and Report Issue.\nError code: 1');
 });
 // Opens an error dialog message
-ipcMain.on('open-errorKilled-dialog', (event,errorCode)=>
-{
-    if(errorCode)
-    {
+ipcMain.on('open-errorKilled-dialog', (event, errorCode) => {
+    if (errorCode) {
         dialog.showErrorBox('Error', parseError(errorCode));
-    }else
-    {
+    } else {
         dialog.showErrorBox('Error', 'An error occured while executing the analysis!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
     }
 });
-ipcMain.on('open-errorCalibration-dialog', (event)=>
-{
+ipcMain.on('open-errorCalibration-dialog', (event) => {
     dialog.showErrorBox('Error', 'An error occured during calibration!\nPlease report this issue by going to help and Report Issue.\nError code: 3');
 });
 
-function parseError(errorCode)
-{
-    let msg = 'An error occured while executing the analysis!\nError code: '+errorCode;
-    switch(errorCode)
-    {
+function parseError(errorCode) {
+    let msg = 'An error occured while executing the analysis!\nError code: ' + errorCode;
+    switch (errorCode) {
         case 11:
             msg += '\nMaximum iterations reached, please check your input values.';
             break;
@@ -101,39 +82,36 @@ function parseError(errorCode)
 }
 
 // Opens a warning dialog message
-ipcMain.on('check-input-dialog', (event)=>
-{
-    const options = 
+ipcMain.on('check-input-dialog', (event) => {
+    const options =
     {
-        type:"info",
-        title:"Warning",
-        message:"Please check your input!\nMake sure that the supplied input values are, e.g., positive or non negative numbers!\n",
-        buttons:['Ok']
+        type: "info",
+        title: "Warning",
+        message: "Please check your input!\nMake sure that the supplied input values are, e.g., positive or non negative numbers!\n",
+        buttons: ['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
 })
 
 // Opens a success dialog message
-ipcMain.on('open-successfulTermination-dialog', (event)=>
-{
-    const options = 
+ipcMain.on('open-successfulTermination-dialog', (event) => {
+    const options =
     {
-        type:"info",
-        title:"Success",
-        message:"Analysis ended successfully",
-        buttons:['Ok']
+        type: "info",
+        title: "Success",
+        message: "Analysis ended successfully",
+        buttons: ['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
 })
 // Opens a success dialog message
-ipcMain.on('open-successfulCalibration-dialog', (event)=>
-{
-    const options = 
+ipcMain.on('open-successfulCalibration-dialog', (event) => {
+    const options =
     {
-        type:"info",
-        title:"Success",
-        message:"Calibration ended successfully",
-        buttons:['Ok']
+        type: "info",
+        title: "Success",
+        message: "Calibration ended successfully",
+        buttons: ['Ok']
     };
     dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
 })
