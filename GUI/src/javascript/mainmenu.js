@@ -2,7 +2,7 @@ const {app, Menu, shell, dialog, nativeImage, BrowserWindow} = require('electron
 const path = require('path');
 const fs = require('fs');
 
-const appName = app.getName();
+const appName = app.name;
 const appIcon = nativeImage.createFromPath(path.join(__dirname,'../../assets/icons/png/64x64.png'))
 let licenseString = '';
 
