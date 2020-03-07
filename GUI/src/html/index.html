@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>FC-Taylor</title>
+    <link rel="stylesheet" href="../../Dependencies/Bootstrap-4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/roller.css" />
+    <link rel="stylesheet" href="../css/dark-mode.css" />
+    <script id="MathJax-script" async src="../../node_modules/mathjax/es5/tex-chtml.js"></script>
+  </head>
+  <body>
+    <div class="container" id="main">
+        <div class="titleSection">
+            <h1>FC-Taylor</h1>
+            <p class="lead">
+                Calibrate a yield surface for an FCC polycrystal
+            </p>
+        </div>
+        <div class="topnav">
+            <button class="btn btn-secondary" onclick="openPage('home', this)" id="defaultOpen">Home</button>
+            <button class="btn btn-secondary" onclick="openPage('textureInput', this)">Texture</button>
+            <button class="btn btn-secondary" onclick="openPage('materialInput', this)">Material</button>
+            <button class="btn btn-secondary" onclick="openPage('otherInput', this)">Analysis</button>
+            <button class="btn btn-secondary" onclick="openPage('calibrateSection', this)">Calibrate</button>
+            <button class="btn btn-secondary" onclick="openPage('visualizeSection', this)">Visualize</button>
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="darkSwitch" />
+                <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+            </div>
+        </div>
+        <div class="content">
+
+            <div id="home" class="tabcontent">
+                <h4>Home</h4>
+                <p>
+                    This program uses the full-constraint (FC) Taylor homogenization approach to calculate the discrete yield surface of an FCC polycrystal. 
+                    The discrete yield surface data can be used to calibrate the Yld2004-18p yield surface for the material.
+                </p>
+                <h5>How to</h5>
+                <p>
+                    <ul>
+                        <li>
+                            Select a file containing information about the crystallographic texture of the material under the "Texture" tab, see the "Texture format" section below for details. 
+                        </li>
+                        <li>
+                            Input your material parameters under the "Material" tab. 
+                        </li>
+                        <li>
+                            Setup, start and monitor the progress of the FC-Taylor analysis under the "Analysis" tab. 
+                        </li>
+                        <li>
+                            Once the analysis has completed
+                            <ul>
+                                <li>
+                                    You can save the discrete yield surface data under the "Analysis" tab by pressing the "Save results" button. 
+                                </li>
+                                <li>
+                                    Go to the "Calibrate" tab and press the "Start calibration" button to calibrate the Yld2004-18p yield surface.
+                                </li>
+                                <li>
+                                    Go to the "Visualize" tab to view the plotted discrete yield surface points and the calibrated Yld2004-18p yield surface.
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </p>
+                <h5>Texture format</h5>
+                <p>
+                    The texture file should contain the keyword <span class="text-light bg-dark textfile">*Euler</span> at the top of the file, 
+                    followed by lines containing Euler angles (in degrees) and an orientation weight separated by commas
+                    , i.e., <span class="text-light bg-dark textfile">phi1, PHI, phi2, weight</span>. 
+                    Lines starting with <span class="text-light bg-dark textfile">**</span> are treated as commented lines and thus not read.
+                </p>
+                <p>
+                    A typical texture file can look like this:
+                </p>
+                <div class="text-light bg-dark textfile">*EULER
+** This is a commented line
+**phi1,    PHI,   phi2,   weight - This is also a commented line 
+ 51.07,  28.75, 344.14,    7.500
+ 33.18,  43.11,   5.45,    4.500
+ 44.53,  32.55, 349.77,    6.500
+ 39.81,  38.04, 354.51,    5.000
+ 29.26,  41.79,   7.10,    2.000
+223.19,  38.99, 167.21,    3.500
+231.21,  35.43, 159.54,    8.500
+ 45.01,  31.46, 352.26,    0.420
+123.45,  32.27, 198.15,    4.000
+227.21,  43.44, 170.03,    1.500</div>
+            </div>
+
+            <div id="textureInput" class="tabcontent">
+                <h4>Texture input</h4>
+                <p>
+                    Select a file containing grain orientations and weights
+                </p>
+                <p>
+                    <button class="btn btn-secondary" id="SelectFileBtn">Select</button>
+                </p>
+                <p>
+                    Selected file:
+                    <div id="FilePath" class="text-light bg-dark textfile"></div>
+                </p>
+            </div>
+
+            <div id="materialInput" class="tabcontent">
+                <h4>Material input</h4>
+                <form>
+                    <!-- Elasticity parameters: -->
+                    <div class="form-row">
+                        <div class="col">
+                            \(\hat{c}_{11} > 0\)
+                            <input type="text" class="form-control" value="106430" id="c11">
+                        </div>
+                        <div class="col">
+                            \(\hat{c}_{12} > 0\)
+                            <input type="text" class="form-control" value="60350" id="c12">
+                        </div>
+                        <div class="col">
+                            \(\hat{c}_{44} > 0\)
+                            <input type="text" class="form-control" value="28210" id="c44">
+                        </div>
+                    </div>
+                </form>
+                <form>
+                    <!-- Constitutive parameters: -->
+                    <div class="form-row">
+                        <div class="col">
+                            Reference slip rate, \(\dot{\gamma}_{0} > 0\)
+                            <input type="text" class="form-control" value="0.01" id="g0">
+                        </div>
+                        <div class="col">
+                            Instantaneous strain rate sensitivity, \(m > 0\)
+                            <input type="text" class="form-control" value="0.005" id="m">
+                        </div>
+                        <div class="col">
+                            Initial critical resolved shear stress, \(\tau_{c0} > 0\)
+                            <input type="text" class="form-control" value="72.2" id="tau0">
+                        </div>
+                    </div>
+                </form>
+                <form>
+                    <!-- Hardening parameters: -->
+                    <div class="form-row">
+                        <div class="col">
+                            Hardening model
+                            <select class="form-control" id="hardeningModel">
+                                <option selected>Voce hardening</option>
+                                <option>Kalidindi hardening</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            Latent hardening coefficient, \(q > 0\)
+                            <input type="text" class="form-control" value="1.4" id="q">
+                        </div>
+                    </div>
+                </form>
+                <form id="VoceParameters">
+                    <div class="form-row">
+                        <div class="col">
+                            \(\theta_{1} \ge 0\)
+                            <input type="text" class="form-control" value="81.5" id="theta1">
+                        </div>
+                        <div class="col">
+                            \(\tau_{1} \ge 0\)
+                            <input type="text" class="form-control" value="16.5" id="tau1">
+                        </div>
+                        <div class="col">
+                            \(\theta_{2} \ge 0\)
+                            <input type="text" class="form-control" value="0.0" id="theta2">
+                        </div>
+                        <div class="col">
+                            \(\tau_{2} \ge 0\)
+                            <input type="text" class="form-control" value="0.0" id="tau2">
+                        </div>
+                    </div>
+                </form>
+                <form id="KalidindiParameters" hidden>
+                    <div class="form-row">
+                        <div class="col">
+                            \(h_{0} \ge 0\)
+                            <input type="text" class="form-control" value="411.25" id="h0">
+                        </div>
+                        <div class="col">
+                            \(\tau_{s} > 0\)
+                            <input type="text" class="form-control" value="88.7" id="taus">
+                        </div>
+                        <div class="col">
+                            \(a > 0\)
+                            <input type="text" class="form-control" value="1.354" id="a">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="otherInput" class="tabcontent">
+                <h4>Analysis input</h4>
+                <form>
+                    <div class="form-row">
+                        <div class="col">
+                            Imposed strain rate, \(\dot{\varepsilon} > 0\)
+                            <input type="text" class="form-control" value="0.001" id="epsdot">
+                        </div>
+                        <div class="col">
+                            Plastic work to extract stress points, \(w_{c}^{p} > 0\)
+                            <input type="text" class="form-control" value="0.3" id="wpc">
+                        </div>
+                        <div class="col">
+                            Resolution of the strain rate grid, \(n_{pts} \ge 2\)
+                            <input type="text" class="form-control" value="20" id="npts">
+                        </div>
+                    </div>
+                </form>
+                <form>
+                    <div class="form-row">
+                        <div class="col">
+                            <br>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="planeStress" checked id="planeStress">
+                                <label class="form-check-label" for="planeStress">Plane stress</label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <br>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="centrosymmetry" checked>
+                                <label class="form-check-label" for="centrosymmetry">Centrosymmetry</label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            Number of cores, \(n_{cpu}\)
+                            <select class="form-control" id="ncpu">
+                                <option selected>1</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+
+                <h4>Run analysis</h4>
+                <p>
+                    Number of stress points to be generated \(N_{\sigma} = \) <span id="nStressPoints">2168</span id="nStressPoints">
+                </p>
+                <p>
+                    <div class="btn-container">
+                        <button class="btn btn-secondary" id="StartProgramBtn" disabled>Start</button>
+                        <button class="btn btn-secondary" id="TerminateProgramBtn" disabled>Terminate</button>
+                        <button class="btn btn-secondary" id="SaveResultBtn" disabled>Save results</button>
+                        <span id="running"></span>
+                        <div id="lds-roller">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+                </p>
+                <h4 style='margin-top: 1em;'>Analysis output:</h4>
+                <p>
+                    <div id="OutputData" class="text-light bg-dark textfile"></div>
+                </p>
+            </div>
+
+            <div id="calibrateSection" class="tabcontent">
+                <h4>Calibration</h4>
+                <p>
+                    Calibrate the Yld2004-18p yield surface to the calculated data points
+                </p>
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="CalibrateYS" disabled>Start calibration</button>
+                    <button class="btn btn-secondary" id="SaveCalibrationBtn" disabled>Save parameters</button>
+                    <span id="calibrating"></span>
+                    <div id="lds-roller-calibration">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+                <div>
+                    <h6>Calibrated parameters:</h6>
+                    <table id="calibratedParameters">
+                        <tbody>
+                            <tr><td>\( \hat{c}^{\prime}_{12} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{13} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{21} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{23} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{31} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{32} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{44} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{55} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime}_{66} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{12} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{13} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{21} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{23} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{31} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{32} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{44} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{55} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( \hat{c}^{\prime \prime}_{66} \)</td><td>\( = \)</td><td>1</td></tr>
+                            <tr><td>\( a \)</td><td>\( = \)</td><td>8</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="visualizeSection" class="tabcontent">
+                <h4>Visualization</h4>
+                <div class="plot-container">
+                    <div id="plot-window-1"></div>
+                    <div id="plot-window-2"></div>
+                    <div id="plot-window-3"></div>
+                    <div id="plot-window-4"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+      // You can also require other files to run in this process
+      require('../javascript/renderer.js')
+    </script>
+    <script src="../javascript/opentabs.js" type="text/javascript"></script>
+    <script src="../../Dependencies/dark-mode-switch/dark-mode-switch.min.js"></script>
+  </body>
+</html>

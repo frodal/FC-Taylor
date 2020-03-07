@@ -3,16 +3,17 @@
 !     For ifort, compile the program with -openmp
 !     Remember to increase the Stack size with -Fn where n is the 
 !     number of bytes, e.g., 
-!     ifort -openmp -F1000000000 main.f
+!     ifort -openmp -F1000000000 main.f -o ./GUI/Core/FC-Taylor.exe -O3
 !     Note that lines starting with !$ are compiler directives
-!     for using OpenMP, i.e., multi-threading
+!     for using, e.g., OpenMP, i.e., multi-threading
 !-----------------------------------------------------------------------
 !     Subroutines
 !-----------------------------------------------------------------------
-      include './Dependencies/SCMM-hypo/Hypo.f'
+      include '../../Dependencies/SCMM-hypo/Hypo.f'
       include './readprops.f'
       include './readeuler.f'
       include './deformation.f'
+      include './uniaxialtension.f'
 !-----------------------------------------------------------------------
 !     FC-Taylor program
 !-----------------------------------------------------------------------
@@ -24,9 +25,11 @@
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
+      real*8 sigmaUT(7)
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
-      integer NITER,NSTATEV,nblock,Nang
+      integer NITER,NSTATEV,nblock,Nang, UTflag
+      integer OMP_get_thread_num
       parameter(nprops=16,NSTATEV=28)
       real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
@@ -41,7 +44,7 @@
 !-----------------------------------------------------------------------
 !     Define some parameters
 !-----------------------------------------------------------------------
-!
+      UTflag = 0
 !-----------------------------------------------------------------------
 !     Define material properties
 !-----------------------------------------------------------------------
@@ -90,8 +93,8 @@
 !-----------------------------------------------------------------------
       NITER  = 10001 ! Max number of iterations
 !-----------------------------------------------------------------------
-      ! dt=wp/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
-      DT     = wp/(epsdot*props(6)*1.d3)
+      ! dt=(we+wp)/(M*Niter*tauc_0*epsdot) (M=3,Niter=1000)
+      DT     = (9*props(6)**2/props(1)+wp)/(epsdot*props(6)*3.d3)
 !-----------------------------------------------------------------------
 !     Write the start date and time
 !-----------------------------------------------------------------------
@@ -110,6 +113,19 @@
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
 !$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
+!-----------------------------------------------------------------------
+!     Calculates the uniaxial stress point along RD
+!-----------------------------------------------------------------------
+      if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
+        UTflag = 1
+        call uniaxialTension(nblock,nstatev,nprops,niter,
+     .                       ang,props,dt,wp,epsdot,sigmaUT)
+        ! Superpose a hydrostatic stress so that s33=0
+        ! Yielding is not dependent upon hydrostatic stress!
+        sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
+        sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
+        sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
+      endif
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
@@ -182,7 +198,7 @@
          !DIR$ FORCEINLINE RECURSIVE
          CALL Hypo(stressNew,stateNew,defgradNew,
      +               stressOld,stateOld,defgradOld,dt,props,
-     +               nblock,3,3,nstatev,nprops,Dissipation)
+     +               nblock,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
 !        UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
@@ -227,7 +243,8 @@
       elseif (ITER.ge.NITER) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
-        stop
+        call sleep(1)
+        error stop 'Error code: 11'
       endif
       enddo
 !$OMP END PARALLEL DO
@@ -237,6 +254,10 @@
       open (unit = 2, file = ".\Output\output.txt")
       write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       if (centro.eq.1)then
+        write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
+     +              sigmaUT(5),sigmaUT(6), sigmaUT(7)
+        write(2,98) -sigmaUT(1),-sigmaUT(2),-sigmaUT(3),-sigmaUT(4),
+     +              -sigmaUT(5),-sigmaUT(6), sigmaUT(7)
         do km=1,ndef
           write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +                sigma(km,5),sigma(km,6), sigma(km,7)
@@ -245,6 +266,8 @@
      +                 sigma(km,7)
         enddo
       else
+        write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
+     +              sigmaUT(5),sigmaUT(6), sigmaUT(7)
         do km=1,ndef
           write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +                sigma(km,5),sigma(km,6), sigma(km,7)

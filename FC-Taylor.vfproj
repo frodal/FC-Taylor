@@ -33,26 +33,15 @@
 			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\deformation.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
+		<File RelativePath=".\src\fortran\deformation.f">
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
 		<File RelativePath=".\Dependencies\SCMM-hypo\Hypo.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
-		<File RelativePath=".\Dependencies\SCMM-hypo\HypoExp.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
+		<File RelativePath=".\src\fortran\main.f"/>
+		<File RelativePath=".\src\fortran\readeuler.f">
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
-		<File RelativePath=".\Dependencies\SCMM-hypo\HypoImp.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
-			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
-		<File RelativePath=".\main.f"/>
-		<File RelativePath=".\readeuler.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
-			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
-		<File RelativePath=".\readprops.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
+		<File RelativePath=".\src\fortran\readprops.f">
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
 		<File RelativePath=".\Dependencies\SCMM-hypo\Subs.f">
-			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File></Filter></Files>
 	<Globals/></VisualStudioProject>

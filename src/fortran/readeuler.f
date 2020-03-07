@@ -20,6 +20,7 @@
       ang         = 0.d0
       ios         = 0
       readflag    = 0
+      k           = 1
 !-----------------------------------------------------------------------
 !         Reading information/input file
 !-----------------------------------------------------------------------
@@ -27,7 +28,8 @@
       if (.not.there) then
         write(6,*) '!! Error'
         write(6,*) './Input/Euler.inp not found'
-        stop
+        call sleep(1)
+        error stop 'Error code: 15'
       endif
       open(unit=16,file=trim('Input/Euler.inp'),status='old',
      +         iostat=ios,access='sequential',action='read')
@@ -38,16 +40,16 @@
         ! First find the type of keyword
           if (line(1:6) .eq. '*EULER') then
             readflag = 1
-            k=1
             goto 78
           elseif (line(1:1) .eq. '*') then
             readflag = 0
             write(6,*) '!! Error'
             write(6,*) 'Unknown keyword: ', trim(line)
             write(6,*) 'Please use one of the following keywords;'
-            write(6,*) '*PROPS, *DEF or *EULER'
+            write(6,*) '**EULER'
             close(unit=16)
-            stop
+            call sleep(1)
+            error stop 'Error code: 16'
           endif
           ! Then read the input data and assign to scalar/array 
           if (readflag .eq. 1) then
@@ -58,7 +60,8 @@
               write(6,*) 'Weight: ',ang(k,4)
               write(6,*) 'At k: ', k
               close(unit=16)
-              stop
+              call sleep(1)
+              error stop 'Error code: 17'
             endif
             k=k+1
           endif
@@ -94,6 +97,7 @@
       temp        = 0.d0
       ios         = 0
       readflag    = 0
+      k           = 1
 !-----------------------------------------------------------------------
 !         Reading information/input file
 !-----------------------------------------------------------------------
@@ -101,7 +105,8 @@
       if (.not.there) then
         write(6,*) '!! Error'
         write(6,*) './Input/Euler.inp not found'
-        stop
+        call sleep(1)
+        error stop 'Error code: 15'
       endif
       open(unit=16,file=trim('Input/Euler.inp'),status='old',
      +         iostat=ios,access='sequential',action='read')
@@ -112,16 +117,16 @@
         ! First find the type of keyword
           if (line(1:6) .eq. '*EULER') then
             readflag = 1
-            k=1
             goto 78
           elseif (line(1:1) .eq. '*') then
             readflag = 0
             write(6,*) '!! Error'
             write(6,*) 'Unknown keyword: ', trim(line)
             write(6,*) 'Please use one of the following keywords;'
-            write(6,*) '*PROPS, *DEF or *EULER'
+            write(6,*) '*EULER'
             close(unit=16)
-            stop
+            call sleep(1)
+            error stop 'Error code: 16'
           endif
           ! Then read the input data and assign to scalar/array 
           if (readflag .eq. 1) then
@@ -132,7 +137,8 @@
               write(6,*) 'Weight: ',temp(4)
               write(6,*) 'At k: ', k
               close(unit=16)
-              stop
+              call sleep(1)
+              error stop 'Error code: 17'
             endif
             k=k+1
           endif
@@ -164,6 +170,17 @@
 !         Load euler angles
 !-----------------------------------------------------------------------
       call readeulerlength(Nang)
+      if(Nang.eq.0)then
+        write(6,*) '!! Error'
+        write(6,*) 'No orientations read!'
+        write(6,*) 'Please make sure to use the keyword:*EULER'
+        write(6,*) 'followed by lines of Euler angles and a weight'
+        write(6,*) ''
+        write(6,*) '*EULER'
+        write(6,*) 'phi1, PHI, phi2, weight'
+        call sleep(1)
+        error stop 'Error code: 18'
+      endif
       allocate(ang(Nang,4))
       call readeuler(ang,Nang)
 !-----------------------------------------------------------------------

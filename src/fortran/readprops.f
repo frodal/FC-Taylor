@@ -51,7 +51,8 @@
       if (.not.there) then
         write(6,*) '!! Error'
         write(6,*) './Input/Taylor.inp not found'
-        stop
+        call sleep(1)
+        error stop 'Error code: 12'
       endif
       open(unit=16,file=trim('Input/Taylor.inp'),status='old',
      +         iostat=ios,access='sequential',action='read')
@@ -70,14 +71,17 @@
             readflag = 0
             write(6,*) 'Unknown keyword: ', trim(line)
             write(6,*) 'Please use one of the following keywords;'
-            write(6,*) '*PROPS, *DEF or *EULER'
-            stop
+            write(6,*) '*PROPS or *DEF'
+            call sleep(1)
+            error stop 'Error code: 13'
           endif
           ! Then read the input data and assign to scalar/array 
           if (readflag .eq. 1) then
             read(line,*,end=78) dummy
+            readflag = 0
           elseif (readflag .eq. 2) then
             read(line,*,end=78) planestress,centro,npts,epsdot,wp,tmpcpu
+            readflag = 0
           endif
         endif
    78 continue
@@ -105,7 +109,8 @@
       props(16) = dummy(12)
       if(npts.lt.2)then
         write(6,*) 'Error! npts must be greater or equal to 2'
-        stop
+        call sleep(1)
+        error stop 'Error code: 14'
       endif
       if(epsdot.le.0.d0)then
         write(6,*) 'Warning! epsdot should be greater than zero'
@@ -127,14 +132,14 @@
       write(6,*) '|              by Bjorn Hakon Frodal               |'
       write(6,*) '|              bjorn.h.frodal@ntnu.no              |'
       write(6,*) '|                                                  |'
-      write(6,*) '|                Copyright (C) 2019                |'
+      write(6,*) '|             Copyright (c) 2018-2020              |'
       write(6,*) '|                Bjorn Hakon Frodal                |'
-      write(6,*) '|  Norwegian University of Science and Technology, |'
-      write(6,*) '|       Department of Structural Engineering,      |'
       write(6,*) '|      Structural Impact Laboratory (SIMLab),      |'
+      write(6,*) '|       Department of Structural Engineering,      |'
+      write(6,*) '|  Norwegian University of Science and Technology, |'
       write(6,*) '|                Trondheim, Norway.                |'
       write(6,*) '|                                                  |'
-      write(6,*) '|                  Version v0.2.0                  |'
+      write(6,*) '|                      v0.5.0                      |'
       write(6,*) '|                                                  |'
       write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
@@ -149,10 +154,22 @@
       write(6,*) 'tau0_c     = ',props(6)
       write(6,*) 'q          = ',props(7)
       write(6,*) 'hflag      = ',props(12)
-      write(6,*) 'theta1/h0  = ',props(13)
-      write(6,*) 'tau1/tau_s = ',props(14)
-      write(6,*) 'theta2/a   = ',props(15)
-      write(6,*) 'tau2       = ',props(16)
+      if(nint(props(12)).eq.1)then
+        write(6,*) 'theta1     = ',props(13)
+        write(6,*) 'tau1       = ',props(14)
+        write(6,*) 'theta2     = ',props(15)
+        write(6,*) 'tau2       = ',props(16)
+      elseif(nint(props(12)).eq.2)then
+        write(6,*) 'h0         = ',props(13)
+        write(6,*) 'tau_s      = ',props(14)
+        write(6,*) 'a          = ',props(15)
+      else
+        write(6,*) '!! Error'
+        write(6,*) 'Unknown hardening model'
+        write(6,*) 'Please use a hflag of 1 or 2'
+        call sleep(1)
+        error stop 'Error code: 19'
+      endif
       write(6,*) '----------------------------------------------------'
       write(6,*) 'Imposed strain rate: ',epsdot
       write(6,*) 'Maximum plastic work: ',wp
