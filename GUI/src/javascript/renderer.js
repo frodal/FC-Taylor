@@ -98,7 +98,7 @@ function CheckLicense()
             ValidateLicense(value);
             if (!LicenseOK) 
             {
-                remote.dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributer.');
+                remote.dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributer.\nContact: bjorn.h.frodal@ntnu.no');
                 remote.app.quit();
             }
         }).catch(error => {
@@ -107,7 +107,7 @@ function CheckLicense()
                 {
                     type: 'error',
                     title: 'Error',
-                    message: 'Could not connect to the license server.\nPlease check your internet connection.',
+                    message: 'Could not connect to the license server.\nPlease check your internet connection.\nContact: bjorn.h.frodal@ntnu.no',
                     buttons: ['Try again', 'Quit'],
                     cancelId: 1
                 });
