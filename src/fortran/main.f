@@ -109,7 +109,9 @@
 !     Loop over deformation points
 !-----------------------------------------------------------------------
 !$    call OMP_set_num_threads(ncpus)
+#ifdef __INTEL_COMPILER
 !$    call kmp_set_stacksize(1000000000)
+#endif
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(work,km,STRESSOLD,stressNew
 !$OMP& ,STATEOLD,stateNew,i,k,defgradOld,defgradNew,iter,Dissipation)
       do km=1,ndef
@@ -251,7 +253,7 @@
 !-----------------------------------------------------------------------
 !     Write the result to file
 !-----------------------------------------------------------------------
-      open (unit = 2, file = ".\Output\output.txt")
+      open (unit = 2, file = "./Output/output.txt")
       write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       if (centro.eq.1)then
         write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
@@ -299,7 +301,6 @@
 !-----------------------------------------------------------------------
 !     END PROGRAM
 !-----------------------------------------------------------------------
-      stop
    98 format(es15.6e3,',',es15.6e3,',',es15.6e3,',',es15.6e3,
      +              ',',es15.6e3,',',es15.6e3,',',es15.6e3)
       end

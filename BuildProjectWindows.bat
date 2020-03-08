@@ -4,7 +4,7 @@ if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bi
 
 if not exist GUI\Core mkdir GUI\Core
 
-call ifort -openmp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
+call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
 if %ERRORLEVEL% neq 0 (
   del main.obj
   echo.
