@@ -8,7 +8,7 @@ pushd "src/python"
 
 pip3 install -r requirements.txt
 
-pyinstaller --onefile --noconfirm --clean --log-level=WARN --distpath=../../GUI/Core --name=FC-Taylor-Calibrate.exe fc-taylor-calibrate.py
+python3 -m PyInstaller --onefile --noconfirm --clean --log-level=WARN --distpath=../../GUI/Core --name=FC-Taylor-Calibrate.exe fc-taylor-calibrate.py
 
 rm -rf __pycache__
 rm -rf build
