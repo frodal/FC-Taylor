@@ -37,16 +37,16 @@
     "gen-icon-mac": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
   },
   "dependencies": {
-    "bent": "^7.1.0",
+    "bent": "^7.1.1",
     "csv-parser": "^2.3.2",
     "electron-squirrel-startup": "^1.0.0",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.0.0",
     "mathjax": "^3.0.1",
     "ml-matrix": "^6.4.1",
-    "plotly.js-dist": "^1.52.2"
+    "plotly.js-dist": "^1.52.3"
   },
   "devDependencies": {
-    "electron": "^8.1.0",
+    "electron": "^8.1.1",
     "electron-installer-windows": "^3.0.0",
     "electron-packager": "^14.2.1",
     "icon-gen": "^2.0.0"
