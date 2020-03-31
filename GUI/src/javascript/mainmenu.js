@@ -50,6 +50,13 @@ const template = [
                 click() { shell.openExternal('https://gitreports.com/issue/frodal/FC-Taylor') }
             },
             {
+                label: 'Learn More',
+                click() { shell.openExternal('http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html') }
+            },
+            {
+                type: 'separator'
+            },
+            {
                 label: 'View License',
                 click() {
                     GetLicense();
@@ -62,13 +69,6 @@ const template = [
                         icon: appIcon
                     });
                 }
-            },
-            {
-                type: 'separator'
-            },
-            {
-                label: 'Learn More',
-                click() { shell.openExternal('http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html') }
             },
             {
                 type: 'separator'
