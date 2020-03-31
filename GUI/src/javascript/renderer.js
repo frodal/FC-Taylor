@@ -2,7 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-const {remote, ipcRenderer} = require('electron');
+const {ipcRenderer} = require('electron');
 const {execFile} = require('child_process');
 const path = require('path');
 const os = require('os');
@@ -10,8 +10,6 @@ const fs = require('fs');
 const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
 const matrix = require('ml-matrix');
-const bent = require('bent')
-const getJSON = bent('json')
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -30,7 +28,6 @@ const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
 const workDir = path.join(__dirname,'../../../core-temp-pid'+process.pid.toString())
 const inputPath = path.join(workDir,'Input');
 const outputPath = path.join(workDir,'Output');
-const LicenseLocation = 'http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.json';
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -90,68 +87,10 @@ let s11Contour = [], s22Contour = [], s12Contour = [], s12Max = [];
 //                                 Lisence check                                  //
 ////////////////////////////////////////////////////////////////////////////////////
 let LicenseOK = false;
-
-function CheckLicense() 
-{
-    getJSON(LicenseLocation)
-        .then(value => {
-            ValidateLicense(value);
-            if (!LicenseOK) 
-            {
-                remote.dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributer.\nContact: bjorn.h.frodal@ntnu.no');
-                remote.app.quit();
-            }
-        }).catch(error => {
-            LicenseOK = false;
-            let choice = remote.dialog.showMessageBoxSync(remote.BrowserWindow.getFocusedWindow(),
-                {
-                    type: 'error',
-                    title: 'Error',
-                    message: 'Could not connect to the license server.\nPlease check your internet connection.\nContact: bjorn.h.frodal@ntnu.no',
-                    buttons: ['Try again', 'Quit'],
-                    cancelId: 1
-                });
-            if (choice === 0) 
-            {
-                CheckLicense();
-            } else 
-            {
-                remote.app.quit();
-            }
-        });
-}
-
-function ValidateLicense(value) 
-{
-    let newestVersion = value.version.split('.')
-    let currentVersion = remote.app.getVersion().split('.');
-    if (newestVersion.length !== currentVersion.length) 
-    {
-        LicenseOK = false;
-        return
-    }
-    for (let i = 0; i < currentVersion.length; ++i) 
-    {
-        newestVersion[i] = parseFloat(newestVersion[i])
-        currentVersion[i] = parseFloat(currentVersion[i])
-        if (newestVersion[i] > currentVersion[i]) 
-        {
-            LicenseOK = false;
-            return
-        }
-        else if (newestVersion[i] < currentVersion[i]) 
-        {
-            LicenseOK = true;
-            return
-        }
-    }
-    LicenseOK = true;
-}
-
-// Check license after 1 sec
-setTimeout(CheckLicense,1000);
-// Repetatly check license every 10 min
-setInterval(CheckLicense,600000);
+ipcRenderer.on('LicenseCheck',(event,value)=>{
+    LicenseOK = value;
+});
+ipcRenderer.send('CheckLicensePlease');
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                  Save input                                    //
