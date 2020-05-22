@@ -14,7 +14,8 @@ if %ERRORLEVEL% neq 0 (
   pause
   exit
 )
-del main.obj
+if exist main.obj del main.obj
+if exist functions.mod del functions.mod
 
 pushd %~dp0\src\python\
 pip install -r requirements.txt
