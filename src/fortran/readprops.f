@@ -1,3 +1,4 @@
+      include './to_upper.f'
 !-----------------------------------------------------------------------
 !                         SUBROUTINE readprops
 !-----------------------------------------------------------------------
@@ -61,10 +62,10 @@
         read(16,fmt='(A)',end=77) line
         if (line(1:2) .ne. '**') then 
         ! First find the type of keyword
-          if (line(1:6) .eq. '*PROPS') then
+          if (to_upper(line(1:6)) .eq. '*PROPS') then
             readflag = 1
             goto 78                
-          elseif (line(1:4) .eq. '*DEF') then
+          elseif (to_upper(line(1:4)) .eq. '*DEF') then
             readflag = 2
             goto 78
           elseif (line(1:1) .eq. '*') then
