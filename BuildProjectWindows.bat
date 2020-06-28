@@ -1,10 +1,12 @@
 @echo off
 
-if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
+if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" ^
+call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
 
 if not exist GUI\Core mkdir GUI\Core
 
-call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
+call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe ^
+           -O3 -QaxCOMMON-AVX512,CORE-AVX512,CORE-AVX2,AVX
 if %ERRORLEVEL% neq 0 (
   del main.obj
   echo.
