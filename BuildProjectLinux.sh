@@ -2,7 +2,9 @@
 
 mkdir -p "GUI/Core"
 
-gfortran -fopenmp -cpp src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
+gfortran -fopenmp -cpp src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3 -msse4.2 -mtune=intel
+
+rm -f functions.mod
 
 pushd "src/python"
 
