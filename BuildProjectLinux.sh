@@ -18,7 +18,7 @@ rm -f FC-Taylor-Calibrate.exe.spec
 
 popd
 
-cp "LICENSE.md" "GUI/LICENSE.md"
+cp "docs/LICENSE.md" "GUI/LICENSE.md"
 
 pushd "GUI"
 

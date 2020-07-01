@@ -44,7 +44,7 @@ rmdir /s /q build
 del FC-Taylor-Calibrate.spec
 popd
 
-copy LICENSE.md GUI\LICENSE.md /y
+copy docs\LICENSE.md GUI\LICENSE.md /y
 
 pushd %~dp0\GUI\
 call npm install
