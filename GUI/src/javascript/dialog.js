@@ -17,7 +17,7 @@ ipcMain.on('open-file-dialog', (event) => {
 ipcMain.on('import-file-dialog', (event) => {
     dialog.showOpenDialog(BrowserWindow.getFocusedWindow(),
         {
-            filters: [{ name: 'inp', extensions: ['inp'] }],
+            filters: [{ name: 'FC-Taylor input file', extensions: ['inp'] }],
             properties: ['openFile']
         }).then((files) => {
             if (!files.canceled) {
@@ -30,7 +30,7 @@ ipcMain.on('import-file-dialog', (event) => {
 ipcMain.on('export-file-dialog', (event) => {
     dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
         {
-            filters: [{ name: 'inp', extensions: ['inp'] },
+            filters: [{ name: 'FC-Taylor input file', extensions: ['inp'] },
             { name: 'All files', extensions: ['*'] }]
         }).then((files) => {
             if (!files.canceled) {
