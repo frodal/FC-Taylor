@@ -22,6 +22,8 @@ const runMsg = document.getElementById('running');
 const calibMsg = document.getElementById('calibrating');
 const outArea = document.getElementById('OutputData');
 const darkSwitch = document.getElementById('darkSwitch');
+const ImportSettingsBtn = document.getElementById('ImportSettingsBtn');
+const ExportSettingsBtn = document.getElementById('ExportSettingsBtn');
 
 const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
@@ -110,7 +112,7 @@ function SetupWorkingDir()
         fs.mkdirSync(outputPath, { recursive: true });
     }
 }
-function SaveInput()
+function ExportTaylor(exportPath)
 {
     let data = '';
     if(hardeningModel.selectedIndex===0)
@@ -126,7 +128,11 @@ ${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}
 *DEF
 ${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value)}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
     }
-    fs.writeFileSync(path.join(inputPath,'Taylor.inp'),data);
+    fs.writeFileSync(exportPath,data);
+}
+function SaveInput()
+{
+    ExportTaylor(path.join(inputPath,'Taylor.inp'));
     fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
     isPlaneStress = planeStress.checked;
 }
@@ -240,6 +246,87 @@ ipcRenderer.on('SelectedFile', (event, newPath)=>
         startProgramBtn.disabled = false;
     }
 });
+
+////////////////////////////////////////////////////////////////////////////////////
+//                           Export/Import settings                               //
+////////////////////////////////////////////////////////////////////////////////////
+// Export Taylor settings to file
+ExportSettingsBtn.addEventListener('click', (event) => {
+    ipcRenderer.send('export-file-dialog');
+});
+ipcRenderer.on('ExportFile', (event, savePath) => {
+    if (savePath.toString() !== '') {
+        ExportTaylor(savePath);
+    }
+});
+// Import Taylor settings from file
+ImportSettingsBtn.addEventListener('click', (event) => {
+    ipcRenderer.send('import-file-dialog');
+});
+ipcRenderer.on('ImportFile', (event, importPath) => {
+    console.log(importPath[0]);
+    if (importPath.toString() !== '') {
+        fs.createReadStream(importPath[0], { encoding: 'UTF-8' })
+            .on('data', (data) => {
+                parseTaylorFile(data)
+            });
+    }
+});
+function parseTaylorFile(data) {
+    lines = data.split('\n');
+    let readProps = false;
+    let readDef = false;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const items = line.split(',');
+        if (readProps && items.length===12){
+            c11.value                    = isNumber(items[0])  ? parseFloat(items[0])     : items[0];
+            c12.value                    = isNumber(items[1])  ? parseFloat(items[1])     : items[1];
+            c44.value                    = isNumber(items[2])  ? parseFloat(items[2])     : items[2];
+            g0.value                     = isNumber(items[3])  ? parseFloat(items[3])     : items[3];
+            m.value                      = isNumber(items[4])  ? parseFloat(items[4])     : items[4];
+            tau0.value                   = isNumber(items[5])  ? parseFloat(items[5])     : items[5];
+            q.value                      = isNumber(items[6])  ? parseFloat(items[6])     : items[6];
+            hardeningModel.selectedIndex = isNumber(items[7])  ? (parseInt(items[7]) === 1 || parseInt(items[7]) === 2 ? parseInt(items[7]) -1 : 0) : 0;
+            VoceForm.hidden = hardeningModel.selectedIndex !== 0;
+            KalidindiForm.hidden = hardeningModel.selectedIndex !== 1;
+            if (hardeningModel.selectedIndex === 0)
+            {
+                theta1.value             = isNumber(items[8])  ? parseFloat(items[8])     : items[8];
+                tau1.value               = isNumber(items[9])  ? parseFloat(items[9])     : items[9];
+                theta2.value             = isNumber(items[10]) ? parseFloat(items[10])    : items[10];
+                tau2.value               = isNumber(items[11]) ? parseFloat(items[11])    : items[11];
+            }
+            else
+            {
+                h0.value                 = isNumber(items[8])  ? parseFloat(items[8])     : items[8];
+                taus.value               = isNumber(items[9])  ? parseFloat(items[9])     : items[9];
+                a.value                  = isNumber(items[10]) ? parseFloat(items[10])    : items[10];
+            }
+        }
+        else if (readDef && items.length===6){
+            planeStress.checked          = isNumber(items[0])  ? parseInt(items[0]) === 1 : planeStress.checked;
+            centro.checked               = isNumber(items[1])  ? parseInt(items[1]) === 1 : centro.checked;
+            npts.value                   = isNumber(items[2])  ? parseFloat(items[2])     : items[2];
+            epsdot.value                 = isNumber(items[3])  ? parseFloat(items[3])     : items[3];
+            wpc.value                    = isNumber(items[4])  ? parseFloat(items[4])     : items[4];
+            ncpu.selectedIndex           = isNumber(items[5])  ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
+            UpdateNstressPoints();
+        }
+        if (line.toUpperCase().startsWith('*PROPS')) {
+            readProps = true;
+            readDef = false;
+        }
+        else if (line.toUpperCase().startsWith('*DEF')) {
+            readProps = false;
+            readDef = true;
+        }
+        else if (!line.startsWith('**')) {
+            readProps = false;
+            readDef = false;
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                Start Program                                   //
