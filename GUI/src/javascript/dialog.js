@@ -13,6 +13,32 @@ ipcMain.on('open-file-dialog', (event) => {
         });
 });
 
+// Open file dialog to import file
+ipcMain.on('import-file-dialog', (event) => {
+    dialog.showOpenDialog(BrowserWindow.getFocusedWindow(),
+        {
+            filters: [{ name: 'inp', extensions: ['inp'] }],
+            properties: ['openFile']
+        }).then((files) => {
+            if (!files.canceled) {
+                event.sender.send('ImportFile', files.filePaths);
+            }
+        });
+});
+
+// Open export file dialog to save file
+ipcMain.on('export-file-dialog', (event) => {
+    dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
+        {
+            filters: [{ name: 'inp', extensions: ['inp'] },
+            { name: 'All files', extensions: ['*'] }]
+        }).then((files) => {
+            if (!files.canceled) {
+                event.sender.send('ExportFile', files.filePath);
+            }
+        });
+});
+
 // Open save file dialog to save file
 ipcMain.on('save-file-dialog', (event) => {
     dialog.showSaveDialog(BrowserWindow.getFocusedWindow(),
