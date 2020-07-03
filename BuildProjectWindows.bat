@@ -1,10 +1,12 @@
 @echo off
 
-if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
+if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" ^
+call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
 
 if not exist GUI\Core mkdir GUI\Core
 
-call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3
+call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe ^
+           -O3 -QaxCOMMON-AVX512,CORE-AVX512,CORE-AVX2,AVX
 if %ERRORLEVEL% neq 0 (
   del main.obj
   echo.
@@ -14,7 +16,8 @@ if %ERRORLEVEL% neq 0 (
   pause
   exit
 )
-del main.obj
+if exist main.obj del main.obj
+if exist functions.mod del functions.mod
 
 pushd %~dp0\src\python\
 pip install -r requirements.txt
@@ -41,7 +44,7 @@ rmdir /s /q build
 del FC-Taylor-Calibrate.spec
 popd
 
-copy LICENSE.md GUI\LICENSE.md /y
+copy docs\LICENSE.md GUI\LICENSE.md /y
 
 pushd %~dp0\GUI\
 call npm install

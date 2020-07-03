@@ -6,6 +6,7 @@
 !-----------------------------------------------------------------------
       subroutine readeuler(ang,nangmax)
 !-----------------------------------------------------------------------
+      use functions
       implicit none
 !-----------------------------------------------------------------------
       integer, intent(in) :: nangmax
@@ -38,7 +39,7 @@
         read(16,fmt='(A)',end=77) line
         if (line(1:2) .ne. '**') then 
         ! First find the type of keyword
-          if (line(1:6) .eq. '*EULER') then
+          if (to_upper(line(1:6)) .eq. '*EULER') then
             readflag = 1
             goto 78
           elseif (line(1:1) .eq. '*') then
@@ -46,7 +47,7 @@
             write(6,*) '!! Error'
             write(6,*) 'Unknown keyword: ', trim(line)
             write(6,*) 'Please use one of the following keywords;'
-            write(6,*) '**EULER'
+            write(6,*) '*EULER'
             close(unit=16)
             call sleep(1)
             error stop 'Error code: 16'
@@ -83,6 +84,7 @@
 !-----------------------------------------------------------------------
       subroutine readeulerlength(k)
 !-----------------------------------------------------------------------
+      use functions
       implicit none
 !-----------------------------------------------------------------------
       integer, intent(out) :: k
@@ -115,7 +117,7 @@
         read(16,fmt='(A)',end=77) line
         if (line(1:2) .ne. '**') then 
         ! First find the type of keyword
-          if (line(1:6) .eq. '*EULER') then
+          if (to_upper(line(1:6)) .eq. '*EULER') then
             readflag = 1
             goto 78
           elseif (line(1:1) .eq. '*') then
