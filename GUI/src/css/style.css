@@ -1,51 +1,41 @@
 /* Import Montserrat font */
 @import url("../../Dependencies/Montserrat/fonts/webfonts/Montserrat.css");
-html 
-{
+html {
     overflow-y: scroll;
 }
 /* Main content area */
-#main 
-{
+#main {
     padding: 32px;
     padding-top: 48px;
-    font-family: 'Montserrat'
+    font-family: "Montserrat";
 }
 /* Draggable and selectable regions */
-body
-{
+body {
     -webkit-app-region: drag;
     -webkit-user-select: none;
 }
-h4
-{
+h4 {
     margin-bottom: 1em;
 }
-h6
-{
+h6 {
     margin-top: 1em;
 }
-td 
-{
+td {
     padding: 0.2em;
     text-align: right;
 }
-#calibratedParameters
-{
+#calibratedParameters {
     font-family: Courier, monospace;
     -webkit-app-region: no-drag;
     -webkit-user-select: text;
 }
-form
-{
+form {
     padding: 5px 0;
 }
-.titleSection
-{
+.titleSection {
     padding: 0 0 2em 0;
 }
-.topnav
-{
+.topnav {
     position: -webkit-sticky;
     position: sticky;
     top: 0;
@@ -54,68 +44,65 @@ form
     padding: 2px 0 2px 0;
     display: flex;
     justify-content: left;
-    align-items: center; 
+    align-items: center;
 }
-.topnav button
-{
+.topnav button {
     margin: 2px;
 }
-.content
-{
+.content {
     padding: 3em 0 2em 0;
 }
-.tabcontent
-{
-    animation:opac 0.8s
+.tabcontent {
+    animation: opac 0.8s;
 }
-@keyframes opac{from{opacity:0} to{opacity:1}}
-#textureInput, #materialInput, #otherInput
-{
+@keyframes opac {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+#textureInput,
+#materialInput,
+#otherInput {
     padding: 0 0 3em 0;
 }
-button 
-{
+button {
     -webkit-app-region: no-drag;
 }
-input
-{
+input {
     -webkit-app-region: no-drag;
 }
-.textfile
-{
+.textfile {
     font-family: monospace;
     -webkit-app-region: no-drag;
     -webkit-user-select: text;
     white-space: pre;
     width: fit-content;
 }
-.btn-container
-{
+.btn-container {
     display: flex;
     align-items: center;
-    height:32px;
+    height: 32px;
 }
-.btn-container button
-{
+.btn-container button {
     margin-right: 6px;
 }
-.plot-container
-{
+.plot-container {
     display: grid;
     grid-template-columns: repeat(2, auto);
     gap: 10px;
     padding-top: 10px;
 }
 /* Scroll bar*/
-::-webkit-scrollbar
-{
-	width: 12px;
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
 }
-::-webkit-scrollbar-thumb
-{
-	background-color: #6c757d;
+::-webkit-scrollbar-thumb {
+    background-color: #6c757d;
 }
-::-webkit-scrollbar-thumb:hover 
-{
-    background: #5a6268; 
+::-webkit-scrollbar-thumb:hover {
+    background: #5a6268;
 }
