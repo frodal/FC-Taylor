@@ -5,11 +5,12 @@
 const {ipcRenderer} = require('electron');
 const {execFile} = require('child_process');
 const path = require('path');
-const os = require('os');
 const fs = require('fs');
 const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
 const matrix = require('ml-matrix');
+
+FCProperties = require('./FCTaylorProperties');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -43,41 +44,11 @@ const selectFileBtn = document.getElementById('SelectFileBtn');
 const filePathArea = document.getElementById('FilePath');
 let texFile = '';
 
-// Material input
-const c11 = document.getElementById('c11');
-const c12 = document.getElementById('c12');
-const c44 = document.getElementById('c44');
-
-const g0 = document.getElementById('g0');
-const m = document.getElementById('m');
-const tau0 = document.getElementById('tau0');
-
-const hardeningModel = document.getElementById('hardeningModel');
-const q = document.getElementById('q');
-
-const VoceForm = document.getElementById('VoceParameters');
-const theta1 = document.getElementById('theta1');
-const tau1 = document.getElementById('tau1');
-const theta2 = document.getElementById('theta2');
-const tau2 = document.getElementById('tau2');
-
-const KalidindiForm = document.getElementById('KalidindiParameters');
-const h0 = document.getElementById('h0');
-const taus = document.getElementById('taus');
-const a = document.getElementById('a');
-
-// Other input
-const epsdot = document.getElementById('epsdot');
-const wpc = document.getElementById('wpc');
-const npts = document.getElementById('npts');
-
-const planeStress = document.getElementById('planeStress');
-const centro = document.getElementById('centrosymmetry');
-const ncpu = document.getElementById('ncpu');
-const nStressPoints = document.getElementById('nStressPoints');
+// FC-Taylor input data
+const inputData = new FCProperties.FCTaylorProperties();
 
 const calibratedParametersTable = document.getElementById('calibratedParameters');
-let isPlaneStress = true;
+let isPlaneStress = inputData.planeStress.checked;
 
 // Plot variables
 let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
@@ -95,7 +66,7 @@ ipcRenderer.on('LicenseCheck',(event,value)=>{
 ipcRenderer.send('CheckLicensePlease');
 
 ////////////////////////////////////////////////////////////////////////////////////
-//                                  Save input                                    //
+//                           Setup working directory                              //
 ////////////////////////////////////////////////////////////////////////////////////
 function SetupWorkingDir()
 {
@@ -110,120 +81,6 @@ function SetupWorkingDir()
     if(!fs.existsSync(outputPath))
     {
         fs.mkdirSync(outputPath, { recursive: true });
-    }
-}
-function ExportTaylor(exportPath)
-{
-    let data = '';
-    if(hardeningModel.selectedIndex===0)
-    {
-        data = `*PROPS
-${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${theta1.value}, ${tau1.value}, ${theta2.value}, ${tau2.value}
-*DEF
-${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value)}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
-    }else
-    {
-        data = `*PROPS
-${c11.value}, ${c12.value}, ${c44.value}, ${g0.value}, ${m.value}, ${tau0.value}, ${q.value}, ${hardeningModel.selectedIndex+1}, ${h0.value}, ${taus.value}, ${a.value}, 0.0
-*DEF
-${planeStress.checked ? 1 : 0}, ${centro.checked ? 1 : 0}, ${parseInt(npts.value)}, ${epsdot.value}, ${wpc.value}, ${ncpu.selectedIndex+1}`;
-    }
-    fs.writeFileSync(exportPath,data);
-}
-function SaveInput()
-{
-    ExportTaylor(path.join(inputPath,'Taylor.inp'));
-    fs.copyFileSync(texFile,path.join(inputPath,'Euler.inp'));
-    isPlaneStress = planeStress.checked;
-}
-// Check the input from the user
-function SafeInput()
-{
-    if(hardeningModel.selectedIndex===0)
-    {
-        return isPositiveNumber(c11.value)     && isPositiveNumber(c12.value) 
-            && isPositiveNumber(c44.value)     && isPositiveNumber(g0.value) 
-            && isPositiveNumber(m.value)       && isPositiveNumber(tau0.value) 
-            && isPositiveNumber(q.value)       && isNonNegativeNumber(theta1.value) 
-            && isNonNegativeNumber(tau1.value) && isNonNegativeNumber(theta2.value) 
-            && isNonNegativeNumber(tau2.value) && (isNumber(npts.value) && parseInt(npts.value)>=2)
-            && isPositiveNumber(epsdot.value)  && isPositiveNumber(wpc.value);
-    }else
-    {
-        return isPositiveNumber(c11.value)    && isPositiveNumber(c12.value) 
-            && isPositiveNumber(c44.value)    && isPositiveNumber(g0.value) 
-            && isPositiveNumber(m.value)      && isPositiveNumber(tau0.value) 
-            && isPositiveNumber(q.value)      && isNonNegativeNumber(h0.value) 
-            && isPositiveNumber(taus.value)   && isPositiveNumber(a.value) 
-            && (isNumber(npts.value)          && parseInt(npts.value)>=2) 
-            && isPositiveNumber(epsdot.value) && isPositiveNumber(wpc.value);
-    }
-}
-function isPositiveNumber(num)
-{
-    return isNumber(num) && parseFloat(num)>0;
-}
-function isNonNegativeNumber(num)
-{
-    return isNumber(num) && parseFloat(num)>=0;
-}
-function isNumber(num)
-{
-    return !isNaN(parseFloat(num)) && isFinite(num);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-//                            Handle multi-threading                              //
-////////////////////////////////////////////////////////////////////////////////////
-// Set up options to select the number of cores to use
-for(let i = 1; i < os.cpus().length; ++i)
-{
-    var option = document.createElement('option');
-    option.text = (i+1).toString();
-    option.selected = true;
-    ncpu.add(option);
-}
-ncpu.selectedIndex = Math.max((os.cpus().length-1)-2,0);
-
-////////////////////////////////////////////////////////////////////////////////////
-//                            Change hardening model                              //
-////////////////////////////////////////////////////////////////////////////////////
-hardeningModel.addEventListener('change', (event)=>
-{
-    VoceForm.hidden = hardeningModel.selectedIndex !== 0;
-    KalidindiForm.hidden = hardeningModel.selectedIndex !== 1;
-});
-
-////////////////////////////////////////////////////////////////////////////////////
-//                      Number of generated stress points                         //
-////////////////////////////////////////////////////////////////////////////////////
-planeStress.addEventListener('change', (event)=>
-{
-    UpdateNstressPoints();
-});
-npts.addEventListener('change',(event)=>
-{
-    UpdateNstressPoints();
-});
-npts.addEventListener('input',(event)=>
-{
-    UpdateNstressPoints();
-});
-function UpdateNstressPoints()
-{
-    if(planeStress.checked && (isNumber(npts.value) && parseInt(npts.value)>=2))
-    {
-        let NptsTemp = parseInt(npts.value);
-        let Nsigma = 6*Math.pow(NptsTemp-2,2)+12*(NptsTemp-2)+8;
-        nStressPoints.innerHTML = `${Nsigma}`;
-    }else if(isNumber(npts.value) && parseInt(npts.value)>=2)
-    {
-        let NptsTemp = parseInt(npts.value);
-        let Nsigma = 10*Math.pow(NptsTemp-2,4)+40*Math.pow(NptsTemp-2,3)+80*Math.pow(NptsTemp-2,2)+80*(NptsTemp-2)+32;
-        nStressPoints.innerHTML = `${Nsigma}`;
-    }else
-    {
-        nStressPoints.innerHTML = "0";
     }
 }
 
@@ -256,7 +113,7 @@ ExportSettingsBtn.addEventListener('click', (event) => {
 });
 ipcRenderer.on('ExportFile', (event, savePath) => {
     if (savePath.toString() !== '') {
-        ExportTaylor(savePath);
+        inputData.ExportTaylor(savePath);
     }
 });
 // Import Taylor settings from file
@@ -264,69 +121,13 @@ ImportSettingsBtn.addEventListener('click', (event) => {
     ipcRenderer.send('import-file-dialog');
 });
 ipcRenderer.on('ImportFile', (event, importPath) => {
-    console.log(importPath[0]);
     if (importPath.toString() !== '') {
         fs.createReadStream(importPath[0], { encoding: 'UTF-8' })
             .on('data', (data) => {
-                parseTaylorFile(data)
+                inputData.parseTaylorFile(data)
             });
     }
 });
-function parseTaylorFile(data) {
-    lines = data.split('\n');
-    let readProps = false;
-    let readDef = false;
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const items = line.split(',');
-        if (readProps && items.length===12){
-            c11.value                    = isNumber(items[0])  ? parseFloat(items[0])     : items[0];
-            c12.value                    = isNumber(items[1])  ? parseFloat(items[1])     : items[1];
-            c44.value                    = isNumber(items[2])  ? parseFloat(items[2])     : items[2];
-            g0.value                     = isNumber(items[3])  ? parseFloat(items[3])     : items[3];
-            m.value                      = isNumber(items[4])  ? parseFloat(items[4])     : items[4];
-            tau0.value                   = isNumber(items[5])  ? parseFloat(items[5])     : items[5];
-            q.value                      = isNumber(items[6])  ? parseFloat(items[6])     : items[6];
-            hardeningModel.selectedIndex = isNumber(items[7])  ? (parseInt(items[7]) === 1 || parseInt(items[7]) === 2 ? parseInt(items[7]) -1 : 0) : 0;
-            VoceForm.hidden = hardeningModel.selectedIndex !== 0;
-            KalidindiForm.hidden = hardeningModel.selectedIndex !== 1;
-            if (hardeningModel.selectedIndex === 0)
-            {
-                theta1.value             = isNumber(items[8])  ? parseFloat(items[8])     : items[8];
-                tau1.value               = isNumber(items[9])  ? parseFloat(items[9])     : items[9];
-                theta2.value             = isNumber(items[10]) ? parseFloat(items[10])    : items[10];
-                tau2.value               = isNumber(items[11]) ? parseFloat(items[11])    : items[11];
-            }
-            else
-            {
-                h0.value                 = isNumber(items[8])  ? parseFloat(items[8])     : items[8];
-                taus.value               = isNumber(items[9])  ? parseFloat(items[9])     : items[9];
-                a.value                  = isNumber(items[10]) ? parseFloat(items[10])    : items[10];
-            }
-        }
-        else if (readDef && items.length===6){
-            planeStress.checked          = isNumber(items[0])  ? parseInt(items[0]) === 1 : planeStress.checked;
-            centro.checked               = isNumber(items[1])  ? parseInt(items[1]) === 1 : centro.checked;
-            npts.value                   = isNumber(items[2])  ? parseFloat(items[2])     : items[2];
-            epsdot.value                 = isNumber(items[3])  ? parseFloat(items[3])     : items[3];
-            wpc.value                    = isNumber(items[4])  ? parseFloat(items[4])     : items[4];
-            ncpu.selectedIndex           = isNumber(items[5])  ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
-            UpdateNstressPoints();
-        }
-        if (line.toUpperCase().startsWith('*PROPS')) {
-            readProps = true;
-            readDef = false;
-        }
-        else if (line.toUpperCase().startsWith('*DEF')) {
-            readProps = false;
-            readDef = true;
-        }
-        else if (!line.startsWith('**')) {
-            readProps = false;
-            readDef = false;
-        }
-    }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                Start Program                                   //
@@ -338,7 +139,7 @@ startProgramBtn.addEventListener('click', (event) => {
     UpdateEnableSaveAndCalibrate();
     if(!LicenseOK)
         return
-    if(SafeInput()){
+    if(inputData.SafeInput()){
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
@@ -346,7 +147,8 @@ startProgramBtn.addEventListener('click', (event) => {
         // disable start button when program is running
         startProgramBtn.disabled = true;
         // Saving input from user to file
-        SaveInput();
+        isPlaneStress = inputData.planeStress.checked;
+        inputData.SaveInput(inputPath, texFile);
         // Enable terminate button when program is running
         terminateProgramBtn.disabled = false;
         roller.classList.add('lds-roller');

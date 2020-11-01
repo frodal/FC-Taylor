@@ -1,0 +1,179 @@
+////////////////////////////////////////////////////////////////////////////////////
+//                               FC-Taylor properties                             //
+////////////////////////////////////////////////////////////////////////////////////
+
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
+
+mat = require('./Material');
+
+class FCTaylorProperties {
+
+
+    constructor() {
+        this.material = new mat.Material();
+        this.epsdot = document.getElementById('epsdot');
+        this.wpc = document.getElementById('wpc');
+        this.npts = document.getElementById('npts');
+        this.planeStress = document.getElementById('planeStress');
+        this.centro = document.getElementById('centrosymmetry');
+        this.ncpu = document.getElementById('ncpu');
+        this.nStressPoints = document.getElementById('nStressPoints');
+
+        // Handle multi-threading
+        // Set up options to select the number of cores to use
+        for (let i = 1; i < os.cpus().length; ++i) {
+            var option = document.createElement('option');
+            option.text = (i + 1).toString();
+            option.selected = true;
+            this.ncpu.add(option);
+        }
+        this.ncpu.selectedIndex = Math.max((os.cpus().length - 1) - 2, 0);
+
+        this.planeStress.addEventListener('change', (event) => {
+            this.UpdateNstressPoints();
+        });
+        this.npts.addEventListener('change', (event) => {
+            this.UpdateNstressPoints();
+        });
+        this.npts.addEventListener('input', (event) => {
+            this.UpdateNstressPoints();
+        });
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    //                      Number of generated stress points                         //
+    ////////////////////////////////////////////////////////////////////////////////////
+    UpdateNstressPoints() {
+        if (this.planeStress.checked && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)) {
+            let NptsTemp = parseInt(this.npts.value);
+            let Nsigma = 6 * Math.pow(NptsTemp - 2, 2) + 12 * (NptsTemp - 2) + 8;
+            this.nStressPoints.innerHTML = `${Nsigma}`;
+        } else if (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2) {
+            let NptsTemp = parseInt(this.npts.value);
+            let Nsigma = 10 * Math.pow(NptsTemp - 2, 4) + 40 * Math.pow(NptsTemp - 2, 3) + 80 * Math.pow(NptsTemp - 2, 2) + 80 * (NptsTemp - 2) + 32;
+            this.nStressPoints.innerHTML = `${Nsigma}`;
+        } else {
+            this.nStressPoints.innerHTML = "0";
+        }
+    }
+
+
+    parseTaylorFile(data) {
+        const lines = data.split('\n');
+        let readProps = false;
+        let readDef = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const items = line.split(',');
+            if (readProps && items.length === 12) {
+                this.material.c11.value = this.isNumber(items[0]) ? parseFloat(items[0]) : items[0];
+                this.material.c12.value = this.isNumber(items[1]) ? parseFloat(items[1]) : items[1];
+                this.material.c44.value = this.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
+                this.material.g0.value = this.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
+                this.material.m.value = this.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
+                this.material.tau0.value = this.isNumber(items[5]) ? parseFloat(items[5]) : items[5];
+                this.material.q.value = this.isNumber(items[6]) ? parseFloat(items[6]) : items[6];
+                this.material.hardeningModel.selectedIndex = this.isNumber(items[7]) ? (parseInt(items[7]) === 1 || parseInt(items[7]) === 2 ? parseInt(items[7]) - 1 : 0) : 0;
+                this.material.VoceForm.hidden = this.material.hardeningModel.selectedIndex !== 0;
+                this.material.KalidindiForm.hidden = this.material.hardeningModel.selectedIndex !== 1;
+                if (this.material.hardeningModel.selectedIndex === 0) {
+                    this.material.theta1.value = this.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
+                    this.material.tau1.value = this.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
+                    this.material.theta2.value = this.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
+                    this.material.tau2.value = this.isNumber(items[11]) ? parseFloat(items[11]) : items[11];
+                }
+                else {
+                    this.material.h0.value = this.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
+                    this.material.taus.value = this.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
+                    this.material.a.value = this.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
+                }
+            }
+            else if (readDef && items.length === 6) {
+                this.planeStress.checked = this.isNumber(items[0]) ? parseInt(items[0]) === 1 : this.planeStress.checked;
+                this.centro.checked = this.isNumber(items[1]) ? parseInt(items[1]) === 1 : this.centro.checked;
+                this.npts.value = this.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
+                this.epsdot.value = this.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
+                this.wpc.value = this.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
+                this.ncpu.selectedIndex = this.isNumber(items[5]) ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
+                this.UpdateNstressPoints();
+            }
+            if (line.toUpperCase().startsWith('*PROPS')) {
+                readProps = true;
+                readDef = false;
+            }
+            else if (line.toUpperCase().startsWith('*DEF')) {
+                readProps = false;
+                readDef = true;
+            }
+            else if (!line.startsWith('**')) {
+                readProps = false;
+                readDef = false;
+            }
+        }
+    }
+
+
+    ExportTaylor(exportPath) {
+        let data = '';
+        if (hardeningModel.selectedIndex === 0) {
+            data = `*PROPS
+${this.material.c11.value}, ${this.material.c12.value}, ${this.material.c44.value}, ${this.material.g0.value}, ${this.material.m.value}, ${this.material.tau0.value}, ${this.material.q.value}, ${this.material.hardeningModel.selectedIndex + 1}, ${this.material.theta1.value}, ${this.material.tau1.value}, ${this.material.theta2.value}, ${this.material.tau2.value}
+*DEF
+${this.planeStress.checked ? 1 : 0}, ${this.centro.checked ? 1 : 0}, ${parseInt(this.npts.value)}, ${this.epsdot.value}, ${this.wpc.value}, ${this.ncpu.selectedIndex + 1}`;
+        } else {
+            data = `*PROPS
+${this.material.c11.value}, ${this.material.c12.value}, ${this.material.c44.value}, ${this.material.g0.value}, ${this.material.m.value}, ${this.material.tau0.value}, ${this.material.q.value}, ${this.material.hardeningModel.selectedIndex + 1}, ${this.material.h0.value}, ${this.material.taus.value}, ${this.material.a.value}, 0.0
+*DEF
+${this.planeStress.checked ? 1 : 0}, ${this.centro.checked ? 1 : 0}, ${parseInt(this.npts.value)}, ${this.epsdot.value}, ${this.wpc.value}, ${this.ncpu.selectedIndex + 1}`;
+        }
+        fs.writeFileSync(exportPath, data);
+    }
+
+
+    SaveInput(inputPath, texFile) {
+        this.ExportTaylor(path.join(inputPath, 'Taylor.inp'));
+        fs.copyFileSync(texFile, path.join(inputPath, 'Euler.inp'));
+    }
+
+    // Check the input from the user
+    SafeInput() {
+        if (this.material.hardeningModel.selectedIndex === 0) {
+            return this.isPositiveNumber(this.material.c11.value) && this.isPositiveNumber(this.material.c12.value)
+                && this.isPositiveNumber(this.material.c44.value) && this.isPositiveNumber(this.material.g0.value)
+                && this.isPositiveNumber(this.material.m.value) && this.isPositiveNumber(this.material.tau0.value)
+                && this.isPositiveNumber(this.material.q.value) && this.isNonNegativeNumber(this.material.theta1.value)
+                && this.isNonNegativeNumber(this.material.tau1.value) && this.isNonNegativeNumber(this.material.theta2.value)
+                && this.isNonNegativeNumber(this.material.tau2.value) && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
+                && this.isPositiveNumber(this.epsdot.value) && this.isPositiveNumber(this.wpc.value);
+        } else {
+            return this.isPositiveNumber(this.material.c11.value) && this.isPositiveNumber(this.material.c12.value)
+                && this.isPositiveNumber(this.material.c44.value) && this.isPositiveNumber(this.material.g0.value)
+                && this.isPositiveNumber(this.material.m.value) && this.isPositiveNumber(this.material.tau0.value)
+                && this.isPositiveNumber(this.material.q.value) && this.isNonNegativeNumber(this.material.h0.value)
+                && this.isPositiveNumber(this.material.taus.value) && this.isPositiveNumber(this.material.a.value)
+                && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
+                && this.isPositiveNumber(this.epsdot.value) && this.isPositiveNumber(this.wpc.value);
+        }
+    }
+
+
+    isPositiveNumber(num) {
+        return this.isNumber(num) && parseFloat(num) > 0;
+    }
+
+
+    isNonNegativeNumber(num) {
+        return this.isNumber(num) && parseFloat(num) >= 0;
+    }
+
+
+    isNumber(num) {
+        return !isNaN(parseFloat(num)) && isFinite(num);
+    }
+}
+
+// Exports
+exports.FCTaylorProperties = FCTaylorProperties;
