@@ -6,7 +6,8 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
-mat = require('./Material');
+const mat = require('./Material');
+const utils = require('./Utils');
 
 class FCTaylorProperties {
 
@@ -47,11 +48,11 @@ class FCTaylorProperties {
     //                      Number of generated stress points                         //
     ////////////////////////////////////////////////////////////////////////////////////
     UpdateNstressPoints() {
-        if (this.planeStress.checked && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)) {
+        if (this.planeStress.checked && (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)) {
             let NptsTemp = parseInt(this.npts.value);
             let Nsigma = 6 * Math.pow(NptsTemp - 2, 2) + 12 * (NptsTemp - 2) + 8;
             this.nStressPoints.innerHTML = `${Nsigma}`;
-        } else if (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2) {
+        } else if (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2) {
             let NptsTemp = parseInt(this.npts.value);
             let Nsigma = 10 * Math.pow(NptsTemp - 2, 4) + 40 * Math.pow(NptsTemp - 2, 3) + 80 * Math.pow(NptsTemp - 2, 2) + 80 * (NptsTemp - 2) + 32;
             this.nStressPoints.innerHTML = `${Nsigma}`;
@@ -69,35 +70,35 @@ class FCTaylorProperties {
             const line = lines[i];
             const items = line.split(',');
             if (readProps && items.length === 12) {
-                this.material.c11.value = this.isNumber(items[0]) ? parseFloat(items[0]) : items[0];
-                this.material.c12.value = this.isNumber(items[1]) ? parseFloat(items[1]) : items[1];
-                this.material.c44.value = this.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
-                this.material.g0.value = this.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
-                this.material.m.value = this.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
-                this.material.tau0.value = this.isNumber(items[5]) ? parseFloat(items[5]) : items[5];
-                this.material.q.value = this.isNumber(items[6]) ? parseFloat(items[6]) : items[6];
-                this.material.hardeningModel.selectedIndex = this.isNumber(items[7]) ? (parseInt(items[7]) === 1 || parseInt(items[7]) === 2 ? parseInt(items[7]) - 1 : 0) : 0;
+                this.material.c11.value = utils.isNumber(items[0]) ? parseFloat(items[0]) : items[0];
+                this.material.c12.value = utils.isNumber(items[1]) ? parseFloat(items[1]) : items[1];
+                this.material.c44.value = utils.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
+                this.material.g0.value = utils.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
+                this.material.m.value = utils.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
+                this.material.tau0.value = utils.isNumber(items[5]) ? parseFloat(items[5]) : items[5];
+                this.material.q.value = utils.isNumber(items[6]) ? parseFloat(items[6]) : items[6];
+                this.material.hardeningModel.selectedIndex = utils.isNumber(items[7]) ? (parseInt(items[7]) === 1 || parseInt(items[7]) === 2 ? parseInt(items[7]) - 1 : 0) : 0;
                 this.material.VoceForm.hidden = this.material.hardeningModel.selectedIndex !== 0;
                 this.material.KalidindiForm.hidden = this.material.hardeningModel.selectedIndex !== 1;
                 if (this.material.hardeningModel.selectedIndex === 0) {
-                    this.material.theta1.value = this.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
-                    this.material.tau1.value = this.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
-                    this.material.theta2.value = this.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
-                    this.material.tau2.value = this.isNumber(items[11]) ? parseFloat(items[11]) : items[11];
+                    this.material.theta1.value = utils.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
+                    this.material.tau1.value = utils.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
+                    this.material.theta2.value = utils.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
+                    this.material.tau2.value = utils.isNumber(items[11]) ? parseFloat(items[11]) : items[11];
                 }
                 else {
-                    this.material.h0.value = this.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
-                    this.material.taus.value = this.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
-                    this.material.a.value = this.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
+                    this.material.h0.value = utils.isNumber(items[8]) ? parseFloat(items[8]) : items[8];
+                    this.material.taus.value = utils.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
+                    this.material.a.value = utils.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
                 }
             }
             else if (readDef && items.length === 6) {
-                this.planeStress.checked = this.isNumber(items[0]) ? parseInt(items[0]) === 1 : this.planeStress.checked;
-                this.centro.checked = this.isNumber(items[1]) ? parseInt(items[1]) === 1 : this.centro.checked;
-                this.npts.value = this.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
-                this.epsdot.value = this.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
-                this.wpc.value = this.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
-                this.ncpu.selectedIndex = this.isNumber(items[5]) ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
+                this.planeStress.checked = utils.isNumber(items[0]) ? parseInt(items[0]) === 1 : this.planeStress.checked;
+                this.centro.checked = utils.isNumber(items[1]) ? parseInt(items[1]) === 1 : this.centro.checked;
+                this.npts.value = utils.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
+                this.epsdot.value = utils.isNumber(items[3]) ? parseFloat(items[3]) : items[3];
+                this.wpc.value = utils.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
+                this.ncpu.selectedIndex = utils.isNumber(items[5]) ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
                 this.UpdateNstressPoints();
             }
             if (line.toUpperCase().startsWith('*PROPS')) {
@@ -141,37 +142,22 @@ ${this.planeStress.checked ? 1 : 0}, ${this.centro.checked ? 1 : 0}, ${parseInt(
     // Check the input from the user
     SafeInput() {
         if (this.material.hardeningModel.selectedIndex === 0) {
-            return this.isPositiveNumber(this.material.c11.value) && this.isPositiveNumber(this.material.c12.value)
-                && this.isPositiveNumber(this.material.c44.value) && this.isPositiveNumber(this.material.g0.value)
-                && this.isPositiveNumber(this.material.m.value) && this.isPositiveNumber(this.material.tau0.value)
-                && this.isPositiveNumber(this.material.q.value) && this.isNonNegativeNumber(this.material.theta1.value)
-                && this.isNonNegativeNumber(this.material.tau1.value) && this.isNonNegativeNumber(this.material.theta2.value)
-                && this.isNonNegativeNumber(this.material.tau2.value) && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
-                && this.isPositiveNumber(this.epsdot.value) && this.isPositiveNumber(this.wpc.value);
+            return utils.isPositiveNumber(this.material.c11.value) && utils.isPositiveNumber(this.material.c12.value)
+                && utils.isPositiveNumber(this.material.c44.value) && utils.isPositiveNumber(this.material.g0.value)
+                && utils.isPositiveNumber(this.material.m.value) && utils.isPositiveNumber(this.material.tau0.value)
+                && utils.isPositiveNumber(this.material.q.value) && utils.isNonNegativeNumber(this.material.theta1.value)
+                && utils.isNonNegativeNumber(this.material.tau1.value) && utils.isNonNegativeNumber(this.material.theta2.value)
+                && utils.isNonNegativeNumber(this.material.tau2.value) && (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
+                && utils.isPositiveNumber(this.epsdot.value) && utils.isPositiveNumber(this.wpc.value);
         } else {
-            return this.isPositiveNumber(this.material.c11.value) && this.isPositiveNumber(this.material.c12.value)
-                && this.isPositiveNumber(this.material.c44.value) && this.isPositiveNumber(this.material.g0.value)
-                && this.isPositiveNumber(this.material.m.value) && this.isPositiveNumber(this.material.tau0.value)
-                && this.isPositiveNumber(this.material.q.value) && this.isNonNegativeNumber(this.material.h0.value)
-                && this.isPositiveNumber(this.material.taus.value) && this.isPositiveNumber(this.material.a.value)
-                && (this.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
-                && this.isPositiveNumber(this.epsdot.value) && this.isPositiveNumber(this.wpc.value);
+            return utils.isPositiveNumber(this.material.c11.value) && utils.isPositiveNumber(this.material.c12.value)
+                && utils.isPositiveNumber(this.material.c44.value) && utils.isPositiveNumber(this.material.g0.value)
+                && utils.isPositiveNumber(this.material.m.value) && utils.isPositiveNumber(this.material.tau0.value)
+                && utils.isPositiveNumber(this.material.q.value) && utils.isNonNegativeNumber(this.material.h0.value)
+                && utils.isPositiveNumber(this.material.taus.value) && utils.isPositiveNumber(this.material.a.value)
+                && (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
+                && utils.isPositiveNumber(this.epsdot.value) && utils.isPositiveNumber(this.wpc.value);
         }
-    }
-
-
-    isPositiveNumber(num) {
-        return this.isNumber(num) && parseFloat(num) > 0;
-    }
-
-
-    isNonNegativeNumber(num) {
-        return this.isNumber(num) && parseFloat(num) >= 0;
-    }
-
-
-    isNumber(num) {
-        return !isNaN(parseFloat(num)) && isFinite(num);
     }
 }
 

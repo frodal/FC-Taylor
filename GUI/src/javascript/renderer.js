@@ -2,15 +2,15 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-const {ipcRenderer} = require('electron');
-const {execFile} = require('child_process');
+const { ipcRenderer } = require('electron');
+const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const Plotly = require('plotly.js-dist');
 const csv = require('csv-parser');
-const matrix = require('ml-matrix');
 
-FCProperties = require('./FCTaylorProperties');
+const { FCTaylorProperties } = require('./FCTaylorProperties');
+const { Plotter } = require('./Plotter');
+const { YieldSurface } = require('./YieldSurface');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -25,12 +25,13 @@ const outArea = document.getElementById('OutputData');
 const darkSwitch = document.getElementById('darkSwitch');
 const ImportSettingsBtn = document.getElementById('ImportSettingsBtn');
 const ExportSettingsBtn = document.getElementById('ExportSettingsBtn');
+const calibratedParametersTable = document.getElementById('calibratedParameters');
 
-const corePath = path.join(__dirname,'../../Core/FC-Taylor.exe');
-const calibratePath = path.join(__dirname,'../../Core/FC-Taylor-Calibrate.exe');
-const workDir = path.join(__dirname,'../../../core-temp-pid'+process.pid.toString())
-const inputPath = path.join(workDir,'Input');
-const outputPath = path.join(workDir,'Output');
+const corePath = path.join(__dirname, '../../Core/FC-Taylor.exe');
+const calibratePath = path.join(__dirname, '../../Core/FC-Taylor-Calibrate.exe');
+const workDir = path.join(__dirname, '../../../core-temp-pid' + process.pid.toString())
+const inputPath = path.join(workDir, 'Input');
+const outputPath = path.join(workDir, 'Output');
 let exeCommandArgs = [''];
 let subProcess = null;
 let stdoutput = '';
@@ -45,22 +46,20 @@ const filePathArea = document.getElementById('FilePath');
 let texFile = '';
 
 // FC-Taylor input data
-const inputData = new FCProperties.FCTaylorProperties();
-
-const calibratedParametersTable = document.getElementById('calibratedParameters');
+const inputData = new FCTaylorProperties();
 let isPlaneStress = inputData.planeStress.checked;
 
 // Plot variables
 let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
-let c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
-let normStress = [], Rvalue = [], angle = [];
-let s11Contour = [], s22Contour = [], s12Contour = [], s12Max = [];
+let ys = new YieldSurface();
+const plotter = new Plotter(darkSwitch);
+setTimeout(ClearDisplayCalibratedParameters, 1000);
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 Lisence check                                  //
 ////////////////////////////////////////////////////////////////////////////////////
 let LicenseOK = false;
-ipcRenderer.on('LicenseCheck',(event,value)=>{
+ipcRenderer.on('LicenseCheck', (event, value) => {
     LicenseOK = value;
 });
 ipcRenderer.send('CheckLicensePlease');
@@ -68,18 +67,14 @@ ipcRenderer.send('CheckLicensePlease');
 ////////////////////////////////////////////////////////////////////////////////////
 //                           Setup working directory                              //
 ////////////////////////////////////////////////////////////////////////////////////
-function SetupWorkingDir()
-{
-    if(!fs.existsSync(workDir))
-    {
+function SetupWorkingDir() {
+    if (!fs.existsSync(workDir)) {
         fs.mkdirSync(workDir, { recursive: true });
     }
-    if(!fs.existsSync(inputPath))
-    {
+    if (!fs.existsSync(inputPath)) {
         fs.mkdirSync(inputPath, { recursive: true });
     }
-    if(!fs.existsSync(outputPath))
-    {
+    if (!fs.existsSync(outputPath)) {
         fs.mkdirSync(outputPath, { recursive: true });
     }
 }
@@ -88,15 +83,12 @@ function SetupWorkingDir()
 //                                 Select File                                    //
 ////////////////////////////////////////////////////////////////////////////////////
 // Sets select program button callback
-selectFileBtn.addEventListener('click', (event)=>
-{
+selectFileBtn.addEventListener('click', (event) => {
     ipcRenderer.send('open-file-dialog');
 });
 // Sets the executable filepath received from the main process (main.js)
-ipcRenderer.on('SelectedFile', (event, newPath)=>
-{
-    if(newPath.toString()!=='')
-    {
+ipcRenderer.on('SelectedFile', (event, newPath) => {
+    if (newPath.toString() !== '') {
         SetupWorkingDir();
         texFile = newPath.toString();
         filePathArea.innerHTML = `${texFile}`;
@@ -137,9 +129,9 @@ startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
-    if(!LicenseOK)
+    if (!LicenseOK)
         return
-    if(inputData.SafeInput()){
+    if (inputData.SafeInput()) {
         // Clear output data field
         outArea.innerHTML = '';
         // Sets the current working directory of the selected program to be its own directory
@@ -159,7 +151,7 @@ startProgramBtn.addEventListener('click', (event) => {
                 if (err !== null && !(subProcess.killed || killedDueToError)) {
                     ipcRenderer.send('open-error-dialog');
                 } else if (killedDueToError) {
-                    ipcRenderer.send('open-errorKilled-dialog',parseInt(err.toString().split('Error code:')[1]));
+                    ipcRenderer.send('open-errorKilled-dialog', parseInt(err.toString().split('Error code:')[1]));
                 } else {
                     ipcRenderer.send('open-successfulTermination-dialog');
                 }
@@ -195,8 +187,7 @@ startProgramBtn.addEventListener('click', (event) => {
             ipcRenderer.send('open-error-dialog');
             outArea.innerHTML = `${err.toString()}`;
         }
-    }else
-    {
+    } else {
         ipcRenderer.send('check-input-dialog');
     }
 });
@@ -205,13 +196,10 @@ startProgramBtn.addEventListener('click', (event) => {
 //                               Terminate Program                                //
 ////////////////////////////////////////////////////////////////////////////////////
 // Sets terminate program button callback
-terminateProgramBtn.addEventListener('click', (event)=>
-{
-    if(subProcess!==null)
-    {
+terminateProgramBtn.addEventListener('click', (event) => {
+    if (subProcess !== null) {
         subProcess.kill();
-    }else
-    {
+    } else {
         ipcRenderer.send('open-successfulTermination-dialog');
     }
 });
@@ -219,20 +207,16 @@ terminateProgramBtn.addEventListener('click', (event)=>
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 Save results                                   //
 ////////////////////////////////////////////////////////////////////////////////////
-saveResultBtn.addEventListener('click', (event) =>
-{
+saveResultBtn.addEventListener('click', (event) => {
     ipcRenderer.send('save-file-dialog');
 });
-ipcRenderer.on('SaveFile', (event, savePath)=>
-{
-    if(savePath.toString()!=='')
-    {
-        fs.copyFileSync(path.join(outputPath,'output.txt'),savePath.toString());
+ipcRenderer.on('SaveFile', (event, savePath) => {
+    if (savePath.toString() !== '') {
+        fs.copyFileSync(path.join(outputPath, 'output.txt'), savePath.toString());
     }
 });
-function UpdateEnableSaveAndCalibrate()
-{
-    let isDisabled = !fs.existsSync(path.join(outputPath,'output.txt'));
+function UpdateEnableSaveAndCalibrate() {
+    let isDisabled = !fs.existsSync(path.join(outputPath, 'output.txt'));
     saveResultBtn.disabled = isDisabled
     calibrateYsBtn.disabled = isDisabled
     saveCalibrationBtn.disabled = true;
@@ -240,10 +224,9 @@ function UpdateEnableSaveAndCalibrate()
     if (isDisabled)
         ClearDisplayCalibratedParameters();
 }
-function DeleteOutput()
-{
-    let tempFilePath = path.join(outputPath,'output.txt');
-    if(fs.existsSync(tempFilePath))
+function DeleteOutput() {
+    let tempFilePath = path.join(outputPath, 'output.txt');
+    if (fs.existsSync(tempFilePath))
         fs.unlinkSync(tempFilePath);
 }
 ////////////////////////////////////////////////////////////////////////////////////
@@ -253,9 +236,8 @@ ipcRenderer.send('core-temp', workDir)
 ////////////////////////////////////////////////////////////////////////////////////
 //                           Calibrate yield surface                              //
 ////////////////////////////////////////////////////////////////////////////////////
-calibrateYsBtn.addEventListener('click',(event)=>
-{
-    if(!LicenseOK)
+calibrateYsBtn.addEventListener('click', (event) => {
+    if (!LicenseOK)
         return
     let outfilePath = path.join(outputPath, 'output.txt');
     // Sets the current working directory of the selected program to be its own directory
@@ -270,14 +252,13 @@ calibrateYsBtn.addEventListener('click',(event)=>
     calibMsg.innerHTML = 'Calibrating';
     try // Try to execute the program and sets a callback for when the program terminates
     {
-        execFile(calibratePath, [outfilePath,'--space',isPlaneStress ? '2D' : '3D'], options, function (err, data) {
+        execFile(calibratePath, [outfilePath, '--space', isPlaneStress ? '2D' : '3D'], options, function (err, data) {
             startProgramBtn.disabled = false;
             calibrateYsBtn.disabled = false;
-            if(err)
-            {
+            if (err) {
                 saveCalibrationBtn.disabled = true;
                 ipcRenderer.send('open-errorCalibration-dialog');
-            }else{
+            } else {
                 saveCalibrationBtn.disabled = false;
                 ipcRenderer.send('open-successfulCalibration-dialog');
                 loadCalibratedYSparams();
@@ -300,432 +281,20 @@ calibrateYsBtn.addEventListener('click',(event)=>
 ////////////////////////////////////////////////////////////////////////////////////
 //                               Save calibration                                 //
 ////////////////////////////////////////////////////////////////////////////////////
-saveCalibrationBtn.addEventListener('click', (event) =>
-{
+saveCalibrationBtn.addEventListener('click', (event) => {
     ipcRenderer.send('save-calibration-dialog');
 });
-ipcRenderer.on('SaveCalibration', (event, savePath)=>
-{
-    if(savePath.toString()!=='')
-    {
-        fs.copyFileSync(path.join(outputPath,'CalibratedParameters.dat'),savePath.toString());
+ipcRenderer.on('SaveCalibration', (event, savePath) => {
+    if (savePath.toString() !== '') {
+        fs.copyFileSync(path.join(outputPath, 'CalibratedParameters.dat'), savePath.toString());
     }
 });
 ////////////////////////////////////////////////////////////////////////////////////
-//                                   Plotting                                     //
+//                              Handle Discrete YS                                //
 ////////////////////////////////////////////////////////////////////////////////////
-async function plotScatter(target,x,y)
-{
-    const layout =
-    {
-        margin: {
-            t: 50,
-            l: 50,
-            b: 50,
-            r: 50
-        },
-        height: 400,
-        width: 400,
-        xaxis: {
-            title: 'RD',
-            range: [-1.5, 1.5],
-            dtick: 0.5,
-            showgrid: true,
-            zeroline: false
-        },
-        yaxis: {
-            title: 'TD',
-            range: [-1.5, 1.5],
-            dtick: 0.5,
-            showgrid: true,
-            zeroline: false
-        },
-        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
-        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
-        font: {
-            family: 'Montserrat',
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
-        },
-        showlegend: false,
-        hovermode: 'closest'
-    };
-    const trace =
-    {
-        x: x,
-        y: y,
-        mode: 'markers',
-        name: 'points',
-        marker: {
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
-            size: 5
-        },
-        type: 'scatter'
-    };
-    const data = [trace];
-    const config = {
-        displaylogo: false,
-        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
-        toImageButtonOptions: {
-            format: 'svg', // one of png, svg, jpeg, webp
-            filename: 'FC-Taylor-plot',
-            height: 500,
-            width: 500,
-            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
-        }
-    };
-    await setImmediatePromise();
-    Plotly.react(target, data, layout, config);
-}
-
-async function plotYS(target,x,y,sxy,sxyMax)
-{
-    const layout =
-    {
-        margin: {
-            t: 50,
-            l: 50,
-            b: 50,
-            r: 50
-        },
-        height: 400,
-        width: 400,
-        xaxis: {
-            title: 'RD',
-            range: [-1.5, 1.5],
-            dtick: 0.5,
-            showgrid: true,
-            zeroline: false
-        },
-        yaxis: {
-            title: 'TD',
-            range: [-1.5, 1.5],
-            dtick: 0.5,
-            showgrid: true,
-            zeroline: false
-        },
-        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
-        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
-        font: {
-            family: 'Montserrat',
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
-        },
-        annotations: [
-            {
-              x: 0,
-              y: 0,
-              text: parseFloat(sxyMax).toFixed(2),
-              showarrow: false,
-            }
-          ],
-        showlegend: false,
-        hovermode: 'closest'
-    };
-    const config = {
-        displaylogo: false,
-        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
-        toImageButtonOptions: {
-            format: 'svg', // one of png, svg, jpeg, webp
-            filename: 'FC-Taylor-plot',
-            height: 500,
-            width: 500,
-            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
-        }
-    };
-    let data = [];
-    for(let k = 0; k < x.length; ++k)
-    {
-        const trace =
-        {
-            x: x[k],
-            y: y[k],
-            mode: 'lines',
-            name: `Sxy = ${sxy[k]}`,
-            line: {
-                color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
-            },
-            type: 'scatter'
-        };
-        data.push(trace);
-    }
-    
-    Plotly.react(target, data, layout, config);
-}
-
-async function plotLankford(target,angle,Rvalue)
-{
-    let max = Rvalue.reduce(function(a, b) {
-        return Math.max(a, b);
-    });
-    let offset = 0.2;
-    let dy = FindDelta(((1+offset)*max-0)/6);
-
-    const layout =
-    {
-        margin: {
-            t: 50,
-            l: 50,
-            b: 50,
-            r: 50
-        },
-        height: 400,
-        width: 400,
-        xaxis: {
-            title: 'Tensile direction',
-            range: [0, 90],
-            dtick: 15,
-            showgrid: true,
-            zeroline: false
-        },
-        yaxis: {
-            title: 'Lankford coefficient',
-            range: [0, (1+offset)*max],
-            dtick: dy,
-            showgrid: true,
-            zeroline: false
-        },
-        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
-        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
-        font: {
-            family: 'Montserrat',
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
-        },
-        showlegend: false,
-        hovermode: 'closest'
-    };
-    const config = {
-        displaylogo: false,
-        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
-        toImageButtonOptions: {
-            format: 'svg', // one of png, svg, jpeg, webp
-            filename: 'FC-Taylor-plot',
-            height: 500,
-            width: 500,
-            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
-        }
-    };
-    const trace =
-    {
-        x: angle,
-        y: Rvalue,
-        mode: 'lines',
-        name: 'Lankford coefficient',
-        line: {
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
-        },
-        type: 'scatter'
-    };
-    const data = [trace];
-    Plotly.react(target, data, layout, config);
-}
-
-function FindDelta(value)
-{
-    if(Math.floor(value)===0)
-    {
-        return 0.1*FindDelta(value*10);
-    }
-    return Math.floor(value)
-}
-
-async function plotNormStress(target,angle,normStress)
-{
-    let max = normStress.reduce(function(a, b) {
-        return Math.max(a, b);
-    });
-    let min = normStress.reduce(function(a, b) {
-        return Math.min(a, b);
-    });
-    let offset = 0.2;
-    let dy = FindDelta(((1+offset)*max-(1-offset)*min)/6);
-    
-    const layout =
-    {
-        margin: {
-            t: 50,
-            l: 50,
-            b: 50,
-            r: 50
-        },
-        height: 400,
-        width: 400,
-        xaxis: {
-            title: 'Tensile direction',
-            range: [0, 90],
-            dtick: 15,
-            showgrid: true,
-            zeroline: false
-        },
-        yaxis: {
-            title: 'Normalized yield stress',
-            range: [(1-offset)*min, (1+offset)*max],
-            dtick: dy,
-            showgrid: true,
-            zeroline: false
-        },
-        paper_bgcolor: darkSwitch.checked ? 'rgb(30, 30, 30)' : '#FFF',
-        plot_bgcolor: darkSwitch.checked ? 'rgb( 30, 30, 30)' : '#FFF',
-        font: {
-            family: 'Montserrat',
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : '#444'
-        },
-        showlegend: false,
-        hovermode: 'closest'
-    };
-    
-    const config = {
-        displaylogo: false,
-        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'hoverCompareCartesian', 'hoverClosestCartesian'],
-        toImageButtonOptions: {
-            format: 'svg', // one of png, svg, jpeg, webp
-            filename: 'FC-Taylor-plot',
-            height: 500,
-            width: 500,
-            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
-        }
-    };
-    const trace =
-    {
-        x: angle,
-        y: normStress,
-        mode: 'lines',
-        name: `Normalized yield stress`,
-        line: {
-            color: darkSwitch.checked ? 'rgb(190,190,190)' : 'rgb(0,0,0)',
-        },
-        type: 'scatter'
-    };
-    const data = [trace];
-    
-    Plotly.react(target, data, layout, config);
-}
-
-async function CalcRandR(angle,c)
-{
-    let normStress = new Array(angle.length);
-    let Rvalue = new Array(angle.length);
-    
-    for(let k = 0; k < angle.length; ++k)
-    {
-        let ang = angle[k]*Math.PI/180.0;
-        // Normalized yield stress
-        normStress[k] = Phi(Math.pow(Math.cos(ang),2)-1/3, Math.pow(Math.sin(ang),2)-1/3, -1/3, Math.sin(ang)*Math.cos(ang),0,0,c);
-        // Lankford coefficient
-        let dfds = yieldgradient(normStress[k]*(Math.pow(Math.cos(ang),2)), normStress[k]*(Math.pow(Math.sin(ang),2)),0,normStress[k]*(Math.sin(ang)*Math.cos(ang)),0,0,c);
-        let Q = new matrix.Matrix([[Math.cos(ang),-Math.sin(ang),0], [Math.sin(ang),Math.cos(ang),0], [0,0,1]]);
-        let df = Q.transpose().mmul(dfds.mmul(Q));
-        Rvalue[k] = df.data[1][1]/df.data[2][2];
-
-        if( k % 10 === 0)
-            await setImmediatePromise();
-    }
-
-    return [normStress, Rvalue];
-}
-
-async function plotRandR(target1,target2,c)
-{
-    angle = linspace(0,90,1001);
-    [normStress, Rvalue] = await CalcRandR(angle,c);
-    plotNormStress(target1,angle,normStress);
-    plotLankford(target2,angle,Rvalue);
-}
-
-async function plotContour(target,c)
-{
-    // find max shear stress
-    let sxyMax = findMaxShear(c);
-    // will create contours at these levels of shear stress
-    let sxy = [];
-    for(let i = 0; i < sxyMax; i+=0.1)
-    {
-        sxy.push(i);
-    }
-    // Setting up variables
-    let l = linspace(0,2*Math.PI,360);
-
-    let x = new Array(sxy.length), z = new Array(sxy.length);
-    for(let k = 0; k < sxy.length; ++k)
-    {
-        x[k] = new Array(l.length);
-        z[k] = new Array(l.length);
-    }
-
-    await setImmediatePromise();
-
-    // finding the yieldsurface, f = 0
-    for(let k = 0; k < sxy.length; ++k)
-    {
-        for(let i = 0; i < l.length; ++i)
-        {
-            let s = domainReduce(0, 2, 10, l[i], sxy[k], c)
-            x[k][i] = s*Math.cos([l[i]]);
-            z[k][i] = s*Math.sin([l[i]]);
-
-            if( i % 10 === 0)
-                await setImmediatePromise()
-        }
-    }
-    s11Contour = x, s22Contour = z, s12Contour = sxy, s12Max = sxyMax;
-    plotYS('plot-window-2',x,z,sxy,sxyMax);
-}
-
-function domainReduce(min, max, N, lode, sxy, c)
-{
-    let s = linspace(min,max,N);
-    let temp1 = 1000, temp2 = 1000;
-    for (let j = 0; j < s.length; ++j) 
-    {
-        temp2 = Math.abs(yieldfunction(s[j] * Math.cos(lode), s[j] * Math.sin(lode), 0, sxy, 0, 0, c));
-        if (temp2 < temp1) 
-        {
-            n = j;
-            temp1 = temp2;
-        }
-    }
-
-    if(temp1<1e-4)
-    {
-        return s[n];
-    }
-    
-    return domainReduce(Math.max(s[n]-(s[1]-s[0]),0), s[n]+(s[1]-s[0]), N, lode, sxy, c)
-}
-
-function findMaxShear(c)
-{
-    // find maks shear stress
-    let sxy = linspace(0.3,1.1,1000);
-    let temp1 = 1000;
-    let temp2 = 1000;
-    let n = 0;
-    for(let i = 0; i < 1000; ++i)
-    {
-        temp2 = Math.abs(yieldfunction(0,0,0,sxy[i],0,0,c));
-        if(temp2 < temp1)
-        {
-            n = i;
-            temp1 = temp2;
-        }
-    }
-    return sxy[n];
-}
-
-function linspace(startValue, endValue, cardinality)
-{
-    var arr = new Array(cardinality);
-    var step = (endValue - startValue) / (cardinality - 1);
-    for (var i = 0; i < cardinality; ++i) 
-    {
-        arr[i] = startValue + (step * i);
-    }
-    return arr;
-}
-
-function loadDiscreteYS()
-{
+function loadDiscreteYS() {
     let filePath = path.join(outputPath, 'output.txt')
-    if (fs.existsSync(filePath)) 
-    {
+    if (fs.existsSync(filePath)) {
         s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
         fs.createReadStream(filePath)
             .pipe(csv())
@@ -739,28 +308,24 @@ function loadDiscreteYS()
             })
             .on('end', () => {
                 [s11, s22, s33, s12, s23, s31] = Normalize(s11, s22, s33, s12, s23, s31);
-                plotScatter('plot-window-1', s11, s22);
+                UpdateAllPlots();
             });
     }
 }
 
-function Normalize(s11, s22, s33, s12, s23, s31)
-{
+function Normalize(s11, s22, s33, s12, s23, s31) {
     // Normalizing the yield stress based on s11=1 at s22=0, s33=0
     let k = 0;
     let er = Infinity;
-    for (let i = 0; i < s11.length; ++i)
-    {
+    for (let i = 0; i < s11.length; ++i) {
         let temp = Math.pow(s22[i], 2) + Math.pow(s33[i], 2) + 2 * Math.pow(s12[i], 2) + 2 * Math.pow(s23[i], 2) + 2 * Math.pow(s31[i], 2);
-        if (temp < er)
-        {
+        if (temp < er) {
             k = i;
             er = temp;
         }
     }
-    let s0 = Math.sqrt(0.5*Math.pow(s11[k]-s22[k],2)+0.5*Math.pow(s22[k]-s33[k],2)+0.5*Math.pow(s33[k]-s11[k],2)+3*Math.pow(s12[k],2)+3*Math.pow(s23[k],2)+3*Math.pow(s31[k],2));
-    for (let i = 0; i < s11.length; ++i) 
-    {
+    let s0 = Math.sqrt(0.5 * Math.pow(s11[k] - s22[k], 2) + 0.5 * Math.pow(s22[k] - s33[k], 2) + 0.5 * Math.pow(s33[k] - s11[k], 2) + 3 * Math.pow(s12[k], 2) + 3 * Math.pow(s23[k], 2) + 3 * Math.pow(s31[k], 2));
+    for (let i = 0; i < s11.length; ++i) {
         s11[i] /= s0;
         s22[i] /= s0;
         s33[i] /= s0;
@@ -770,129 +335,48 @@ function Normalize(s11, s22, s33, s12, s23, s31)
     }
     return [s11, s22, s33, s12, s23, s31];
 }
-
-async function loadCalibratedYSparams()
-{
+////////////////////////////////////////////////////////////////////////////////////
+//                               Handle YS params                                 //
+////////////////////////////////////////////////////////////////////////////////////
+async function loadCalibratedYSparams() {
     let paramPath = path.join(outputPath, 'CalibratedParameters.dat')
-    if (fs.existsSync(paramPath)) 
-    {
-        c = [];
+    if (fs.existsSync(paramPath)) {
+        let c = [];
         fs.createReadStream(paramPath)
             .pipe(csv())
             .on('data', (data) => {
                 c.push(parseFloat(data['values']));
             })
             .on('end', () => {
-                DisplayCalibratedParameters(c);
-                plotRandR('plot-window-3', 'plot-window-4', c);
-                plotContour('plot-window-2', c);
+                ys.Update(c).then(() => {
+                    DisplayCalibratedParameters(ys);
+                    UpdateAllPlots()
+                });
             });
     }
 }
-function DisplayCalibratedParameters(c)
-{
-    for(let i=0; i < c.length; ++i)
-    {
-        calibratedParametersTable.rows[i].cells[2].innerHTML = parseFloat(c[i]).toFixed(4);
+
+function DisplayCalibratedParameters(ys) {
+    for (let i = 0; i < ys.c.length; ++i) {
+        calibratedParametersTable.rows[i].cells[2].innerHTML = parseFloat(ys.c[i]).toFixed(4);
     }
 }
 
-function ClearDisplayCalibratedParameters()
-{
-    c = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8];
-    DisplayCalibratedParameters(c);
+function ClearDisplayCalibratedParameters() {
+    ys.Clear();
+    DisplayCalibratedParameters(ys);
+    UpdateAllPlots();
 }
-
-function yieldfunction(sx,sy,sz,sxy,syz,sxz,c)
-{
-    // YLD2004-18p yield surface f=(phi/4)^(1/m)-sigma_y
-
-    // Deviatoric stress
-    let x = sx - (sx + sy + sz) / 3.0;
-    let y = sy - (sx + sy + sz) / 3.0;
-    let z = sz - (sx + sy + sz) / 3.0;
-
-    let phi = calcPhi(x,y,z,sxy,syz,sxz,c)
-
-    // Evaluate f
-    return Math.pow((phi / 4.0), (1.0 / c[18])) - 1.0;
-}
-
-function calcPhi(x,y,z,sxy,syz,sxz,c)
-{
-    // Stress tensor quantities of s'
-    let x1 = -c[0] * y - c[1] * z;
-    let y1 = -c[2] * x - c[3] * z;
-    let z1 = -c[4] * x - c[5] * y;
-    let xy1 = c[6] * sxy;
-    let yz1 = c[7] * syz;
-    let xz1 = c[8] * sxz;
-
-    // Stress tensor quantities of s''
-    let x2 = -c[9] * y - c[10] * z;
-    let y2 = -c[11] * x - c[12] * z;
-    let z2 = -c[13] * x - c[14] * y;
-    let xy2 = c[15] * sxy;
-    let yz2 = c[16] * syz;
-    let xz2 = c[17] * sxz;
-
-    // Calculate eigenvalues of s' and s''
-    let A = new matrix.Matrix([[x1, xy1, xz1], [xy1, y1, yz1], [xz1, yz1, z1]]);
-    let B = new matrix.Matrix([[x2, xy2, xz2], [xy2, y2, yz2], [xz2, yz2, z2]]);
-    let eigA = new matrix.EigenvalueDecomposition(A);
-    let eigB = new matrix.EigenvalueDecomposition(B);
-    let s1 = eigA.realEigenvalues;
-    let s2 = eigB.realEigenvalues;
-
-    // Calculate phi
-    let phi = 0.0;
-    for (let i = 0; i < 3; ++i) {
-        for (let j = 0; j < 3; ++j) {
-            phi += Math.pow(Math.abs(s1[i] - s2[j]), c[18]);
-        }
-    }
-    return phi;
-}
-
-function Phi(x,y,z,sxy,syz,sxz,c)
-{
-    let phi = calcPhi(x,y,z,sxy,syz,sxz,c)
-
-    return 1.0/(Math.pow(phi/4.0, 1.0/c[18]));
-}
-
-function yieldgradient(sx,sy,sz,sxy,syz,sxz,c)
-{
-    let h=1e-5;
-    
-    let dfds11=(yieldfunction(sx+h,sy,sz,sxy,syz,sxz,c)-yieldfunction(sx-h,sy,sz,sxy,syz,sxz,c))/(2*h);
-    let dfds22=(yieldfunction(sx,sy+h,sz,sxy,syz,sxz,c)-yieldfunction(sx,sy-h,sz,sxy,syz,sxz,c))/(2*h);
-    let dfds33=(yieldfunction(sx,sy,sz+h,sxy,syz,sxz,c)-yieldfunction(sx,sy,sz-h,sxy,syz,sxz,c))/(2*h);
-    let dfds12=(yieldfunction(sx,sy,sz,sxy+0.5*h,syz,sxz,c)-yieldfunction(sx,sy,sz,sxy-0.5*h,syz,sxz,c))/(2*h);
-    let dfds23=(yieldfunction(sx,sy,sz,sxy,syz+0.5*h,sxz,c)-yieldfunction(sx,sy,sz,sxy,syz-0.5*h,sxz,c))/(2*h);
-    let dfds31=(yieldfunction(sx,sy,sz,sxy,syz,sxz+0.5*h,c)-yieldfunction(sx,sy,sz,sxy,syz,sxz-0.5*h,c))/(2*h);
-    
-    return new matrix.Matrix([[dfds11,dfds12,dfds31], [dfds12,dfds22,dfds23], [dfds31,dfds23,dfds33]]);
-
-}
-
-// Function to call so that the event loop is not blocked, i.e., cycle the event loop
-function setImmediatePromise() {
-    return new Promise((resolve) => {
-        setImmediate(() => resolve());
-    });
-}
-
-// Dark mode switch
-darkSwitch.addEventListener('change', (event)=>
-{
-    if(s11.length>0)
-        plotScatter('plot-window-1',s11,s22)
-    if(s11Contour.length>0)
-        plotYS('plot-window-2',s11Contour,s22Contour,s12Contour,s12Max);
-    if(angle.length>0)
-    {
-        plotNormStress('plot-window-3',angle,normStress);
-        plotLankford('plot-window-4',angle,Rvalue);
-    }
+////////////////////////////////////////////////////////////////////////////////////
+//                               Dark mode switch                                 //
+////////////////////////////////////////////////////////////////////////////////////
+darkSwitch.addEventListener('change', (event) => {
+    UpdateAllPlots();
 });
+
+async function UpdateAllPlots() {
+    plotter.plotScatter('plot-window-1', s11, s22)
+    plotter.plotYS('plot-window-2', ys);
+    plotter.plotNormStress('plot-window-3', ys);
+    plotter.plotLankford('plot-window-4', ys);
+}
