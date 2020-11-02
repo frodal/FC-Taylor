@@ -53,7 +53,7 @@ let isPlaneStress = inputData.planeStress.checked;
 let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
 let ys = new YieldSurface();
 const plotter = new Plotter(darkSwitch);
-setTimeout(ClearDisplayCalibratedParameters, 1000);
+window.addEventListener('load',()=>{setTimeout(ClearDisplayCalibratedParameters, 1000)});
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 Lisence check                                  //
