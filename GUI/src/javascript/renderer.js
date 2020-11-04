@@ -25,7 +25,6 @@ const outArea = document.getElementById('OutputData');
 const darkSwitch = document.getElementById('darkSwitch');
 const ImportSettingsBtn = document.getElementById('ImportSettingsBtn');
 const ExportSettingsBtn = document.getElementById('ExportSettingsBtn');
-const calibratedParametersTable = document.getElementById('calibratedParameters');
 
 const corePath = path.join(__dirname, '../../Core/FC-Taylor.exe');
 const calibratePath = path.join(__dirname, '../../Core/FC-Taylor-Calibrate.exe');
@@ -53,7 +52,7 @@ let isPlaneStress = inputData.planeStress.checked;
 let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
 let ys = new YieldSurface();
 const plotter = new Plotter(darkSwitch);
-window.addEventListener('load',()=>{setTimeout(ClearDisplayCalibratedParameters, 1000)});
+window.addEventListener('load', () => { setTimeout(UpdateAllPlots, 1000) });
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 Lisence check                                  //
@@ -222,17 +221,19 @@ function UpdateEnableSaveAndCalibrate() {
     saveCalibrationBtn.disabled = true;
     loadDiscreteYS();
     if (isDisabled)
-        ClearDisplayCalibratedParameters();
+        ClearCalibratedParameters();
 }
 function DeleteOutput() {
     let tempFilePath = path.join(outputPath, 'output.txt');
     if (fs.existsSync(tempFilePath))
         fs.unlinkSync(tempFilePath);
 }
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                                   On close                                     //
 ////////////////////////////////////////////////////////////////////////////////////
 ipcRenderer.send('core-temp', workDir)
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                           Calibrate yield surface                              //
 ////////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +247,7 @@ calibrateYsBtn.addEventListener('click', (event) => {
     startProgramBtn.disabled = true;
     calibrateYsBtn.disabled = true;
     saveCalibrationBtn.disabled = true;
-    ClearDisplayCalibratedParameters();
+    ClearCalibratedParameters();
     // Show calibrating roller
     calibRoller.classList.add('lds-roller');
     calibMsg.innerHTML = 'Calibrating';
@@ -261,7 +262,7 @@ calibrateYsBtn.addEventListener('click', (event) => {
             } else {
                 saveCalibrationBtn.disabled = false;
                 ipcRenderer.send('open-successfulCalibration-dialog');
-                loadCalibratedYSparams();
+                ys.loadCalibratedYSparams(outputPath, () => { UpdateAllPlots(); });
             }
             // Hide calibrating roller
             calibRoller.classList.remove('lds-roller');
@@ -278,6 +279,7 @@ calibrateYsBtn.addEventListener('click', (event) => {
         calibMsg.innerHTML = '';
     }
 });
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                               Save calibration                                 //
 ////////////////////////////////////////////////////////////////////////////////////
@@ -289,6 +291,7 @@ ipcRenderer.on('SaveCalibration', (event, savePath) => {
         fs.copyFileSync(path.join(outputPath, 'CalibratedParameters.dat'), savePath.toString());
     }
 });
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                              Handle Discrete YS                                //
 ////////////////////////////////////////////////////////////////////////////////////
@@ -335,38 +338,15 @@ function Normalize(s11, s22, s33, s12, s23, s31) {
     }
     return [s11, s22, s33, s12, s23, s31];
 }
-////////////////////////////////////////////////////////////////////////////////////
-//                               Handle YS params                                 //
-////////////////////////////////////////////////////////////////////////////////////
-async function loadCalibratedYSparams() {
-    let paramPath = path.join(outputPath, 'CalibratedParameters.dat')
-    if (fs.existsSync(paramPath)) {
-        let c = [];
-        fs.createReadStream(paramPath)
-            .pipe(csv())
-            .on('data', (data) => {
-                c.push(parseFloat(data['values']));
-            })
-            .on('end', () => {
-                ys.Update(c).then(() => {
-                    DisplayCalibratedParameters(ys);
-                    UpdateAllPlots()
-                });
-            });
-    }
-}
 
-function DisplayCalibratedParameters(ys) {
-    for (let i = 0; i < ys.c.length; ++i) {
-        calibratedParametersTable.rows[i].cells[2].innerHTML = parseFloat(ys.c[i]).toFixed(4);
-    }
-}
-
-function ClearDisplayCalibratedParameters() {
+////////////////////////////////////////////////////////////////////////////////////
+//                                Clear YS params                                 //
+////////////////////////////////////////////////////////////////////////////////////
+function ClearCalibratedParameters() {
     ys.Clear();
-    DisplayCalibratedParameters(ys);
     UpdateAllPlots();
 }
+
 ////////////////////////////////////////////////////////////////////////////////////
 //                               Dark mode switch                                 //
 ////////////////////////////////////////////////////////////////////////////////////

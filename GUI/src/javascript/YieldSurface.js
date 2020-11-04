@@ -2,6 +2,9 @@
 //                                 Yield Surface                                  //
 ////////////////////////////////////////////////////////////////////////////////////
 
+const path = require('path');
+const fs = require('fs');
+const csv = require('csv-parser');
 const matrix = require('ml-matrix');
 
 const { linspace, setImmediatePromise } = require('./Utils');
@@ -9,11 +12,13 @@ const { linspace, setImmediatePromise } = require('./Utils');
 class YieldSurface {
 
     constructor() {
+        this.calibratedParametersTable = document.getElementById('calibratedParameters');
         this.Clear();
     }
 
     Clear() {
         this.c = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8];
+        this.DisplayCalibratedParameters();
         this.normStress = [];
         this.Rvalue = [];
         this.angle = [];
@@ -25,6 +30,7 @@ class YieldSurface {
 
     async Update(c = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8]) {
         this.c = c;
+        this.DisplayCalibratedParameters();
         await this.CalcRandR();
         await this.CalcContour();
     }
@@ -184,6 +190,30 @@ class YieldSurface {
             }
         }
         return sxy[n];
+    }
+
+    async loadCalibratedYSparams(outputPath, OnFinished) {
+        let paramPath = path.join(outputPath, 'CalibratedParameters.dat')
+        if (fs.existsSync(paramPath)) {
+            let c = [];
+            fs.createReadStream(paramPath)
+                .pipe(csv())
+                .on('data', (data) => {
+                    c.push(parseFloat(data['values']));
+                })
+                .on('end', () => {
+                    this.Update(c).then(() => {
+                        OnFinished();
+                    });
+                });
+        }
+    }
+
+    async DisplayCalibratedParameters() {
+        if (this.calibratedParametersTable)
+            for (let i = 0; i < this.c.length; ++i) {
+                this.calibratedParametersTable.rows[i].cells[2].innerHTML = parseFloat(this.c[i]).toFixed(4);
+            }
     }
 }
 
