@@ -217,5 +217,66 @@ class YieldSurface {
     }
 }
 
+class DiscreteYieldSurface {
+
+    constructor() {
+        this.Clear();
+    }
+
+    Clear() {
+        this.s11 = [];
+        this.s22 = [];
+        this.s33 = [];
+        this.s12 = [];
+        this.s23 = [];
+        this.s31 = [];
+    }
+
+    async LoadDiscreteYS(outputPath, OnFinished) {
+        let filePath = path.join(outputPath, 'output.txt')
+        if (fs.existsSync(filePath)) {
+            this.Clear();
+            fs.createReadStream(filePath)
+                .pipe(csv())
+                .on('data', (data) => {
+                    this.s11.push(parseFloat(data[" S11"]));
+                    this.s22.push(parseFloat(data[" S22"]));
+                    this.s33.push(parseFloat(data[" S33"]));
+                    this.s12.push(parseFloat(data[" S12"]));
+                    this.s23.push(parseFloat(data[" S23"]));
+                    this.s31.push(parseFloat(data[" S31"]));
+                })
+                .on('end', () => {
+                    this.Normalize().then(() => {
+                        OnFinished();
+                    });
+                });
+        }
+    }
+
+    async Normalize() {
+        // Normalizing the yield stress based on s11=1 at s22=0, s33=0
+        let k = 0;
+        let er = Infinity;
+        for (let i = 0; i < this.s11.length; ++i) {
+            let temp = Math.pow(this.s22[i], 2) + Math.pow(this.s33[i], 2) + 2 * Math.pow(this.s12[i], 2) + 2 * Math.pow(this.s23[i], 2) + 2 * Math.pow(this.s31[i], 2);
+            if (temp < er) {
+                k = i;
+                er = temp;
+            }
+        }
+        let s0 = Math.sqrt(0.5 * Math.pow(this.s11[k] - this.s22[k], 2) + 0.5 * Math.pow(this.s22[k] - this.s33[k], 2) + 0.5 * Math.pow(this.s33[k] - this.s11[k], 2) + 3 * Math.pow(this.s12[k], 2) + 3 * Math.pow(this.s23[k], 2) + 3 * Math.pow(this.s31[k], 2));
+        for (let i = 0; i < this.s11.length; ++i) {
+            this.s11[i] /= s0;
+            this.s22[i] /= s0;
+            this.s33[i] /= s0;
+            this.s12[i] /= s0;
+            this.s23[i] /= s0;
+            this.s31[i] /= s0;
+        }
+    }
+}
+
 // Exports
 exports.YieldSurface = YieldSurface;
+exports.DiscreteYieldSurface = DiscreteYieldSurface;

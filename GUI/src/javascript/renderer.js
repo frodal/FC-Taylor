@@ -6,11 +6,10 @@ const { ipcRenderer } = require('electron');
 const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const csv = require('csv-parser');
 
 const { FCTaylorProperties } = require('./FCTaylorProperties');
 const { Plotter } = require('./Plotter');
-const { YieldSurface } = require('./YieldSurface');
+const { YieldSurface, DiscreteYieldSurface } = require('./YieldSurface');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
 const terminateProgramBtn = document.getElementById('TerminateProgramBtn');
@@ -49,7 +48,7 @@ const inputData = new FCTaylorProperties();
 let isPlaneStress = inputData.planeStress.checked;
 
 // Plot variables
-let s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
+let DiscreteYS = new DiscreteYieldSurface();
 let ys = new YieldSurface();
 const plotter = new Plotter(darkSwitch);
 window.addEventListener('load', () => { setTimeout(UpdateAllPlots, 1000) });
@@ -219,7 +218,7 @@ function UpdateEnableSaveAndCalibrate() {
     saveResultBtn.disabled = isDisabled
     calibrateYsBtn.disabled = isDisabled
     saveCalibrationBtn.disabled = true;
-    loadDiscreteYS();
+    DiscreteYS.LoadDiscreteYS(outputPath, () => { UpdateAllPlots(); });
     if (isDisabled)
         ClearCalibratedParameters();
 }
@@ -293,53 +292,6 @@ ipcRenderer.on('SaveCalibration', (event, savePath) => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
-//                              Handle Discrete YS                                //
-////////////////////////////////////////////////////////////////////////////////////
-function loadDiscreteYS() {
-    let filePath = path.join(outputPath, 'output.txt')
-    if (fs.existsSync(filePath)) {
-        s11 = [], s22 = [], s33 = [], s12 = [], s23 = [], s31 = [];
-        fs.createReadStream(filePath)
-            .pipe(csv())
-            .on('data', (data) => {
-                s11.push(parseFloat(data[" S11"]));
-                s22.push(parseFloat(data[" S22"]));
-                s33.push(parseFloat(data[" S33"]));
-                s12.push(parseFloat(data[" S12"]));
-                s23.push(parseFloat(data[" S23"]));
-                s31.push(parseFloat(data[" S31"]));
-            })
-            .on('end', () => {
-                [s11, s22, s33, s12, s23, s31] = Normalize(s11, s22, s33, s12, s23, s31);
-                UpdateAllPlots();
-            });
-    }
-}
-
-function Normalize(s11, s22, s33, s12, s23, s31) {
-    // Normalizing the yield stress based on s11=1 at s22=0, s33=0
-    let k = 0;
-    let er = Infinity;
-    for (let i = 0; i < s11.length; ++i) {
-        let temp = Math.pow(s22[i], 2) + Math.pow(s33[i], 2) + 2 * Math.pow(s12[i], 2) + 2 * Math.pow(s23[i], 2) + 2 * Math.pow(s31[i], 2);
-        if (temp < er) {
-            k = i;
-            er = temp;
-        }
-    }
-    let s0 = Math.sqrt(0.5 * Math.pow(s11[k] - s22[k], 2) + 0.5 * Math.pow(s22[k] - s33[k], 2) + 0.5 * Math.pow(s33[k] - s11[k], 2) + 3 * Math.pow(s12[k], 2) + 3 * Math.pow(s23[k], 2) + 3 * Math.pow(s31[k], 2));
-    for (let i = 0; i < s11.length; ++i) {
-        s11[i] /= s0;
-        s22[i] /= s0;
-        s33[i] /= s0;
-        s12[i] /= s0;
-        s23[i] /= s0;
-        s31[i] /= s0;
-    }
-    return [s11, s22, s33, s12, s23, s31];
-}
-
-////////////////////////////////////////////////////////////////////////////////////
 //                                Clear YS params                                 //
 ////////////////////////////////////////////////////////////////////////////////////
 function ClearCalibratedParameters() {
@@ -355,7 +307,7 @@ darkSwitch.addEventListener('change', (event) => {
 });
 
 async function UpdateAllPlots() {
-    plotter.plotScatter('plot-window-1', s11, s22)
+    plotter.plotScatter('plot-window-1', DiscreteYS.s11, DiscreteYS.s22)
     plotter.plotYS('plot-window-2', ys);
     plotter.plotNormStress('plot-window-3', ys);
     plotter.plotLankford('plot-window-4', ys);
