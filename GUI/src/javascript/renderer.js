@@ -55,7 +55,7 @@ const plotter = new Plotter(darkSwitch);
 window.addEventListener('load', () => { setTimeout(UpdateAllPlots, 1000) });
 
 ////////////////////////////////////////////////////////////////////////////////////
-//                                 Lisence check                                  //
+//                                 License check                                  //
 ////////////////////////////////////////////////////////////////////////////////////
 let LicenseOK = false;
 ipcRenderer.on('LicenseCheck', (event, value) => {

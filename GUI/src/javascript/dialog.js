@@ -73,15 +73,15 @@ ipcMain.on('open-errorKilled-dialog', (event, errorCode) => {
     if (errorCode) {
         dialog.showErrorBox('Error', parseError(errorCode));
     } else {
-        dialog.showErrorBox('Error', 'An error occured while executing the analysis!\nSee the ouput for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
+        dialog.showErrorBox('Error', 'An error occurred while executing the analysis!\nSee the output for details.\nPlease report this issue by going to help and Report Issue.\nError code: 2');
     }
 });
 ipcMain.on('open-errorCalibration-dialog', (event) => {
-    dialog.showErrorBox('Error', 'An error occured during calibration!\nPlease report this issue by going to help and Report Issue.\nError code: 3');
+    dialog.showErrorBox('Error', 'An error occurred during calibration!\nPlease report this issue by going to help and Report Issue.\nError code: 3');
 });
 
 function parseError(errorCode) {
-    let msg = 'An error occured while executing the analysis!\nError code: ' + errorCode;
+    let msg = 'An error occurred while executing the analysis!\nError code: ' + errorCode;
     switch (errorCode) {
         case 11:
             msg += '\nMaximum iterations reached, please check your input values.';

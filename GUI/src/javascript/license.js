@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////
-//                                 Lisence check                                  //
+//                                 License check                                  //
 ////////////////////////////////////////////////////////////////////////////////////
 const { app, dialog, BrowserWindow, ipcMain } = require('electron');
 const bent = require('bent')
@@ -13,7 +13,7 @@ async function CheckLicense() {
         .then(value => {
             ValidateLicense(value);
             if (!LicenseOK) {
-                dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributer.\nContact: bjorn.h.frodal@ntnu.no');
+                dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributor.\nContact: bjorn.h.frodal@ntnu.no');
                 app.quit();
             }
         }).catch(error => {
@@ -125,7 +125,7 @@ function openVersionDialog(uptoDate) {
 // Check license request from the renderer process
 ipcMain.on('CheckLicensePlease', CheckLicense);
 
-// Repetatly check license every 10 min
+// Repeatedly check license every 10 min
 setInterval(CheckLicense, 600000);
 
 // Exports
