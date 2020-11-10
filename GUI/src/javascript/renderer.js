@@ -6,6 +6,7 @@ const { ipcRenderer } = require('electron');
 const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 
 const { FCTaylorProperties } = require('./FCTaylorProperties');
 const { Plotter } = require('./Plotter');
@@ -229,9 +230,14 @@ function DeleteOutput() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-//                                   On close                                     //
+//                             On close and reload                                //
 ////////////////////////////////////////////////////////////////////////////////////
-ipcRenderer.send('core-temp', workDir)
+window.addEventListener('beforeunload', () => {
+    // Delete the working directory
+    if (fs.existsSync(workDir)) {
+        fsExtra.remove(workDir);
+    }
+});
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                           Calibrate yield surface                              //
