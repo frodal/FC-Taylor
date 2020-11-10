@@ -6,12 +6,12 @@ const bent = require('bent')
 const getJSON = bent('json')
 
 const LicenseLocation = 'http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.json';
-let LicenseOK = false;
 
 async function CheckLicense() {
     getJSON(LicenseLocation)
         .then(value => {
-            ValidateLicense(value);
+            let LicenseOK = ValidateLicense(value.version);
+            SendToRenderer(LicenseOK);
             if (!LicenseOK) {
                 dialog.showErrorBox('Error', 'The version of the program you are using is deprecated.\nPlease request a new version from the distributor.\nContact: bjorn.h.frodal@ntnu.no');
                 app.quit();
@@ -34,30 +34,26 @@ async function CheckLicense() {
         });
 }
 
-function ValidateLicense(value) {
-    let newestVersion = value.version.split('.')
+function ValidateLicense(version) {
+    let newestVersion = version.split('.')
     let currentVersion = app.getVersion().split('.');
     if (newestVersion.length !== currentVersion.length) {
-        SendToRenderer(false);
-        return
+        return false;
     }
     for (let i = 0; i < currentVersion.length; ++i) {
         newestVersion[i] = parseFloat(newestVersion[i])
         currentVersion[i] = parseFloat(currentVersion[i])
         if (newestVersion[i] > currentVersion[i]) {
-            SendToRenderer(false);
-            return
+            return false;
         }
         else if (newestVersion[i] < currentVersion[i]) {
-            SendToRenderer(true);
-            return
+            return true;
         }
     }
-    SendToRenderer(true);
+    return true;
 }
 
 function SendToRenderer(value) {
-    LicenseOK = value;
     let win = BrowserWindow.getFocusedWindow();
     if (win) {
         win.send('LicenseCheck', value);
@@ -67,25 +63,8 @@ function SendToRenderer(value) {
 async function CheckVersion() {
     getJSON(LicenseLocation)
         .then(value => {
-            let newestVersion = value.newestVersion.split('.')
-            let currentVersion = app.getVersion().split('.');
-            if (newestVersion.length !== currentVersion.length) {
-                openVersionDialog(false);
-                return
-            }
-            for (let i = 0; i < currentVersion.length; ++i) {
-                newestVersion[i] = parseFloat(newestVersion[i])
-                currentVersion[i] = parseFloat(currentVersion[i])
-                if (newestVersion[i] > currentVersion[i]) {
-                    openVersionDialog(false);
-                    return
-                }
-                else if (newestVersion[i] < currentVersion[i]) {
-                    openVersionDialog(true);
-                    return
-                }
-            }
-            openVersionDialog(true);
+            let versionOK = ValidateLicense(value.newestVersion);
+            openVersionDialog(versionOK);
         }).catch(error => {
             const options =
             {
@@ -129,4 +108,5 @@ ipcMain.on('CheckLicensePlease', CheckLicense);
 setInterval(CheckLicense, 600000);
 
 // Exports
+exports.CheckLicense = CheckLicense;
 exports.CheckVersion = CheckVersion;
