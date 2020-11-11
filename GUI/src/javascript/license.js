@@ -4,6 +4,7 @@
 const { app, dialog, BrowserWindow, ipcMain } = require('electron');
 const bent = require('bent')
 const getJSON = bent('json')
+const ms = require('ms')
 
 const LicenseLocation = 'http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.json';
 
@@ -60,11 +61,11 @@ function SendToRenderer(value) {
     }
 }
 
-async function CheckVersion() {
+async function CheckVersion(displayDialogOnUptoDate = true) {
     getJSON(LicenseLocation)
         .then(value => {
             let versionOK = ValidateLicense(value.newestVersion);
-            openVersionDialog(versionOK);
+            openVersionDialog(versionOK, displayDialogOnUptoDate);
         }).catch(error => {
             const options =
             {
@@ -77,16 +78,18 @@ async function CheckVersion() {
         });
 }
 
-function openVersionDialog(uptoDate) {
+function openVersionDialog(uptoDate, displayDialogOnUptoDate) {
     if (uptoDate) {
-        const options =
-        {
-            type: "info",
-            title: "You're all good",
-            message: "You've got the latest version of " + app.name + "; thanks for staying on the ball",
-            buttons: ['Ok']
-        };
-        dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+        if (displayDialogOnUptoDate) {
+            const options =
+            {
+                type: "info",
+                title: "You're all good",
+                message: "You've got the latest version of " + app.name + "; thanks for staying on the ball",
+                buttons: ['Ok']
+            };
+            dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+        }
     } else {
         const options =
         {
@@ -101,12 +104,15 @@ function openVersionDialog(uptoDate) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-// Check license request from the renderer process
-ipcMain.on('CheckLicensePlease', CheckLicense);
+function Init() {
+    // Check license request from the renderer process
+    ipcMain.on('CheckLicensePlease', CheckLicense);
 
-// Repeatedly check license every 10 min
-setInterval(CheckLicense, 600000);
+    // Repeatedly check license every 10 minutes
+    setInterval(CheckLicense, ms('10 minutes'));
+}
 
 // Exports
+exports.Init = Init;
 exports.CheckLicense = CheckLicense;
 exports.CheckVersion = CheckVersion;

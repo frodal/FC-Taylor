@@ -1,5 +1,7 @@
 // Handle installation, update and uninstall events
 if (require('electron-squirrel-startup')) return;
+// update application
+require('./Updater')({ logger: require('electron-log') })
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
@@ -74,4 +76,4 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 require('./dialog');
-require('./license');
+require('./license').Init();
