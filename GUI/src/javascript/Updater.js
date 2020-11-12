@@ -51,6 +51,7 @@ function initUpdater(opts) {
     autoUpdater.on('error', err => {
         log('updater error')
         log(err)
+        LicenseChecker.CheckVersion(false);
     })
 
     autoUpdater.on('checking-for-update', () => {
