@@ -145,7 +145,8 @@ def main():
     shouldPlot = args.plot
 
     # Creates the tests
-    tests = [GUITest(name) for name in ['AA6060', 'AA6082.25', 'AA6082.50']]
+    tests = [GUITest(name)
+             for name in ['Simple', 'AA6060', 'AA6082.25', 'AA6082.50']]
 
     # Do stuff
     if action == 'post':

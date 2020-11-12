@@ -1,0 +1,11 @@
+**
+**
+** This is the FC-Taylor input file
+**
+**
+*PROPS
+**    C11,      C12,      C44,   g0_dot,        m,   tau0_c,        q,    hflag,   th1/h0, tau1/t_s,    th2/a,     tau2
+ 106430.0,  60350.0,  28210.0,    0.001,     0.01,     80.0,      1.4,        2,   411.25,     88.7,    1.354,      0.0
+*DEF
+** planestress, centro,  npts,   epsdot,      wpc,    ncpus
+        1,        1,       20,   0.0001,     0.30,        0
