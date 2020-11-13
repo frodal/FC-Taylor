@@ -6,6 +6,9 @@ require('./Updater')({ logger: require('electron-log') })
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+const ToolbarMenu = require('./mainmenu');
+const LicenseChecker = require('./license');
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -48,7 +51,7 @@ function createWindow() {
     // Sets the application menu, i.e., 'File', 'Edit' etc. 
     // Passing null will suppress the default menu. On Windows and Linux, 
     // this has the additional effect of removing the menu bar from the window.
-    require('./mainmenu')
+    ToolbarMenu.CreateMenu();
 }
 
 // This method will be called when Electron has finished
@@ -76,4 +79,4 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 require('./dialog');
-require('./license').Init();
+LicenseChecker.Init();

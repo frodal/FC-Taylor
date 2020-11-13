@@ -61,7 +61,7 @@ let LicenseOK = false;
 ipcRenderer.on('LicenseCheck', (event, value) => {
     LicenseOK = value;
 });
-ipcRenderer.send('CheckLicensePlease');
+window.addEventListener('load', () => { ipcRenderer.send('CheckLicensePlease'); });
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                           Setup working directory                              //
