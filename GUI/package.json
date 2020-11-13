@@ -21,14 +21,14 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "npm run build-win && npm run build-linux64 && npm run build-darwin64",
+    "build": "npm run build-win64 && npm run build-linux64 && npm run build-darwin64",
     "build-debug": "set DEBUG=electron-packager && npm run build",
     "build-win": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=all --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
     "build-win32": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=ia32 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
     "build-win64": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=x64 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
     "build-linux64": "electron-packager ./ --overwrite --asar --prune=true --platform=linux --arch=x64 --no-tmpdir --icon=assets/icons/png/1024x1024.png --out=../GUIbinaries/",
     "build-darwin64": "electron-packager ./ --overwrite --asar --prune=true --platform=darwin --arch=x64 --no-tmpdir --icon=assets/icons/mac/icon.icns --out=../GUIbinaries/ --darwinDarkModeSupport=true",
-    "setup": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer/ --icon=./assets/icons/win/icon.ico --noMsi",
+    "setup": "npm run setup-win64",
     "setup-win32": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer-ia32/ --icon=./assets/icons/win/icon.ico --noMsi",
     "setup-win64": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-x64/ --dest=../GUIbinaries/installer-x64/ --icon=./assets/icons/win/icon.ico --noMsi",
     "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64",
@@ -37,18 +37,22 @@
     "gen-icon-mac": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
   },
   "dependencies": {
-    "bent": "^7.3.7",
+    "bent": "^7.3.12",
     "csv-parser": "^2.3.3",
+    "electron-is-dev": "^1.2.0",
+    "electron-log": "^4.3.0",
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^9.0.1",
-    "mathjax": "^3.0.5",
-    "ml-matrix": "^6.5.0",
-    "plotly.js-dist": "^1.54.5"
+    "is-url": "^1.2.4",
+    "mathjax": "^3.1.2",
+    "ml-matrix": "^6.5.3",
+    "ms": "^2.1.2",
+    "plotly.js-dist": "^1.57.1"
   },
   "devDependencies": {
-    "electron": "^8.3.4",
+    "electron": "^10.1.5",
     "electron-installer-windows": "^3.0.0",
-    "electron-packager": "^15.0.0",
+    "electron-packager": "^15.1.0",
     "icon-gen": "^2.0.0"
   }
 }

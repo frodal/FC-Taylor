@@ -18,7 +18,7 @@ function GetLicense() {
     return licenseString;
 };
 
-const template = [
+function CreateMenu(template = [
     {
         role: 'window',
         submenu: [
@@ -99,7 +99,10 @@ const template = [
             }
         ]
     }
-];
+]) {
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+}
 
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
+// Exports
+exports.CreateMenu = CreateMenu;

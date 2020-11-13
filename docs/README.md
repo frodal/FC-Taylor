@@ -1,6 +1,6 @@
 # FC-Taylor Program
 
-A full constraint (FC) Taylor program useful for generating discrete yield surface data. The program uses the hypoelastic implementation in the SIMLab Crystal Mechanics Model (SCMM-hypo) for solving the single crystal response of each individual grain. Download the latest version of the FC-Taylor application [here](https://github.com/frodal/FC-Taylor/releases).
+A full constraint (FC) Taylor program useful for generating discrete yield surface data. The discrete yield surface data can further be used to calibrate the phenomenological Yld2004-18p yield surface with the application. The program uses the hypoelastic implementation in the SIMLab Crystal Mechanics Model (SCMM-hypo) for solving the single crystal response of each individual grain. Download the latest version of the FC-Taylor application [here](https://github.com/frodal/FC-Taylor/releases).
 
 ## Usage
 
@@ -27,17 +27,9 @@ To build the FC-Taylor application follow these simple steps.
 4. Install Python 3 and pip3 (`sudo apt-get install python3 pip3`)
 5. Run the `BuildProjectLinux.sh` script, by using the command line, to compile and build the application for Linux x64
 
-### Compiling and building for MacOS on MacOS
+### Compiling and building for MacOS on MacOS (darwin)
 
-See the points above, under the Linux build information.
-
-### Compiling only the Fortran Source
-
-For the GNU Fortran compiler (gfortran), compile the Fortran cource with the compiler flags `-fopenmp` and `-cpp`. For the Intel Visual Fortran compiler (ifort), compile the source with the compiler flags `-openmp` and `-fpp`. Remember to increase the Stack size with `-Fn` where `n` is the number of bytes, e.g., `ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe -O3`.
-
-Note that lines starting with `!$` in the Fortran source files are compiler directives to use OpenMP, i.e., multi-threading.
-
-To circumvent issues with memory (the stack size) and OpenMP, the Fortran source files should be compiled into an x64 executable.
+Your on your own, see the Linux build information for tips.
 
 ### Update GUI dependencies
 
@@ -45,6 +37,7 @@ To circumvent issues with memory (the stack size) and OpenMP, the Fortran source
 * Update only [Electron](https://electronjs.org/docs/tutorial/first-app#installing-electron) by running `npm install --save-dev electron@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-packager](https://github.com/electron-userland/electron-packager) by running `npm install --save-dev electron-packager@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-installer-windows](https://github.com/electron-userland/electron-installer-windows) by running `npm install --save-dev electron-installer-windows@latest` using the command line in the `FC-Taylor/GUI` directory
+* etc.
 
 See also the [GUIwrapper](https://github.com/frodal/GUIwrapper) repository
 

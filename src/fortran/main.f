@@ -32,7 +32,7 @@
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock,Nang, UTflag
       integer OMP_get_thread_num
-      parameter(nprops=16,NSTATEV=28)
+      parameter(nprops=16,NSTATEV=34)
       real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
 !-----------------------------------------------------------------------
@@ -199,14 +199,13 @@
 !-----------------------------------------------------------------------
 !        CALL UMAT
 !-----------------------------------------------------------------------
-         !DIR$ FORCEINLINE RECURSIVE
+!DIR$ FORCEINLINE RECURSIVE
          CALL Hypo(stressNew,stateNew,defgradNew,
      +               stressOld,stateOld,defgradOld,dt,props,
      +               nblock,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
 !        UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
-         STRESSOLD = STRESSNEW
          STATEOLD = STATENEW
          defgradOld = defgradNew
          do i=1,nblock
