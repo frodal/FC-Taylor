@@ -1,8 +1,24 @@
 !-----------------------------------------------------------------------
-!     For gfortran, compile the program with -fopenmp 
+!-----------------------------------------------------------------------
+!
+!                         FC-Taylor program
+!
+!                       by Bjorn Hakon Frodal
+!                       bjorn.h.frodal@ntnu.no
+!
+!                            Copyright (c)
+!                         Bjorn Hakon Frodal
+!               Structural Impact Laboratory (SIMLab),
+!                Department of Structural Engineering,
+!           Norwegian University of Science and Technology,
+!                         Trondheim, Norway.
+!
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     For gfortran, compile the program with -fopenmp
 !     For ifort, compile the program with -openmp
-!     Remember to increase the Stack size with -Fn where n is the 
-!     number of bytes, e.g., 
+!     Remember to increase the Stack size with -Fn where n is the
+!     number of bytes, e.g.,
 !     ifort -openmp -F1000000000 main.f -o ./GUI/Core/FC-Taylor.exe -O3
 !     Note that lines starting with !$ are compiler directives
 !     for using, e.g., OpenMP, i.e., multi-threading
@@ -27,7 +43,7 @@
      .                  STATEOLD(:,:), STATENEW(:,:), defgradNew(:,:),
      .                  defgradOld(:,:), Dissipation(:), Dij(:,:),
      .                  sigma(:,:)
-      real*8 sigmaUT(7)
+      real*8 sigmaUT(7),taylorFactor
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock,Nang, UTflag
@@ -123,7 +139,8 @@
       if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
         UTflag = 1
         call uniaxialTension(nblock,nstatev,nprops,niter,
-     .                       ang,props,dt,wp,epsdot,sigmaUT)
+     .                       ang,props,dt,wp,epsdot,sigmaUT,
+     .                       taylorFactor)
         ! Superpose a hydrostatic stress so that s33=0
         ! Yielding is not dependent upon hydrostatic stress!
         sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
@@ -165,7 +182,7 @@
       do while((work.lt.wp).and.(ITER.lt.NITER))
         iter = iter+1
 !-----------------------------------------------------------------------
-!        Extract strain increments 
+!        Extract strain increments
 !-----------------------------------------------------------------------
          do i=1,nblock
             defgradNew(i,1) = defgradOld(i,1)*(Dij(km,1)*dt+one)
@@ -221,7 +238,7 @@
         if((currentTime.ge.(printTime+printDelay*real(ncpus))).or.
      .      (iComplete+1.eq.ndef))then
             printTime = printTime+printDelay*real(ncpus)
-            write(6,*) 'Deformation points completed: ',
+            write(6,*) 'Deformation points completed:',
      .                  iComplete+1, ' of ', ndef
         endif
 !-----------------------------------------------------------------------
@@ -254,7 +271,7 @@
 !-----------------------------------------------------------------------
 !     Write the result to file
 !-----------------------------------------------------------------------
-      open (unit = 2, file = "./Output/output.txt")
+      open (unit = 2, file = './Output/output.txt')
       write(2,*) 'S11, S22, S33, S12, S23, S31, wp'
       if (centro.eq.1)then
         write(2,98) sigmaUT(1),sigmaUT(2),sigmaUT(3),sigmaUT(4),
@@ -265,7 +282,7 @@
           write(2,98) sigma(km,1),sigma(km,2),sigma(km,3),sigma(km,4),
      +                sigma(km,5),sigma(km,6), sigma(km,7)
           write(2,98) -sigma(km,1),-sigma(km,2),-sigma(km,3),
-     +                -sigma(km,4),-sigma(km,5),-sigma(km,6), 
+     +                -sigma(km,4),-sigma(km,5),-sigma(km,6),
      +                 sigma(km,7)
         enddo
       else
@@ -286,6 +303,7 @@
      &           DATE1(1:4),' at ',TIME1(1:2),':',TIME1(3:4),':',
      &           TIME1(5:6)
       write(6,*) '----------------------------------------------------'
+      write(6,*) 'Calculated Taylor factor (RD/ED):', taylorFactor
 !-----------------------------------------------------------------------
 !     Deallocate allocated memory
 !-----------------------------------------------------------------------

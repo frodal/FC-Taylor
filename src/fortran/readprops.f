@@ -147,23 +147,23 @@
       write(6,*) '|                      INPUT                       |'
       write(6,*) '|                                                  |'
       write(6,*) '----------------------------------------------------'
-      write(6,*) 'C11        = ',props(1)
-      write(6,*) 'C12        = ',props(2)
-      write(6,*) 'C44        = ',props(3)
-      write(6,*) 'gamma0_dot = ',props(4)
-      write(6,*) 'm          = ',props(5)
-      write(6,*) 'tau0_c     = ',props(6)
-      write(6,*) 'q          = ',props(7)
-      write(6,*) 'hflag      = ',props(12)
+      write(6,*) 'C11        =',props(1)
+      write(6,*) 'C12        =',props(2)
+      write(6,*) 'C44        =',props(3)
+      write(6,*) 'gamma0_dot =',props(4)
+      write(6,*) 'm          =',props(5)
+      write(6,*) 'tau0_c     =',props(6)
+      write(6,*) 'q          =',props(7)
+      write(6,*) 'hflag      =',props(12)
       if(nint(props(12)).eq.1)then
-        write(6,*) 'theta1     = ',props(13)
-        write(6,*) 'tau1       = ',props(14)
-        write(6,*) 'theta2     = ',props(15)
-        write(6,*) 'tau2       = ',props(16)
+        write(6,*) 'theta1     =',props(13)
+        write(6,*) 'tau1       =',props(14)
+        write(6,*) 'theta2     =',props(15)
+        write(6,*) 'tau2       =',props(16)
       elseif(nint(props(12)).eq.2)then
-        write(6,*) 'h0         = ',props(13)
-        write(6,*) 'tau_s      = ',props(14)
-        write(6,*) 'a          = ',props(15)
+        write(6,*) 'h0         =',props(13)
+        write(6,*) 'tau_s      =',props(14)
+        write(6,*) 'a          =',props(15)
       else
         write(6,*) '!! Error'
         write(6,*) 'Unknown hardening model'
@@ -173,8 +173,8 @@
       endif
       write(6,*) '----------------------------------------------------'
       write(6,*) 'Imposed strain rate: ',epsdot
-      write(6,*) 'Maximum plastic work: ',wp
-      write(6,*) 'Resolution of strain space grid, npts = ',npts
+      write(6,*) 'Maximum plastic work:',wp
+      write(6,*) 'Resolution of strain space grid, npts =',npts
       if(planestress.eq.1)then
         write(6,*) 'Stress space dimension: 2D'
       else
@@ -197,7 +197,7 @@
 !$    else
 !$      ncpus = tmpcpu
 !$    endif
-      write(6,*) 'Number of threads/cpus used: ',ncpus
+      write(6,*) 'Number of threads/cpus used:',ncpus
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
       return

@@ -6,19 +6,21 @@
 ! 
 !-----------------------------------------------------------------------
       subroutine uniaxialTension(nblock,nstatev,nprops,niter,
-     .                           ang,props,dt,wp,epsdot,sigma)
+     .                           ang,props,dt,wp,epsdot,sigma,
+     .                           taylorFactor)
 !-----------------------------------------------------------------------
       implicit none
 !-----------------------------------------------------------------------
       integer, intent(in) :: nblock, nstatev, nprops, niter
       real*8, intent(in) :: ang(nblock,4), props(nprops), dt, wp,
      .                      epsdot
-      real*8, intent(out) :: sigma(7)
+      real*8, intent(out) :: sigma(7), taylorFactor
 !     Local variables
       real*8 work, stressold(nblock,6), stateold(nblock,nstatev),
      .       defgradold(nblock,9), defgradNew(nblock,9), 
      .       stressNew(nblock,6), stateNew(nblock,nstatev),
-     .       Dissipation(nblock), D(6), ddsdde(6,6), ddedds(6,6)
+     .       Dissipation(nblock), D(6), ddsdde(6,6), ddedds(6,6),
+     .       tau_c_avg
       real*8 zero, half, one, two
       integer i, k, iter
       parameter(zero=0.d0, half=5.d-1, one=1.d0, two=2.d0)
@@ -92,8 +94,15 @@
         stateOld   = stateNew
         defgradOld = defgradNew
         work = work+sigma(7)
-        sigma(7) = work
       enddo
+      sigma(7) = work
+      do k=13,24
+        do i=1,nblock
+          tau_c_avg = tau_c_avg + stateNew(i,k)*ang(i,4)
+        enddo
+      enddo
+      tau_c_avg = tau_c_avg/12.d0
+      taylorFactor = sigma(1)/tau_c_avg
       if (iter.ge.niter) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'

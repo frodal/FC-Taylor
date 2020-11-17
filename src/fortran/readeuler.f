@@ -236,8 +236,8 @@
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       write(6,*) 'Euler Angles read successfully'
-      write(6,*) 'Number of orientations read: ',Nang
-      write(6,*) 'Number of unique orientations: ',NuniqueAng
+      write(6,*) 'Number of orientations read:  ',Nang
+      write(6,*) 'Number of unique orientations:',NuniqueAng
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
       if(NuniqueAng.eq.Nang)then
