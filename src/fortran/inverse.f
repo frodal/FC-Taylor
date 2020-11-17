@@ -9,10 +9,10 @@
 ! output ...
 ! c(n,n) - inverse matrix of A
 ! comments ...
-! the original matrix a(n,n) will be destroyed 
+! the original matrix a(n,n) will be destroyed
 ! during the calculation
 !===========================================================
-      implicit none 
+      implicit none
       integer n
       double precision a(n,n), c(n,n)
       double precision L(n,n), U(n,n), b(n), d(n), x(n)
@@ -36,7 +36,7 @@
         end do
       end do
 
-! Step 2: prepare L and U matrices 
+! Step 2: prepare L and U matrices
 ! L matrix is a matrix of the elimination coefficient
 ! + the diagonal elements are 1.0
       do i=1,n

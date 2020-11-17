@@ -2,13 +2,13 @@
       module functions
 !-----------------------------------------------------------------------
         implicit none
-        character(len=26), parameter, private :: low  = 
+        character(len=26), parameter, private :: low  =
      .  "abcdefghijklmnopqrstuvwxyz"
-        character(len=26), parameter, private :: high = 
+        character(len=26), parameter, private :: high =
      .  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         contains
 !-----------------------------------------------------------------------
-! returns upper case of string s
+!     returns upper case of string s
 !-----------------------------------------------------------------------
       function to_upper(s) result(t)
 !-----------------------------------------------------------------------
@@ -36,7 +36,7 @@
 !-----------------------------------------------------------------------
       end function to_upper
 !-----------------------------------------------------------------------
-! returns lower case of string s
+!     returns lower case of string s
 !-----------------------------------------------------------------------
       function to_lower(s) result(t)
         implicit none

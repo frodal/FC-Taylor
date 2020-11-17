@@ -136,136 +136,136 @@
 !-----------------------------------------------------------------------
 !     Calculates the uniaxial stress point along RD
 !-----------------------------------------------------------------------
-      if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
-        UTflag = 1
-        call uniaxialTension(nblock,nstatev,nprops,niter,
-     .                       ang,props,dt,wp,epsdot,sigmaUT,
-     .                       taylorFactor)
-        ! Superpose a hydrostatic stress so that s33=0
-        ! Yielding is not dependent upon hydrostatic stress!
-        sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
-        sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
-        sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
-      endif
+        if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
+          UTflag = 1
+          call uniaxialTension(nblock,nstatev,nprops,niter,
+     .                         ang,props,dt,wp,epsdot,sigmaUT,
+     .                         taylorFactor)
+          ! Superpose a hydrostatic stress so that s33=0
+          ! Yielding is not dependent upon hydrostatic stress!
+          sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
+          sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
+          sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
+        endif
 !-----------------------------------------------------------------------
-!     Initialize some variables
+!       Initialize some variables
 !-----------------------------------------------------------------------
-      work = zero
-      STRESSOLD = zero
+        work = zero
+        STRESSOLD = zero
 !-----------------------------------------------------------------------
-      do i=1,nblock
-        STATEOLD(i,1) = ang(i,1)
-        STATEOLD(i,2) = ang(i,2)
-        STATEOLD(i,3) = ang(i,3)
-      enddo
-      do k=4,NSTATEV
         do i=1,nblock
-            STATEOLD(i,k) = zero
+          STATEOLD(i,1) = ang(i,1)
+          STATEOLD(i,2) = ang(i,2)
+          STATEOLD(i,3) = ang(i,3)
         enddo
-      enddo
+        do k=4,NSTATEV
+          do i=1,nblock
+            STATEOLD(i,k) = zero
+          enddo
+        enddo
 !-----------------------------------------------------------------------
-      do i=1,nblock
-        defgradOld(i,1) = one
-        defgradOld(i,2) = one
-        defgradOld(i,3) = one
-        defgradOld(i,4) = zero
-        defgradOld(i,5) = zero
-        defgradOld(i,6) = zero
-        defgradOld(i,7) = zero
-        defgradOld(i,8) = zero
-        defgradOld(i,9) = zero
-      enddo
+        do i=1,nblock
+          defgradOld(i,1) = one
+          defgradOld(i,2) = one
+          defgradOld(i,3) = one
+          defgradOld(i,4) = zero
+          defgradOld(i,5) = zero
+          defgradOld(i,6) = zero
+          defgradOld(i,7) = zero
+          defgradOld(i,8) = zero
+          defgradOld(i,9) = zero
+        enddo
 !-----------------------------------------------------------------------
-!     Start loop
+!       Start loop
 !-----------------------------------------------------------------------
-      iter = 0
-      do while((work.lt.wp).and.(ITER.lt.NITER))
-        iter = iter+1
+        iter = 0
+        do while((work.lt.wp).and.(ITER.lt.NITER))
+          iter = iter+1
 !-----------------------------------------------------------------------
-!        Extract strain increments
+!         Extract strain increments
 !-----------------------------------------------------------------------
-         do i=1,nblock
+          do i=1,nblock
             defgradNew(i,1) = defgradOld(i,1)*(Dij(km,1)*dt+one)
-     +           +defgradOld(i,7)*Dij(km,4)*dt
-     +           +defgradOld(i,6)*Dij(km,6)*dt
+     +                       +defgradOld(i,7)*Dij(km,4)*dt
+     +                       +defgradOld(i,6)*Dij(km,6)*dt
             defgradNew(i,2) = defgradOld(i,2)*(Dij(km,2)*dt+one)
-     +           +defgradOld(i,4)*Dij(km,4)*dt
-     +           +defgradOld(i,8)*Dij(km,5)*dt
+     +                       +defgradOld(i,4)*Dij(km,4)*dt
+     +                       +defgradOld(i,8)*Dij(km,5)*dt
             defgradNew(i,3) = defgradOld(i,3)*(Dij(km,3)*dt+one)
-     +           +defgradOld(i,9)*Dij(km,6)*dt
-     +           +defgradOld(i,5)*Dij(km,5)*dt
+     +                       +defgradOld(i,9)*Dij(km,6)*dt
+     +                       +defgradOld(i,5)*Dij(km,5)*dt
             defgradNew(i,4) = defgradOld(i,4)*(Dij(km,1)*dt+one)
-     +           +defgradOld(i,2)*Dij(km,4)*dt
-     +           +defgradOld(i,8)*Dij(km,6)*dt
+     +                       +defgradOld(i,2)*Dij(km,4)*dt
+     +                       +defgradOld(i,8)*Dij(km,6)*dt
             defgradNew(i,5) = defgradOld(i,5)*(Dij(km,2)*dt+one)
-     +           +defgradOld(i,9)*Dij(km,4)*dt
-     +           +defgradOld(i,3)*Dij(km,5)*dt
+     +                       +defgradOld(i,9)*Dij(km,4)*dt
+     +                       +defgradOld(i,3)*Dij(km,5)*dt
             defgradNew(i,6) = defgradOld(i,6)*(Dij(km,3)*dt+one)
-     +           +defgradOld(i,1)*Dij(km,6)*dt
-     +           +defgradOld(i,7)*Dij(km,5)*dt
+     +                       +defgradOld(i,1)*Dij(km,6)*dt
+     +                       +defgradOld(i,7)*Dij(km,5)*dt
             defgradNew(i,7) = defgradOld(i,7)*(Dij(km,2)*dt+one)
-     +           +defgradOld(i,1)*Dij(km,4)*dt
-     +           +defgradOld(i,6)*Dij(km,5)*dt
+     +                       +defgradOld(i,1)*Dij(km,4)*dt
+     +                       +defgradOld(i,6)*Dij(km,5)*dt
             defgradNew(i,8) = defgradOld(i,8)*(Dij(km,3)*dt+one)
-     +           +defgradOld(i,4)*Dij(km,6)*dt
-     +           +defgradOld(i,2)*Dij(km,5)*dt
+     +                       +defgradOld(i,4)*Dij(km,6)*dt
+     +                       +defgradOld(i,2)*Dij(km,5)*dt
             defgradNew(i,9) = defgradOld(i,9)*(Dij(km,1)*dt+one)
-     +           +defgradOld(i,5)*Dij(km,4)*dt
-     +           +defgradOld(i,3)*Dij(km,6)*dt
-         enddo
+     +                       +defgradOld(i,5)*Dij(km,4)*dt
+     +                       +defgradOld(i,3)*Dij(km,6)*dt
+          enddo
 !-----------------------------------------------------------------------
-!        CALL UMAT
+!         CALL UMAT
 !-----------------------------------------------------------------------
 !DIR$ FORCEINLINE RECURSIVE
-         CALL Hypo(stressNew,stateNew,defgradNew,
-     +               stressOld,stateOld,defgradOld,dt,props,
-     +               nblock,nstatev,nprops,Dissipation)
+          CALL Hypo(stressNew,stateNew,defgradNew,
+     +              stressOld,stateOld,defgradOld,dt,props,
+     +              nblock,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
-!        UPDATE VARIABLES FOR NEXT TIME STEP
+!         UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
-         STATEOLD = STATENEW
-         defgradOld = defgradNew
-         do i=1,nblock
+          STATEOLD = STATENEW
+          defgradOld = defgradNew
+          do i=1,nblock
             work = work + Dissipation(i)*ang(i,4)
-         enddo
-      enddo
-      if (work.ge.wp) then
+          enddo
+        enddo
+        if (work.ge.wp) then
 !-----------------------------------------------------------------------
-!     Write to window if enough time has passed
+!         Write to window if enough time has passed
 !-----------------------------------------------------------------------
 !$OMP CRITICAL
-        call cpu_time(currentTime)
-        if((currentTime.ge.(printTime+printDelay*real(ncpus))).or.
-     .      (iComplete+1.eq.ndef))then
+          call cpu_time(currentTime)
+          if((currentTime.ge.(printTime+printDelay*real(ncpus))).or.
+     .       (iComplete+1.eq.ndef))then
             printTime = printTime+printDelay*real(ncpus)
             write(6,*) 'Deformation points completed:',
      .                  iComplete+1, ' of ', ndef
-        endif
+          endif
 !-----------------------------------------------------------------------
-!     Calculate stress based on the Taylor hypothesis
+!         Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
-        iComplete = iComplete+1
-        do i=1,nblock
+          iComplete = iComplete+1
+          do i=1,nblock
             sigma(km,1) = sigma(km,1)+STRESSNEW(i,1)*ang(i,4)
             sigma(km,2) = sigma(km,2)+STRESSNEW(i,2)*ang(i,4)
             sigma(km,3) = sigma(km,3)+STRESSNEW(i,3)*ang(i,4)
             sigma(km,4) = sigma(km,4)+STRESSNEW(i,4)*ang(i,4)
             sigma(km,5) = sigma(km,5)+STRESSNEW(i,5)*ang(i,4)
             sigma(km,6) = sigma(km,6)+STRESSNEW(i,6)*ang(i,4)
-        enddo
-        ! Superpose a hydrostatic stress so that s33=0
-        ! Yielding is not dependent upon hydrostatic stress!
-        sigma(km,1) = sigma(km,1)-sigma(km,3)
-        sigma(km,2) = sigma(km,2)-sigma(km,3)
-        sigma(km,3) = sigma(km,3)-sigma(km,3)
-        sigma(km,7) = work
+          enddo
+          ! Superpose a hydrostatic stress so that s33=0
+          ! Yielding is not dependent upon hydrostatic stress!
+          sigma(km,1) = sigma(km,1)-sigma(km,3)
+          sigma(km,2) = sigma(km,2)-sigma(km,3)
+          sigma(km,3) = sigma(km,3)-sigma(km,3)
+          sigma(km,7) = work
 !$OMP END CRITICAL
-      elseif (ITER.ge.NITER) then
-        write(6,*) '!! Error'
-        write(6,*) 'Maximum number of iterations reached'
-        call sleep(1)
-        error stop 'Error code: 11'
-      endif
+        elseif (ITER.ge.NITER) then
+          write(6,*) '!! Error'
+          write(6,*) 'Maximum number of iterations reached'
+          call sleep(1)
+          error stop 'Error code: 11'
+        endif
       enddo
 !$OMP END PARALLEL DO
 !-----------------------------------------------------------------------
