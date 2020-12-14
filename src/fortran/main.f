@@ -47,7 +47,7 @@
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock,Nang, UTflag
-      integer OMP_get_thread_num
+!$    integer OMP_get_thread_num
       parameter(nprops=16,NSTATEV=34)
       real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
@@ -136,16 +136,18 @@
 !-----------------------------------------------------------------------
 !     Calculates the uniaxial stress point along RD
 !-----------------------------------------------------------------------
-        if((UTflag.eq.0).and.(OMP_get_thread_num().eq.0))then
-          UTflag = 1
-          call uniaxialTension(nblock,nstatev,nprops,niter,
-     .                         ang,props,dt,wp,epsdot,sigmaUT,
-     .                         taylorFactor)
-          ! Superpose a hydrostatic stress so that s33=0
-          ! Yielding is not dependent upon hydrostatic stress!
-          sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
-          sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
-          sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
+        if(UTflag.eq.0)then
+!$        if(OMP_get_thread_num().eq.0)then
+            UTflag = 1
+            call uniaxialTension(nblock,nstatev,nprops,niter,
+     .                           ang,props,dt,wp,epsdot,sigmaUT,
+     .                           taylorFactor)
+            ! Superpose a hydrostatic stress so that s33=0
+            ! Yielding is not dependent upon hydrostatic stress!
+            sigmaUT(1) = sigmaUT(1)-sigmaUT(3)
+            sigmaUT(2) = sigmaUT(2)-sigmaUT(3)
+            sigmaUT(3) = sigmaUT(3)-sigmaUT(3)
+!$        endif
         endif
 !-----------------------------------------------------------------------
 !       Initialize some variables
