@@ -27,6 +27,7 @@ const ImportSettingsBtn = document.getElementById('ImportSettingsBtn');
 const ExportSettingsBtn = document.getElementById('ExportSettingsBtn');
 
 const corePath = path.join(__dirname, '../../Core/FC-Taylor.exe');
+const openMPdll = path.join(__dirname, '../../Core/libiomp5md.dll');
 const calibratePath = path.join(__dirname, '../../Core/FC-Taylor-Calibrate.exe');
 const workDir = path.join(__dirname, '../../../core-temp-pid' + process.pid.toString())
 const inputPath = path.join(workDir, 'Input');
@@ -75,6 +76,15 @@ function SetupWorkingDir() {
     }
     if (!fs.existsSync(outputPath)) {
         fs.mkdirSync(outputPath, { recursive: true });
+    }
+    if (process.platform === 'win32') {
+        fs.copyFileSync(openMPdll, path.join(workDir, 'libiomp5md.dll'), fs.constants.COPYFILE_EXCL);
+    } else if (process.platform === 'linux') {
+        // TODO: Statically link openMP for linux or include the dynamic link library for Linux in Core
+        console.log('OpenMP on Linux!')
+    } else if (process.platform === 'darwin') {
+        // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
+        console.log('OpenMP on darwin!')
     }
 }
 
