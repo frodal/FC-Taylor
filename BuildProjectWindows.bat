@@ -1,14 +1,14 @@
 @echo off
 
-if exist "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" ^
-call "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\bin\compilervars.bat" intel64
+if exist "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" ^
+call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
 
 if not exist GUI\Core mkdir GUI\Core
 
 call ifort -openmp -fpp -F1000000000 src/fortran/main.f -o ./GUI/Core/FC-Taylor.exe ^
            -O3 -QaxCOMMON-AVX512,CORE-AVX512,CORE-AVX2,AVX
 if %ERRORLEVEL% neq 0 (
-  del main.obj
+  if exist main.obj del main.obj
   echo.
   echo Could not compile the Fortran source!
   echo The program was therefore not built!
@@ -30,7 +30,7 @@ call pyinstaller --onefile --noconfirm --clean ^
 if %ERRORLEVEL% neq 0 (
   rmdir /s /q __pycache__
   rmdir /s /q build
-  del FC-Taylor-Calibrate.spec
+  if exist FC-Taylor-Calibrate.spec del FC-Taylor-Calibrate.spec
   popd
   echo.
   echo Could not build the Python calibration script!
@@ -41,7 +41,7 @@ if %ERRORLEVEL% neq 0 (
 )
 rmdir /s /q __pycache__
 rmdir /s /q build
-del FC-Taylor-Calibrate.spec
+if exist FC-Taylor-Calibrate.spec del FC-Taylor-Calibrate.spec
 popd
 
 copy docs\LICENSE.md GUI\LICENSE.md /y
