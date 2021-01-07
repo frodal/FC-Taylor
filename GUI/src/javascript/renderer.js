@@ -78,7 +78,10 @@ function SetupWorkingDir() {
         fs.mkdirSync(outputPath, { recursive: true });
     }
     if (process.platform === 'win32') {
-        fs.copyFileSync(openMPdll, path.join(workDir, 'libiomp5md.dll'), fs.constants.COPYFILE_EXCL);
+        const openMPdllTempPath = path.join(workDir, 'libiomp5md.dll')
+        if (!openMPdllTempPath.exists) {
+            fs.copyFileSync(openMPdll, openMPdllTempPath);
+        }
     } else if (process.platform === 'linux') {
         // TODO: Statically link openMP for linux or include the dynamic link library for Linux in Core
         console.log('OpenMP on Linux!')
