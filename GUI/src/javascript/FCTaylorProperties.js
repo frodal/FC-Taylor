@@ -35,6 +35,9 @@ class FCTaylorProperties {
         this.planeStress.addEventListener('change', (event) => {
             this.UpdateNstressPoints();
         });
+        this.centro.addEventListener('change', (event) => {
+            this.UpdateNstressPoints();
+        });
         this.npts.addEventListener('change', (event) => {
             this.UpdateNstressPoints();
         });
@@ -48,14 +51,15 @@ class FCTaylorProperties {
     //                      Number of generated stress points                         //
     ////////////////////////////////////////////////////////////////////////////////////
     UpdateNstressPoints() {
+        let UTstresspoints = this.centro.checked ? 2 : 1;
         if (this.planeStress.checked && (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)) {
             let NptsTemp = parseInt(this.npts.value);
             let Nsigma = 6 * Math.pow(NptsTemp - 2, 2) + 12 * (NptsTemp - 2) + 8;
-            this.nStressPoints.innerHTML = `${Nsigma}`;
+            this.nStressPoints.innerHTML = `${Nsigma + UTstresspoints}`;
         } else if (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2) {
             let NptsTemp = parseInt(this.npts.value);
             let Nsigma = 10 * Math.pow(NptsTemp - 2, 4) + 40 * Math.pow(NptsTemp - 2, 3) + 80 * Math.pow(NptsTemp - 2, 2) + 80 * (NptsTemp - 2) + 32;
-            this.nStressPoints.innerHTML = `${Nsigma}`;
+            this.nStressPoints.innerHTML = `${Nsigma + UTstresspoints}`;
         } else {
             this.nStressPoints.innerHTML = "0";
         }

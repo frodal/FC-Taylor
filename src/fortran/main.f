@@ -15,11 +15,6 @@
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
-!     For gfortran, compile the program with -fopenmp
-!     For ifort, compile the program with -openmp
-!     Remember to increase the Stack size with -Fn where n is the
-!     number of bytes, e.g.,
-!     ifort -openmp -F1000000000 main.f -o ./GUI/Core/FC-Taylor.exe -O3
 !     Note that lines starting with !$ are compiler directives
 !     for using, e.g., OpenMP, i.e., multi-threading
 !-----------------------------------------------------------------------
@@ -241,7 +236,7 @@
      .       (iComplete+1.eq.ndef))then
             printTime = printTime+printDelay*real(ncpus)
             write(6,*) 'Deformation points completed:',
-     .                  iComplete+1, ' of ', ndef
+     .                  iComplete+1+UTflag, ' of ', ndef+1
           endif
 !-----------------------------------------------------------------------
 !         Calculate stress based on the Taylor hypothesis
