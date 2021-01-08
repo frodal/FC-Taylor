@@ -24,9 +24,9 @@ To build the FC-Taylor application follow these simple steps.
 1. Clone the project from Github (`git clone --recursive https://github.com/frodal/FC-Taylor.git`)
 2. Install the [Intel oneAPI](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-oneapi-toolkits-via-apt.html) HPC Toolkit including the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers) (Alternatively install the GNU compilers `sudo apt-get install gfortran gcc g++`)
 3. Install the [Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script)
-3. Install Node.js (`nvm install node`)
-4. Install Python 3 and pip3 (`sudo apt-get install python3 python3-pip`)
-5. Run the `BuildProjectLinux.sh` script, by using the command line, to compile and build the application for Linux x64
+4. Install Node.js (`nvm install node`)
+5. Install Python 3 and pip3 (`sudo apt-get install python3 python3-pip`)
+6. Run the `BuildProjectLinux.sh` script, by using the command line, to compile and build the application for Linux x64
 
 ### Compiling and building for MacOS on MacOS (darwin)
 
