@@ -78,16 +78,16 @@ function SetupWorkingDir() {
         fs.mkdirSync(outputPath, { recursive: true });
     }
     if (process.platform === 'win32') {
+        // Copies the OpenMP dll to the working directory on Windows
         const openMPdllTempPath = path.join(workDir, 'libiomp5md.dll')
         if (!openMPdllTempPath.exists) {
             fs.copyFileSync(openMPdll, openMPdllTempPath);
         }
-    } else if (process.platform === 'linux') {
-        // TODO: Statically link openMP for linux or include the dynamic link library for Linux in Core
-        console.log('OpenMP on Linux!')
+    // } else if (process.platform === 'linux') {
+        // OpenMP is statically linked for linux with the Intel compiler
     } else if (process.platform === 'darwin') {
         // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
-        console.log('OpenMP on darwin!')
+        console.log('OpenMP is not yet supported on darwin!')
     }
 }
 
