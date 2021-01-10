@@ -216,7 +216,7 @@
 !     Local variables
       real*8 Dissipation(nblock), stressNew(nblock,6),
      .       stateNew(nblock,nstatev), defgradNew(nblock,9),
-     .       sigma(7), sigTGT(12,6), CTO(6,6), inc(12,6), del(6)
+     .       sigma(7), sigTGT(12,6), inc(12,6), del(6)
       real*8 zero, one, pert, o2pert
       integer i, j, k, kk
       parameter(zero=0.d0, one=1.d0,pert=1e-6,o2pert=1.0/(2.0*pert))
@@ -255,13 +255,7 @@
       do i=1,12,2
         kk = kk+1
         do j=1,6
-          CTO(kk,j) = (sigTGT(i+1,j)-sigTGT(i,j))*o2pert
-        enddo
-      enddo
-!-----------------------------------------------------------------------
-      do i=1,6
-        do j=1,6
-          ddsdde(j,i) = CTO(i,j)
+          ddsdde(j,kk) = (sigTGT(i+1,j)-sigTGT(i,j))*o2pert
         enddo
       enddo
 !-----------------------------------------------------------------------
