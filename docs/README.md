@@ -35,7 +35,7 @@ Your on your own, see the Linux build information for tips.
 ### Update GUI dependencies
 
 * Check which dependencies that have updates available with `npm outdated` using the command line in the `FC-Taylor/GUI` directory
-* Update all GUI dependencies by running `npm update` using the command line in the `FC-Taylor/GUI` directory, this will not update to an update with a greater major version number
+* Update all GUI dependencies by running `npm update` using the command line in the `FC-Taylor/GUI` directory, note that this will not update to an update with a greater major version number
 * Update only [Electron](https://electronjs.org/docs/tutorial/first-app#installing-electron) by running `npm install --save-dev electron@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-packager](https://github.com/electron-userland/electron-packager) by running `npm install --save-dev electron-packager@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-installer-windows](https://github.com/electron-userland/electron-installer-windows) by running `npm install --save-dev electron-installer-windows@latest` using the command line in the `FC-Taylor/GUI` directory
