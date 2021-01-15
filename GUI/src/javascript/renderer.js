@@ -142,7 +142,10 @@ startProgramBtn.addEventListener('click', (event) => {
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
     if (!LicenseOK)
+    {
+        ipcRenderer.send('CheckLicensePlease');
         return
+    }
     if (inputData.SafeInput()) {
         // Clear output data field
         outArea.innerHTML = '';
