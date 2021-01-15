@@ -186,15 +186,15 @@ def GetYS(c):
     else:
         return None
 
-def GetInitial(choise):
-    if choise == Space.fixed2D:
+def GetInitial(choice):
+    if choice == Space.fixed2D:
         c0 = np.zeros(12)
-    elif choise == Space.free2D:
+    elif choice == Space.free2D:
         c0 = np.zeros(13)
         c0[12] = 8.0
-    elif choise == Space.fixed3D:
+    elif choice == Space.fixed3D:
         c0 = np.zeros(16)
-    elif choise == Space.free3D:
+    elif choice == Space.free3D:
         c0 = np.zeros(17)
         c0[16] = 8.0
     else:
@@ -220,9 +220,9 @@ def Normalize(s11,s22,s33,s12,s23,s31):
     s31=s31/s0
     return s11, s22, s33, s12, s23, s31
 
-def Correct(c,s11,s22,s33,s12,s23,s31,choise):
+def Correct(c,s11,s22,s33,s12,s23,s31,choice):
     # Calculate the normalized yield stress along RD/ED
-    YieldFunc = GetYS(GetInitial(choise))
+    YieldFunc = GetYS(GetInitial(choice))
     normS = 1.0/(YieldFunc(1.0,0.0,0.0,0.0,0.0,0.0,c)+1.0)
 
     # Correct the normalized yield points
@@ -288,7 +288,7 @@ def SaveResult(c,folder):
             file.write('%30s, %12.8f\n' % (parameterName[17],1.0))
             file.write('%30s, %12.8f' % (parameterName[18],8.0))
 
-def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise):
+def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice):
     # Basinhopping input
     niter=200 		# No. iteration in basinhopping
     T=0.001			# The "temperature" parameter
@@ -297,7 +297,7 @@ def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise):
     disp=False		# Should the status messages from basinhopping be printed?
     ##################################################################
 
-    c0 = GetInitial(choise)
+    c0 = GetInitial(choice)
     YieldFunc = GetYS(c0)
 
     c = c0
@@ -316,14 +316,14 @@ def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise):
 
     return c
 
-def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise):
+def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice):
     # input
     niter=1000 		# Max no. iteration
     solver='SLSQP'	# Minimizer to be used ('SLSQP','BFGS',...)
     disp=False		# Should the status messages be printed?
     ##################################################################
 
-    c0 = GetInitial(choise)
+    c0 = GetInitial(choice)
     YieldFunc = GetYS(c0)
 
     c = c0
@@ -340,12 +340,12 @@ def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise):
 
     return c
 
-def OptimizeLS(s11, s22, s33, s12, s23, s31, choise):
+def OptimizeLS(s11, s22, s33, s12, s23, s31, choice):
     # input
     solver='lm'	# Minimizer to be used
     ##################################################################
 
-    c0 = GetInitial(choise)
+    c0 = GetInitial(choice)
     YieldFunc = GetYS(c0)
 
     c = c0
@@ -362,12 +362,12 @@ def OptimizeLS(s11, s22, s33, s12, s23, s31, choise):
 
     return c
 
-def Calibrate(s11, s22, s33, s12, s23, s31, choise):
-    if len(GetInitial(choise))>len(s11):
-        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choise)
+def Calibrate(s11, s22, s33, s12, s23, s31, choice):
+    if len(GetInitial(choice))>len(s11):
+        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice)
     else:
-        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choise)
-    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choise)
+        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choice)
+    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice)
     return c
 
 def main():
@@ -385,10 +385,11 @@ def main():
 
     assert (fileName.exists()),('Could not find input file: '+str(fileName))
 
+    choice = Space.free3D
     if spaceInput == '2D':
-        choise = Space.fixed2D
+        choice = Space.fixed2D
     elif spaceInput == '3D':
-        choise = Space.fixed3D
+        choice = Space.fixed3D
 
     # Loading CP-FEM data
     s11, s22, s33, s12, s23, s31 = LoadTests(fileName)
@@ -396,13 +397,13 @@ def main():
     s11, s22, s33, s12, s23, s31 = Normalize(s11,s22,s33,s12,s23,s31)
 
     # Initial calibration
-    c = Calibrate(s11, s22, s33, s12, s23, s31, choise)
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choice)
 
     # Correct yield stress based on normalized yield stress along RD/ED, which should be 1
-    s11, s22, s33, s12, s23, s31 = Correct(c,s11,s22,s33,s12,s23,s31,choise)
+    s11, s22, s33, s12, s23, s31 = Correct(c,s11,s22,s33,s12,s23,s31,choice)
 
     # Final calibration
-    c = Calibrate(s11, s22, s33, s12, s23, s31, choise)
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choice)
 
     # Writes the parameters to a file
     SaveResult(c,fileName.parent)

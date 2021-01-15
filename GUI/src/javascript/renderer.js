@@ -27,6 +27,7 @@ const ImportSettingsBtn = document.getElementById('ImportSettingsBtn');
 const ExportSettingsBtn = document.getElementById('ExportSettingsBtn');
 
 const corePath = path.join(__dirname, '../../Core/FC-Taylor.exe');
+const openMPdll = path.join(__dirname, '../../Core/libiomp5md.dll');
 const calibratePath = path.join(__dirname, '../../Core/FC-Taylor-Calibrate.exe');
 const workDir = path.join(__dirname, '../../../core-temp-pid' + process.pid.toString())
 const inputPath = path.join(workDir, 'Input');
@@ -75,6 +76,18 @@ function SetupWorkingDir() {
     }
     if (!fs.existsSync(outputPath)) {
         fs.mkdirSync(outputPath, { recursive: true });
+    }
+    if (process.platform === 'win32') {
+        // Copies the OpenMP dll to the working directory on Windows
+        const openMPdllTempPath = path.join(workDir, 'libiomp5md.dll')
+        if (!openMPdllTempPath.exists) {
+            fs.copyFileSync(openMPdll, openMPdllTempPath);
+        }
+    // } else if (process.platform === 'linux') {
+        // OpenMP is statically linked for linux with the Intel compiler
+    } else if (process.platform === 'darwin') {
+        // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
+        console.log('OpenMP is not yet supported on darwin!')
     }
 }
 
@@ -129,7 +142,10 @@ startProgramBtn.addEventListener('click', (event) => {
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
     if (!LicenseOK)
+    {
+        ipcRenderer.send('CheckLicensePlease');
         return
+    }
     if (inputData.SafeInput()) {
         // Clear output data field
         outArea.innerHTML = '';

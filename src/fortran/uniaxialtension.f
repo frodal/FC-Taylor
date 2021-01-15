@@ -2,23 +2,25 @@
 !-----------------------------------------------------------------------
 !                         SUBROUTINE uniaxialTension
 !-----------------------------------------------------------------------
-!  
-! 
+!
+!
 !-----------------------------------------------------------------------
       subroutine uniaxialTension(nblock,nstatev,nprops,niter,
-     .                           ang,props,dt,wp,epsdot,sigma)
+     .                           ang,props,dt,wp,epsdot,sigma,
+     .                           taylorFactor)
 !-----------------------------------------------------------------------
       implicit none
 !-----------------------------------------------------------------------
       integer, intent(in) :: nblock, nstatev, nprops, niter
       real*8, intent(in) :: ang(nblock,4), props(nprops), dt, wp,
      .                      epsdot
-      real*8, intent(out) :: sigma(7)
+      real*8, intent(out) :: sigma(7), taylorFactor
 !     Local variables
       real*8 work, stressold(nblock,6), stateold(nblock,nstatev),
-     .       defgradold(nblock,9), defgradNew(nblock,9), 
+     .       defgradold(nblock,9), defgradNew(nblock,9),
      .       stressNew(nblock,6), stateNew(nblock,nstatev),
-     .       Dissipation(nblock), D(6), ddsdde(6,6), ddedds(6,6)
+     .       Dissipation(nblock), D(6), ddsdde(6,6), ddedds(6,6),
+     .       tau_c_avg
       real*8 zero, half, one, two
       integer i, k, iter
       parameter(zero=0.d0, half=5.d-1, one=1.d0, two=2.d0)
@@ -36,7 +38,7 @@
       enddo
       do k=4,nstatev
         do i=1,nblock
-            stateold(i,k) = zero
+          stateold(i,k) = zero
         enddo
       enddo
 !-----------------------------------------------------------------------
@@ -65,21 +67,21 @@
       do while((work.lt.wp).and.(ITER.lt.NITER))
         iter = iter+1
 !-----------------------------------------------------------------------
-!        CALL Taylor
+!       CALL Taylor
 !-----------------------------------------------------------------------
         call TaylorCTO(nblock,nstatev,nprops,
      .                 ang,props,dt,D,stressOld,stateOld,
      .                 defgradOld,ddsdde)
         call inverse(ddsdde,ddedds,6)
         do i=1,6
-            D(i) = ddedds(i,1)
+          D(i) = ddedds(i,1)
         enddo
         D = epsdot*D/sqrt(D(1)**2+D(2)**2+D(3)**2+
      .                    two*D(4)**2+two*D(5)**2+two*D(6)**2)
         do i=1,6
-            D(i) = D(i)-(ddedds(i,2)*sigma(2)+
-     .                   ddedds(i,3)*sigma(3)+ddedds(i,4)*sigma(4)+
-     .                   ddedds(i,5)*sigma(5)+ddedds(i,6)*sigma(6))
+          D(i) = D(i)-(ddedds(i,2)*sigma(2)+
+     .                 ddedds(i,3)*sigma(3)+ddedds(i,4)*sigma(4)+
+     .                 ddedds(i,5)*sigma(5)+ddedds(i,6)*sigma(6))
         enddo
         D = epsdot*D/sqrt(D(1)**2+D(2)**2+D(3)**2+
      .                    two*D(4)**2+two*D(5)**2+two*D(6)**2)
@@ -87,13 +89,20 @@
      .              ang,props,dt,D,stressOld,stateOld,
      .              defgradOld,stressNew,stateNew,defgradNew,sigma)
 !-----------------------------------------------------------------------
-!        UPDATE VARIABLES FOR NEXT TIME STEP
+!       UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
         stateOld   = stateNew
         defgradOld = defgradNew
         work = work+sigma(7)
-        sigma(7) = work
       enddo
+      sigma(7) = work
+      do k=13,24
+        do i=1,nblock
+          tau_c_avg = tau_c_avg + stateNew(i,k)*ang(i,4)
+        enddo
+      enddo
+      tau_c_avg = tau_c_avg/12.d0
+      taylorFactor = sigma(1)/tau_c_avg
       if (iter.ge.niter) then
         write(6,*) '!! Error'
         write(6,*) 'Maximum number of iterations reached'
@@ -107,8 +116,8 @@
 !-----------------------------------------------------------------------
 !                         SUBROUTINE Taylor
 !-----------------------------------------------------------------------
-!  
-! 
+!
+!
 !-----------------------------------------------------------------------
       subroutine Taylor(nblock,nstatev,nprops,
      .                  ang,props,dt,D,stressOld,stateOld,
@@ -130,56 +139,55 @@
 !-----------------------------------------------------------------------
 !     Initialize some variables
 !-----------------------------------------------------------------------
-      Dissipation = zero
       sigma = zero
 !-----------------------------------------------------------------------
-!        Create deformation gradient based on the rate of deformation
+!     Create deformation gradient based on the rate of deformation
 !-----------------------------------------------------------------------
-         do i=1,nblock
-            defgradNew(i,1) = defgradOld(i,1)*(D(1)*dt+one)
-     +           +defgradOld(i,7)*D(4)*dt
-     +           +defgradOld(i,6)*D(6)*dt
-            defgradNew(i,2) = defgradOld(i,2)*(D(2)*dt+one)
-     +           +defgradOld(i,4)*D(4)*dt
-     +           +defgradOld(i,8)*D(5)*dt
-            defgradNew(i,3) = defgradOld(i,3)*(D(3)*dt+one)
-     +           +defgradOld(i,9)*D(6)*dt
-     +           +defgradOld(i,5)*D(5)*dt
-            defgradNew(i,4) = defgradOld(i,4)*(D(1)*dt+one)
-     +           +defgradOld(i,2)*D(4)*dt
-     +           +defgradOld(i,8)*D(6)*dt
-            defgradNew(i,5) = defgradOld(i,5)*(D(2)*dt+one)
-     +           +defgradOld(i,9)*D(4)*dt
-     +           +defgradOld(i,3)*D(5)*dt
-            defgradNew(i,6) = defgradOld(i,6)*(D(3)*dt+one)
-     +           +defgradOld(i,1)*D(6)*dt
-     +           +defgradOld(i,7)*D(5)*dt
-            defgradNew(i,7) = defgradOld(i,7)*(D(2)*dt+one)
-     +           +defgradOld(i,1)*D(4)*dt
-     +           +defgradOld(i,6)*D(5)*dt
-            defgradNew(i,8) = defgradOld(i,8)*(D(3)*dt+one)
-     +           +defgradOld(i,4)*D(6)*dt
-     +           +defgradOld(i,2)*D(5)*dt
-            defgradNew(i,9) = defgradOld(i,9)*(D(1)*dt+one)
-     +           +defgradOld(i,5)*D(4)*dt
-     +           +defgradOld(i,3)*D(6)*dt
-         enddo
+      do i=1,nblock
+        defgradNew(i,1) = defgradOld(i,1)*(D(1)*dt+one)
+     +                   +defgradOld(i,7)*D(4)*dt
+     +                   +defgradOld(i,6)*D(6)*dt
+        defgradNew(i,2) = defgradOld(i,2)*(D(2)*dt+one)
+     +                   +defgradOld(i,4)*D(4)*dt
+     +                   +defgradOld(i,8)*D(5)*dt
+        defgradNew(i,3) = defgradOld(i,3)*(D(3)*dt+one)
+     +                   +defgradOld(i,9)*D(6)*dt
+     +                   +defgradOld(i,5)*D(5)*dt
+        defgradNew(i,4) = defgradOld(i,4)*(D(1)*dt+one)
+     +                   +defgradOld(i,2)*D(4)*dt
+     +                   +defgradOld(i,8)*D(6)*dt
+        defgradNew(i,5) = defgradOld(i,5)*(D(2)*dt+one)
+     +                   +defgradOld(i,9)*D(4)*dt
+     +                   +defgradOld(i,3)*D(5)*dt
+        defgradNew(i,6) = defgradOld(i,6)*(D(3)*dt+one)
+     +                   +defgradOld(i,1)*D(6)*dt
+     +                   +defgradOld(i,7)*D(5)*dt
+        defgradNew(i,7) = defgradOld(i,7)*(D(2)*dt+one)
+     +                   +defgradOld(i,1)*D(4)*dt
+     +                   +defgradOld(i,6)*D(5)*dt
+        defgradNew(i,8) = defgradOld(i,8)*(D(3)*dt+one)
+     +                   +defgradOld(i,4)*D(6)*dt
+     +                   +defgradOld(i,2)*D(5)*dt
+        defgradNew(i,9) = defgradOld(i,9)*(D(1)*dt+one)
+     +                   +defgradOld(i,5)*D(4)*dt
+     +                   +defgradOld(i,3)*D(6)*dt
+      enddo
 !-----------------------------------------------------------------------
-!        CALL UMAT
+!     CALL UMAT
 !-----------------------------------------------------------------------
-      CALL Hypo(stressNew,stateNew,defgradNew,
+      call Hypo(stressNew,stateNew,defgradNew,
      +          stressOld,stateOld,defgradOld,dt,props,
      +          nblock,nstatev,nprops,Dissipation)
 !-----------------------------------------------------------------------
 !     Calculate stress based on the Taylor hypothesis
 !-----------------------------------------------------------------------
       do i=1,nblock
-          sigma(1) = sigma(1)+stressNew(i,1)*ang(i,4)
-          sigma(2) = sigma(2)+stressNew(i,2)*ang(i,4)
-          sigma(3) = sigma(3)+stressNew(i,3)*ang(i,4)
-          sigma(4) = sigma(4)+stressNew(i,4)*ang(i,4)
-          sigma(5) = sigma(5)+stressNew(i,5)*ang(i,4)
-          sigma(6) = sigma(6)+stressNew(i,6)*ang(i,4)
+        sigma(1) = sigma(1)+stressNew(i,1)*ang(i,4)
+        sigma(2) = sigma(2)+stressNew(i,2)*ang(i,4)
+        sigma(3) = sigma(3)+stressNew(i,3)*ang(i,4)
+        sigma(4) = sigma(4)+stressNew(i,4)*ang(i,4)
+        sigma(5) = sigma(5)+stressNew(i,5)*ang(i,4)
+        sigma(6) = sigma(6)+stressNew(i,6)*ang(i,4)
       enddo
       do i=1,nblock
         sigma(7) = sigma(7) + Dissipation(i)*ang(i,4)
@@ -191,8 +199,8 @@
 !-----------------------------------------------------------------------
 !                         SUBROUTINE TaylorCTO
 !-----------------------------------------------------------------------
-!  
-! 
+!
+!
 !-----------------------------------------------------------------------
       subroutine TaylorCTO(nblock,nstatev,nprops,
      .                     ang,props,dt,D,stressOld,stateOld,
@@ -206,9 +214,9 @@
      .       defgradOld(nblock,9)
       real*8, intent(out) :: ddsdde(6,6)
 !     Local variables
-      real*8 Dissipation(nblock), stressNew(nblock,6), 
+      real*8 Dissipation(nblock), stressNew(nblock,6),
      .       stateNew(nblock,nstatev), defgradNew(nblock,9),
-     .       sigma(7), sigTGT(12,6), CTO(6,6), inc(12,6), del(6)
+     .       sigma(7), sigTGT(12,6), inc(12,6), del(6)
       real*8 zero, one, pert, o2pert
       integer i, j, k, kk
       parameter(zero=0.d0, one=1.d0,pert=1e-6,o2pert=1.0/(2.0*pert))
@@ -247,13 +255,7 @@
       do i=1,12,2
         kk = kk+1
         do j=1,6
-          CTO(kk,j) = (sigTGT(i+1,j)-sigTGT(i,j))*o2pert
-        enddo
-      enddo
-!-----------------------------------------------------------------------
-      do i=1,6
-        do j=1,6
-          ddsdde(j,i) = CTO(i,j)
+          ddsdde(j,kk) = (sigTGT(i+1,j)-sigTGT(i,j))*o2pert
         enddo
       enddo
 !-----------------------------------------------------------------------

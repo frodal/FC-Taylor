@@ -9,22 +9,20 @@
 ! output ...
 ! c(n,n) - inverse matrix of A
 ! comments ...
-! the original matrix a(n,n) will be destroyed 
+! the original matrix a(n,n) will be destroyed
 ! during the calculation
 !===========================================================
-      implicit none 
+      implicit none
       integer n
       double precision a(n,n), c(n,n)
       double precision L(n,n), U(n,n), b(n), d(n), x(n)
       double precision coeff
       integer i, j, k
-
 ! step 0: initialization for matrices L and U and b
 ! Fortran 90/95 aloows such operations on matrices
       L=0.0
       U=0.0
       b=0.0
-
 ! step 1: forward elimination
       do k=1, n-1
         do i=k+1,n
@@ -35,8 +33,7 @@
           end do
         end do
       end do
-
-! Step 2: prepare L and U matrices 
+! Step 2: prepare L and U matrices
 ! L matrix is a matrix of the elimination coefficient
 ! + the diagonal elements are 1.0
       do i=1,n
@@ -48,7 +45,6 @@
           U(i,j) = a(i,j)
         end do
       end do
-
 ! Step 3: compute columns of the inverse matrix C
       do k=1,n
         b(k)=1.0

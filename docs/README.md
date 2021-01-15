@@ -14,7 +14,7 @@ To build the FC-Taylor application follow these simple steps.
 
 1. Clone the project from Github (`git clone --recursive https://github.com/frodal/FC-Taylor.git`)
 2. Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/)
-3. Install [Intel Parallel Studio XE](https://software.intel.com/en-us/fortran-compilers) with the Intel Visual Fortran compiler
+3. Install the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers)
 4. Install [Node.js](https://nodejs.org)
 5. Install [Python](https://www.python.org)
 6. Run the `BuildProjectWindows.bat` script, by double-clicking it or using the command line, to compile, build and package the application for Windows x64
@@ -22,10 +22,11 @@ To build the FC-Taylor application follow these simple steps.
 ### Compiling and building for Linux on Linux or using the Windows Subsystem for Linux (WSL)
 
 1. Clone the project from Github (`git clone --recursive https://github.com/frodal/FC-Taylor.git`)
-2. Install gfortran, gcc and g++ (`sudo apt-get install gfortran gcc g++`)
-3. Install Node.js and the Node package manager (`sudo apt-get node.js npm`)
-4. Install Python 3 and pip3 (`sudo apt-get install python3 pip3`)
-5. Run the `BuildProjectLinux.sh` script, by using the command line, to compile and build the application for Linux x64
+2. Install the [Intel oneAPI](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-oneapi-toolkits-via-apt.html) HPC Toolkit including the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers) (Alternatively install the GNU compilers `sudo apt-get install gfortran gcc g++`)
+3. Install the [Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script)
+4. Install Node.js (`nvm install node`)
+5. Install Python 3 and pip3 (`sudo apt-get install python3 python3-pip`)
+6. Run the `BuildProjectLinux.sh` script, by using the command line, to compile and build the application for Linux x64
 
 ### Compiling and building for MacOS on MacOS (darwin)
 
@@ -33,7 +34,8 @@ Your on your own, see the Linux build information for tips.
 
 ### Update GUI dependencies
 
-* Update all GUI dependencies by running `npm update` using the command line in the `FC-Taylor/GUI` directory
+* Check which dependencies that have updates available with `npm outdated` using the command line in the `FC-Taylor/GUI` directory
+* Update all GUI dependencies by running `npm update` using the command line in the `FC-Taylor/GUI` directory, note that this will not update to an update with a greater major version number
 * Update only [Electron](https://electronjs.org/docs/tutorial/first-app#installing-electron) by running `npm install --save-dev electron@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-packager](https://github.com/electron-userland/electron-packager) by running `npm install --save-dev electron-packager@latest` using the command line in the `FC-Taylor/GUI` directory
 * Update only [Electron-installer-windows](https://github.com/electron-userland/electron-installer-windows) by running `npm install --save-dev electron-installer-windows@latest` using the command line in the `FC-Taylor/GUI` directory

@@ -2,7 +2,7 @@
 !                         SUBROUTINE readprops
 !-----------------------------------------------------------------------
 ! Reads information to the FORTRAN program
-! 
+!
 !-----------------------------------------------------------------------
       subroutine readprops(props,nprops,
      .                     planestress,centro,npts,epsdot,wp,ncpus)
@@ -19,7 +19,7 @@
       character*1000 line
       LOGICAL THERE
 !-----------------------------------------------------------------------
-!         Initial and default values
+!     Initial and default values
 !-----------------------------------------------------------------------
       props       = 0.d0
       ios         = 0
@@ -46,7 +46,7 @@
       dummy(11)   = 25.d0
       dummy(12)   = 15.d0
 !-----------------------------------------------------------------------
-!         Reading information/input file
+!     Reading information/input file
 !-----------------------------------------------------------------------
       INQUIRE( FILE=trim('Input/Taylor.inp'), EXIST=THERE )
       if (.not.there) then
@@ -60,11 +60,11 @@
       do while(ios == 0)
       ! Read all the lines that do not begin with "**"
         read(16,fmt='(A)',end=77) line
-        if (line(1:2) .ne. '**') then 
+        if (line(1:2) .ne. '**') then
         ! First find the type of keyword
           if (to_upper(line(1:6)) .eq. '*PROPS') then
             readflag = 1
-            goto 78                
+            goto 78
           elseif (to_upper(line(1:4)) .eq. '*DEF') then
             readflag = 2
             goto 78
@@ -76,7 +76,7 @@
             call sleep(1)
             error stop 'Error code: 13'
           endif
-          ! Then read the input data and assign to scalar/array 
+          ! Then read the input data and assign to scalar/array
           if (readflag .eq. 1) then
             read(line,*,end=78) dummy
             readflag = 0
@@ -90,7 +90,7 @@
    77 continue
       close(unit=16)
 !-----------------------------------------------------------------------
-!         Assigning values to the properties variable
+!     Assigning values to the properties variable
 !-----------------------------------------------------------------------
       props(1) = dummy(1)
       props(2) = dummy(2)
@@ -124,7 +124,7 @@
         wp = 2.d-1
       endif
 !-----------------------------------------------------------------------
-!         Write information
+!     Write information
 !-----------------------------------------------------------------------
       write(6,*) '----------------------------------------------------'
       write(6,*) '|                                                  |'
@@ -133,7 +133,7 @@
       write(6,*) '|              by Bjorn Hakon Frodal               |'
       write(6,*) '|              bjorn.h.frodal@ntnu.no              |'
       write(6,*) '|                                                  |'
-      write(6,*) '|             Copyright (c) 2018-2020              |'
+      write(6,*) '|             Copyright (c) 2018-2021              |'
       write(6,*) '|                Bjorn Hakon Frodal                |'
       write(6,*) '|      Structural Impact Laboratory (SIMLab),      |'
       write(6,*) '|       Department of Structural Engineering,      |'
@@ -147,23 +147,23 @@
       write(6,*) '|                      INPUT                       |'
       write(6,*) '|                                                  |'
       write(6,*) '----------------------------------------------------'
-      write(6,*) 'C11        = ',props(1)
-      write(6,*) 'C12        = ',props(2)
-      write(6,*) 'C44        = ',props(3)
-      write(6,*) 'gamma0_dot = ',props(4)
-      write(6,*) 'm          = ',props(5)
-      write(6,*) 'tau0_c     = ',props(6)
-      write(6,*) 'q          = ',props(7)
-      write(6,*) 'hflag      = ',props(12)
+      write(6,*) 'C11        =',props(1)
+      write(6,*) 'C12        =',props(2)
+      write(6,*) 'C44        =',props(3)
+      write(6,*) 'gamma0_dot =',props(4)
+      write(6,*) 'm          =',props(5)
+      write(6,*) 'tau0_c     =',props(6)
+      write(6,*) 'q          =',props(7)
+      write(6,*) 'hflag      =',props(12)
       if(nint(props(12)).eq.1)then
-        write(6,*) 'theta1     = ',props(13)
-        write(6,*) 'tau1       = ',props(14)
-        write(6,*) 'theta2     = ',props(15)
-        write(6,*) 'tau2       = ',props(16)
+        write(6,*) 'theta1     =',props(13)
+        write(6,*) 'tau1       =',props(14)
+        write(6,*) 'theta2     =',props(15)
+        write(6,*) 'tau2       =',props(16)
       elseif(nint(props(12)).eq.2)then
-        write(6,*) 'h0         = ',props(13)
-        write(6,*) 'tau_s      = ',props(14)
-        write(6,*) 'a          = ',props(15)
+        write(6,*) 'h0         =',props(13)
+        write(6,*) 'tau_s      =',props(14)
+        write(6,*) 'a          =',props(15)
       else
         write(6,*) '!! Error'
         write(6,*) 'Unknown hardening model'
@@ -173,8 +173,8 @@
       endif
       write(6,*) '----------------------------------------------------'
       write(6,*) 'Imposed strain rate: ',epsdot
-      write(6,*) 'Maximum plastic work: ',wp
-      write(6,*) 'Resolution of strain space grid, npts = ',npts
+      write(6,*) 'Maximum plastic work:',wp
+      write(6,*) 'Resolution of strain space grid, npts =',npts
       if(planestress.eq.1)then
         write(6,*) 'Stress space dimension: 2D'
       else
@@ -186,7 +186,7 @@
         write(6,*) 'Centrosymmetry not used'
       endif
 !-----------------------------------------------------------------------
-!   The following code is compiled if OpenMP is used
+!     The following code is compiled if OpenMP is used
 !-----------------------------------------------------------------------
 !$    if(tmpcpu.eq.0) then
 !$      ncpus = OMP_get_num_procs()
@@ -197,7 +197,7 @@
 !$    else
 !$      ncpus = tmpcpu
 !$    endif
-      write(6,*) 'Number of threads/cpus used: ',ncpus
+      write(6,*) 'Number of threads/cpus used:',ncpus
       write(6,*) '----------------------------------------------------'
 !-----------------------------------------------------------------------
       return
