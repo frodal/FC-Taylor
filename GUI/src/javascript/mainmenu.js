@@ -51,7 +51,7 @@ function CreateMenu(template = [
             },
             {
                 label: 'Learn More',
-                click() { shell.openExternal('http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html') }
+                click() { shell.openExternal('https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html') }
             },
             {
                 type: 'separator'
