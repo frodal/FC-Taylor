@@ -91,7 +91,7 @@ function initUpdater(opts) {
 
 function validateInput(opts) {
     const defaults = {
-        host: 'http://folk.ntnu.no/frodal/Cite/Projects',
+        host: 'https://folk.ntnu.no/frodal/Cite/Projects',
         updateInterval: '10 minutes',
         logger: console,
         notifyUser: true
@@ -102,8 +102,8 @@ function validateInput(opts) {
     const electron = opts.electron || require('electron')
 
     assert(
-        isURL(host) && host.startsWith('http'),
-        'host must be a valid HTTP or HTTPS URL'
+        isURL(host) && host.startsWith('https'),
+        'host must be a valid HTTPS URL'
     )
 
     assert(

@@ -6,7 +6,7 @@ const bent = require('bent')
 const getJSON = bent('json')
 const ms = require('ms')
 
-const LicenseLocation = 'http://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.json';
+const LicenseLocation = 'https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.json';
 
 async function CheckLicense() {
     getJSON(LicenseLocation)
