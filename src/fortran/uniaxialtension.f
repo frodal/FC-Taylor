@@ -91,6 +91,7 @@
 !-----------------------------------------------------------------------
 !       UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
+        stressOld  = stressNew
         stateOld   = stateNew
         defgradOld = defgradNew
         work = work+sigma(7)

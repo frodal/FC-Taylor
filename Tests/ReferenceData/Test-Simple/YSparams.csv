@@ -1,20 +1,20 @@
                     parameters,values
          \hat{c}^{\prime}_{12},   1.00000000
          \hat{c}^{\prime}_{13},   1.00000000
-         \hat{c}^{\prime}_{21},   0.38613169
-         \hat{c}^{\prime}_{23},   0.62714348
-         \hat{c}^{\prime}_{31},   1.21847198
-         \hat{c}^{\prime}_{32},   1.05626170
-         \hat{c}^{\prime}_{44},   1.61435467
+         \hat{c}^{\prime}_{21},   0.38592161
+         \hat{c}^{\prime}_{23},   0.62668662
+         \hat{c}^{\prime}_{31},   1.21852351
+         \hat{c}^{\prime}_{32},   1.05639937
+         \hat{c}^{\prime}_{44},   1.61434530
          \hat{c}^{\prime}_{55},   1.00000000
          \hat{c}^{\prime}_{66},   1.00000000
-  \hat{c}^{\prime \prime}_{12},   0.95893015
-  \hat{c}^{\prime \prime}_{13},   1.15286104
-  \hat{c}^{\prime \prime}_{21},  -0.35908015
-  \hat{c}^{\prime \prime}_{23},  -0.58732947
-  \hat{c}^{\prime \prime}_{31},  -0.22699740
-  \hat{c}^{\prime \prime}_{32},  -1.29095943
-  \hat{c}^{\prime \prime}_{44},  -1.04728434
+  \hat{c}^{\prime \prime}_{12},   0.95896449
+  \hat{c}^{\prime \prime}_{13},   1.15282131
+  \hat{c}^{\prime \prime}_{21},  -0.35928931
+  \hat{c}^{\prime \prime}_{23},  -0.58765483
+  \hat{c}^{\prime \prime}_{31},  -0.22688250
+  \hat{c}^{\prime \prime}_{32},  -1.29086460
+  \hat{c}^{\prime \prime}_{44},  -1.04731026
   \hat{c}^{\prime \prime}_{55},   1.00000000
   \hat{c}^{\prime \prime}_{66},   1.00000000
                              a,   8.00000000

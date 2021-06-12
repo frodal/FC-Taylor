@@ -20,6 +20,7 @@
 !-----------------------------------------------------------------------
 !     Subroutines
 !-----------------------------------------------------------------------
+#define SCMM_HYPO_DFLAG 0
 #include "../../Dependencies/SCMM-hypo/Hypo.f"
 #include "../../Dependencies/SCMM-hypo/Subs.f"
       include './functions.f'
@@ -42,7 +43,7 @@
       integer nDmax,nprops, iComplete
       integer k,ITER,ndef,i,km,planestress,centro,npts,ncpus
       integer NITER,NSTATEV,nblock,Nang
-      parameter(nprops=16,NSTATEV=34)
+      parameter(nprops=16,NSTATEV=28)
       real*8 epsdot,wp
       CHARACTER*12 DATE1,TIME1
 !-----------------------------------------------------------------------
@@ -215,6 +216,7 @@
 !-----------------------------------------------------------------------
 !         UPDATE VARIABLES FOR NEXT TIME STEP
 !-----------------------------------------------------------------------
+            stressOld = stressNew
             STATEOLD = STATENEW
             defgradOld = defgradNew
             do i=1,nblock
