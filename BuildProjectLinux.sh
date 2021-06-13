@@ -13,11 +13,16 @@ fi
 
 rm -f functions.mod
 
+python3 -m venv .env --clear
+source ./.env/bin/activate
+
 pushd "src/python"
 
 python3 -m pip install -r requirements.txt
 
 python3 -m PyInstaller --onefile --noconfirm --clean --log-level=WARN --distpath=../../GUI/Core --name=FC-Taylor-Calibrate.exe fc-taylor-calibrate.py
+
+deactivate
 
 rm -rf __pycache__
 rm -rf build

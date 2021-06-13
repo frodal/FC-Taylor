@@ -19,8 +19,10 @@ if %ERRORLEVEL% neq 0 (
 if exist main.obj del main.obj
 if exist functions.mod del functions.mod
 
+call python -m venv .env --clear --upgrade-deps
+call ".env\Scripts\activate.bat"
 pushd %~dp0\src\python\
-pip install -r requirements.txt
+call pip install -r requirements.txt
 call pyinstaller --onefile --noconfirm --clean ^
                  --log-level=WARN ^
                  --distpath=../../GUI/Core ^
@@ -32,6 +34,7 @@ if %ERRORLEVEL% neq 0 (
   rmdir /s /q build
   if exist FC-Taylor-Calibrate.spec del FC-Taylor-Calibrate.spec
   popd
+  call deactivate
   echo.
   echo Could not build the Python calibration script!
   echo The program was therefore not built!
@@ -43,6 +46,7 @@ rmdir /s /q __pycache__
 rmdir /s /q build
 if exist FC-Taylor-Calibrate.spec del FC-Taylor-Calibrate.spec
 popd
+call deactivate
 
 copy docs\LICENSE.md GUI\LICENSE.md /y
 
