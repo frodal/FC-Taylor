@@ -140,7 +140,7 @@
       write(6,*) '|  Norwegian University of Science and Technology, |'
       write(6,*) '|                Trondheim, Norway.                |'
       write(6,*) '|                                                  |'
-      write(6,*) '|                      v0.10.0                     |'
+      write(6,*) '|                      v0.11.0                     |'
       write(6,*) '|                                                  |'
       write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
