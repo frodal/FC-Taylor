@@ -1,5 +1,5 @@
-numpy>=1.20.3
-scipy>=1.6.3
+numpy>=1.21.2
+scipy>=1.7.1
 argparse>=1.4.0
 pathlib>=1.0.1
-pyinstaller>=4.3
+pyinstaller>=4.5.1
