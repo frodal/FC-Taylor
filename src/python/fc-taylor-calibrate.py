@@ -11,7 +11,7 @@ class Space(enum.Enum):
     free2D  = enum.auto()
     fixed2D = enum.auto()
 
-def yieldfunction3D(s11,s22,s33,s12,s23,s31,c):
+def yieldfunction3D(s11,s22,s33,s12,s23,s31,c,exponent):
     ## YLD2004-18p yield surface f=(phi/4)^(1/m)-sigma_y
     # Yield surface parameters
     c1_12=1.0
@@ -69,10 +69,10 @@ def yieldfunction3D(s11,s22,s33,s12,s23,s31,c):
     
     return (phi/4.0)**(1.0/m)-1.0
 
-def yieldfunction3Dfixed(s11,s22,s33,s12,s23,s31,c):
-    return yieldfunction3D(s11,s22,s33,s12,s23,s31,np.append(c,[8.0]))
+def yieldfunction3Dfixed(s11,s22,s33,s12,s23,s31,c,exponent):
+    return yieldfunction3D(s11,s22,s33,s12,s23,s31,np.append(c,[exponent]),exponent)
 
-def yieldfunction2D(s11,s22,s33,s12,s23,s31,c):
+def yieldfunction2D(s11,s22,s33,s12,s23,s31,c,exponent):
     ## YLD2004-18p yield surface f=(phi/4)^(1/m)-sigma_y
     # Yield surface parameters
     c1_12=1.0
@@ -130,8 +130,8 @@ def yieldfunction2D(s11,s22,s33,s12,s23,s31,c):
     
     return (phi/4.0)**(1.0/m)-1.0
 
-def yieldfunction2Dfixed(s11,s22,s33,s12,s23,s31,c):
-    return yieldfunction2D(s11,s22,s33,s12,s23,s31,np.append(c,[8.0]))
+def yieldfunction2Dfixed(s11,s22,s33,s12,s23,s31,c,exponent):
+    return yieldfunction2D(s11,s22,s33,s12,s23,s31,np.append(c,[exponent]),exponent)
 
 def LoadTests(path):
     s11=[]
@@ -151,10 +151,10 @@ def LoadTests(path):
             s31.append(float(line.split(',')[5]))
     return np.array(s11), np.array(s22), np.array(s33), np.array(s12), np.array(s23), np.array(s31)
 
-def ObjFun(c,s11,s22,s33,s12,s23,s31,YS):
-    return sum(ObjFunVec(c,s11,s22,s33,s12,s23,s31,YS)**2)
+def ObjFun(c,s11,s22,s33,s12,s23,s31,YS,exponent):
+    return sum(ObjFunVec(c,s11,s22,s33,s12,s23,s31,YS,exponent)**2)
 
-def ObjFunVec(c,s11,s22,s33,s12,s23,s31,YS):
+def ObjFunVec(c,s11,s22,s33,s12,s23,s31,YS,exponent):
     
     N=s11.size
     f=np.zeros(N)
@@ -170,7 +170,7 @@ def ObjFunVec(c,s11,s22,s33,s12,s23,s31,YS):
         return f
     
     for k in range(N):
-        f[k]=YS(s11[k],s22[k],s33[k],s12[k],s23[k],s31[k],c)
+        f[k]=YS(s11[k],s22[k],s33[k],s12[k],s23[k],s31[k],c,exponent)
     return f
 
 def GetYS(c):
@@ -220,10 +220,10 @@ def Normalize(s11,s22,s33,s12,s23,s31):
     s31=s31/s0
     return s11, s22, s33, s12, s23, s31
 
-def Correct(c,s11,s22,s33,s12,s23,s31,choice):
+def Correct(c,s11,s22,s33,s12,s23,s31,choice,exponent):
     # Calculate the normalized yield stress along RD/ED
     YieldFunc = GetYS(GetInitial(choice))
-    normS = 1.0/(YieldFunc(1.0,0.0,0.0,0.0,0.0,0.0,c)+1.0)
+    normS = 1.0/(YieldFunc(1.0,0.0,0.0,0.0,0.0,0.0,c,exponent)+1.0)
 
     # Correct the normalized yield points
     s11 = s11/normS
@@ -234,7 +234,7 @@ def Correct(c,s11,s22,s33,s12,s23,s31,choice):
     s31 = s31/normS
     return s11, s22, s33, s12, s23, s31
 
-def SaveResult(c,folder):
+def SaveResult(c,folder,exponent):
     parameterName = [r'\hat{c}^{\prime}_{12}',
                      r'\hat{c}^{\prime}_{13}',
                      r'\hat{c}^{\prime}_{21}',
@@ -266,7 +266,7 @@ def SaveResult(c,folder):
         elif N==16:
             for i in range(N):
                 file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
-            file.write('%30s, %12.8f' % (parameterName[18],8.0))
+            file.write('%30s, %12.8f' % (parameterName[18],exponent))
         elif N==13:
             for i in range(5):
                 file.write('%30s, %12.8f\n' % (parameterName[i+2],c[i]))
@@ -286,9 +286,9 @@ def SaveResult(c,folder):
                 file.write('%30s, %12.8f\n' % (parameterName[i+4],c[i]))
             file.write('%30s, %12.8f\n' % (parameterName[16],1.0))
             file.write('%30s, %12.8f\n' % (parameterName[17],1.0))
-            file.write('%30s, %12.8f' % (parameterName[18],8.0))
+            file.write('%30s, %12.8f' % (parameterName[18],exponent))
 
-def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice):
+def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice, exponent):
     # Basinhopping input
     niter=200 		# No. iteration in basinhopping
     T=0.001			# The "temperature" parameter
@@ -301,14 +301,14 @@ def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice):
     YieldFunc = GetYS(c0)
 
     c = c0
-    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc)
+    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc, exponent)
 
     # Trying to find global minimum
     for i in range(0, 5):
-        res = optimize.basinhopping(ObjFun, c0, niter=niter, T=T, stepsize=stepsize+0.1*i, minimizer_kwargs={'method': solver, 'args': (s11, s22, s33, s12, s23, s31, YieldFunc)}, disp=disp)
+        res = optimize.basinhopping(ObjFun, c0, niter=niter, T=T, stepsize=stepsize+0.1*i, minimizer_kwargs={'method': solver, 'args': (s11, s22, s33, s12, s23, s31, YieldFunc, exponent)}, disp=disp)
 
         ctrial = res.x
-        ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc)
+        ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc, exponent)
 
         if ftrial < f:
             c = ctrial
@@ -316,7 +316,7 @@ def OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice):
 
     return c
 
-def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice):
+def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice, exponent):
     # input
     niter=1000 		# Max no. iteration
     solver='SLSQP'	# Minimizer to be used ('SLSQP','BFGS',...)
@@ -327,12 +327,12 @@ def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice):
     YieldFunc = GetYS(c0)
 
     c = c0
-    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc)
+    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc, exponent)
 
-    res = optimize.minimize(ObjFun, c0, args=(s11, s22, s33, s12, s23, s31, YieldFunc), method=solver,options={'maxiter': niter, 'disp': disp})
+    res = optimize.minimize(ObjFun, c0, args=(s11, s22, s33, s12, s23, s31, YieldFunc, exponent), method=solver,options={'maxiter': niter, 'disp': disp})
 
     ctrial = res.x
-    ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc)
+    ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc, exponent)
 
     if ftrial < f:
         c = ctrial
@@ -340,7 +340,7 @@ def OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice):
 
     return c
 
-def OptimizeLS(s11, s22, s33, s12, s23, s31, choice):
+def OptimizeLS(s11, s22, s33, s12, s23, s31, choice, exponent):
     # input
     solver='lm'	# Minimizer to be used
     ##################################################################
@@ -349,12 +349,12 @@ def OptimizeLS(s11, s22, s33, s12, s23, s31, choice):
     YieldFunc = GetYS(c0)
 
     c = c0
-    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc)
+    f = ObjFun(c, s11, s22, s33, s12, s23, s31, YieldFunc, exponent)
 
-    res = optimize.least_squares(ObjFunVec, c0, args=(s11, s22, s33, s12, s23, s31, YieldFunc), method=solver)
+    res = optimize.least_squares(ObjFunVec, c0, args=(s11, s22, s33, s12, s23, s31, YieldFunc, exponent), method=solver)
 
     ctrial = res.x
-    ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc)
+    ftrial = ObjFun(ctrial, s11,s22, s33, s12, s23, s31, YieldFunc, exponent)
 
     if ftrial < f:
         c = ctrial
@@ -362,11 +362,11 @@ def OptimizeLS(s11, s22, s33, s12, s23, s31, choice):
 
     return c
 
-def Calibrate(s11, s22, s33, s12, s23, s31, choice):
+def Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent):
     if len(GetInitial(choice))>len(s11):
-        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice)
+        c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice, exponent)
     else:
-        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choice)
+        c = OptimizeLS(s11, s22, s33, s12, s23, s31, choice, exponent)
     # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice)
     return c
 
@@ -379,17 +379,29 @@ def main():
                         help='Choose where the test is run.'+
                         ' 3D: 3-dimensional calibration.'+
                         ' 2D: 2-dimensional calibration (Default option).')
+    parser.add_argument('--exponent',default=8.0,type=float,
+                        help='Choose an exponent for the yield surface.')
+    parser.add_argument('--calibrateExponent',action='store_true',
+                        help='Choose the exponent should be calibrated.')
     args = parser.parse_args()
     fileName = Path(args.inputFile)
     spaceInput = args.space
+    exponent = args.exponent
+    calibrateExponent = args.calibrateExponent
 
     assert (fileName.exists()),('Could not find input file: '+str(fileName))
 
     choice = Space.free3D
     if spaceInput == '2D':
-        choice = Space.fixed2D
+        if calibrateExponent:
+            choice = Space.free2D
+        else:
+            choice = Space.fixed2D
     elif spaceInput == '3D':
-        choice = Space.fixed3D
+        if calibrateExponent:
+            choice = Space.free3D
+        else:
+            choice = Space.fixed3D
 
     # Loading CP-FEM data
     s11, s22, s33, s12, s23, s31 = LoadTests(fileName)
@@ -397,17 +409,18 @@ def main():
     s11, s22, s33, s12, s23, s31 = Normalize(s11,s22,s33,s12,s23,s31)
 
     # Initial calibration
-    c = Calibrate(s11, s22, s33, s12, s23, s31, choice)
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent)
 
     # Correct yield stress based on normalized yield stress along RD/ED, which should be 1
-    s11, s22, s33, s12, s23, s31 = Correct(c,s11,s22,s33,s12,s23,s31,choice)
+    s11, s22, s33, s12, s23, s31 = Correct(c,s11,s22,s33,s12,s23,s31,choice,exponent)
 
     # Final calibration
-    c = Calibrate(s11, s22, s33, s12, s23, s31, choice)
+    c = Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent)
 
     # Writes the parameters to a file
-    SaveResult(c,fileName.parent)
+    SaveResult(c,fileName.parent,exponent)
 
 ##################################################################
 if __name__=="__main__":
     main()
+    
