@@ -278,6 +278,28 @@
                 <p>
                     Calibrate the Yld2004-18p yield surface to the calculated data points
                 </p>
+                <p>
+                    <form>
+                        <div class="form-row">
+                            <div class="col">
+                                Yield surface exponent, \( a \geq 2 \)
+                                <select class="form-control" id="YSexponentOption">
+                                    <option selected>User-defined exponent</option>
+                                    <option>Calibrate exponent</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <div id=YSexponentContainer>
+                                    <br>
+                                    <input type="text" class="form-control" value="8" id="YSexponent">
+                                </div>
+                            </div>
+                            <div class="col">
+                                
+                            </div>
+                        </div>
+                    </form>
+                </p>
                 <div class="btn-container">
                     <button class="btn btn-secondary" id="CalibrateYS" disabled>Start calibration</button>
                     <button class="btn btn-secondary" id="SaveCalibrationBtn" disabled>Save parameters</button>

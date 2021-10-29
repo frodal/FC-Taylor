@@ -83,7 +83,7 @@ function SetupWorkingDir() {
         if (!openMPdllTempPath.exists) {
             fs.copyFileSync(openMPdll, openMPdllTempPath);
         }
-    // } else if (process.platform === 'linux') {
+        // } else if (process.platform === 'linux') {
         // OpenMP is statically linked for linux with the Intel compiler
     } else if (process.platform === 'darwin') {
         // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
@@ -141,8 +141,7 @@ startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
-    if (!LicenseOK)
-    {
+    if (!LicenseOK) {
         ipcRenderer.send('CheckLicensePlease');
         return
     }
@@ -261,6 +260,10 @@ window.addEventListener('beforeunload', () => {
 calibrateYsBtn.addEventListener('click', (event) => {
     if (!LicenseOK)
         return
+    if (!inputData.SafeExponent()) {
+        ipcRenderer.send('check-input-dialog');
+        return
+    }
     let outfilePath = path.join(outputPath, 'output.txt');
     // Sets the current working directory of the selected program to be its own directory
     let options = { cwd: path.dirname(outfilePath) };
@@ -274,11 +277,19 @@ calibrateYsBtn.addEventListener('click', (event) => {
     calibMsg.innerHTML = 'Calibrating';
     try // Try to execute the program and sets a callback for when the program terminates
     {
-        execFile(calibratePath, [outfilePath, '--space', isPlaneStress ? '2D' : '3D'], options, function (err, data) {
+        let args = [outfilePath, '--space', isPlaneStress ? '2D' : '3D'];
+        if (inputData.YSexponentOption.selectedIndex == 0) {
+            args.push('--exponent', inputData.YSexponent.value);
+        } else {
+            args.push('--calibrateExponent');
+        }
+        execFile(calibratePath, args, options, function (err, data) {
             startProgramBtn.disabled = false;
             calibrateYsBtn.disabled = false;
             if (err) {
                 saveCalibrationBtn.disabled = true;
+                console.log(err);
+                console.log(data);
                 ipcRenderer.send('open-errorCalibration-dialog');
             } else {
                 saveCalibrationBtn.disabled = false;
