@@ -222,7 +222,7 @@ def Normalize(s11, s22, s33, s12, s23, s31):
     for i in range(s11.size):
         estimate = np.sqrt(s22[i]**2+s33[i]**2+2*s12[i]
                            ** 2+2*s23[i]**2+2*s31[i]**2)
-        if (estimate < er):
+        if estimate < er:
             k = i
             er = estimate
 
@@ -252,6 +252,47 @@ def Correct(c, s11, s22, s33, s12, s23, s31, choice, exponent):
     s31 = s31/normS
     return s11, s22, s33, s12, s23, s31
 
+
+def CorrectYieldStress(c, choice, exponent):
+    
+    YieldFunc = GetYS(GetInitial(choice))
+    normS = 2.0
+    while abs(normS-1.0)>1.0e-6:
+        # Calculate the normalized yield stress along RD/ED
+        normS = 1.0/(YieldFunc(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, c, exponent)+1.0)
+        c = CorrectYSparmeters(c, normS, choice)
+
+    return c
+
+def CorrectYSparmeters(c, normS, choice):
+    # Correct the YS parameters
+    for i in range(len(c)-1):
+        c[i] = c[i]*normS
+
+    if choice == Space.fixed2D:
+        c[-1] = c[-1]*normS
+        c[0] = c[0]+normS-1
+        c[2] = c[2]+normS-1
+        c[7] = c[7]+normS-1
+        c[9] = c[9]+normS-1
+    elif choice == Space.free2D:
+        c[0] = c[0]+normS-1
+        c[2] = c[2]+normS-1
+        c[7] = c[7]+normS-1
+        c[9] = c[9]+normS-1
+    elif choice == Space.fixed3D:
+        c[-1] = c[-1]*normS
+        c[0] = c[0]+normS-1
+        c[2] = c[2]+normS-1
+        c[9] = c[9]+normS-1
+        c[11] = c[11]+normS-1
+    elif choice == Space.free3D:
+        c[0] = c[0]+normS-1
+        c[2] = c[2]+normS-1
+        c[9] = c[9]+normS-1
+        c[11] = c[11]+normS-1
+    
+    return c
 
 def SaveResult(c, folder, exponent):
     parameterName = [r'\hat{c}^{\prime}_{12}',
@@ -437,15 +478,11 @@ def main():
     # Normalize data by the yield stress
     s11, s22, s33, s12, s23, s31 = Normalize(s11, s22, s33, s12, s23, s31)
 
-    # Initial calibration
+    # Calibration
     c = Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent)
 
     # Correct yield stress based on normalized yield stress along RD/ED, which should be 1
-    s11, s22, s33, s12, s23, s31 = Correct(
-        c, s11, s22, s33, s12, s23, s31, choice, exponent)
-
-    # Final calibration
-    c = Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent)
+    c = CorrectYieldStress(c, choice, exponent)
 
     # Writes the parameters to a file
     SaveResult(c, fileName.parent, exponent)
