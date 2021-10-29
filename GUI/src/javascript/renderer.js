@@ -288,8 +288,6 @@ calibrateYsBtn.addEventListener('click', (event) => {
             calibrateYsBtn.disabled = false;
             if (err) {
                 saveCalibrationBtn.disabled = true;
-                console.log(err);
-                console.log(data);
                 ipcRenderer.send('open-errorCalibration-dialog');
             } else {
                 saveCalibrationBtn.disabled = false;
