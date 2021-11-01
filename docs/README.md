@@ -14,7 +14,7 @@ To build the FC-Taylor application follow these simple steps.
 
 1. Clone the project from Github (`git clone --recursive https://github.com/frodal/FC-Taylor.git`)
 2. Install [Microsoft Visual Studio](https://visualstudio.microsoft.com/)
-3. Install the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers)
+3. Install the Intel oneAPI Base and HPC Toolkits including the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers)
 4. Install [Node.js](https://nodejs.org)
 5. Install [Python](https://www.python.org)
 6. Run the `BuildProjectWindows.bat` script, by double-clicking it or using the command line, to compile, build and package the application for Windows x64
@@ -22,7 +22,7 @@ To build the FC-Taylor application follow these simple steps.
 ### Compiling and building for Linux on Linux or using the Windows Subsystem for Linux (WSL)
 
 1. Clone the project from Github (`git clone --recursive https://github.com/frodal/FC-Taylor.git`)
-2. Install the [Intel oneAPI](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-oneapi-toolkits-via-apt.html) HPC Toolkit including the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers) (Alternatively install the GNU compilers `sudo apt-get install gfortran gcc g++`)
+2. Install the [Intel oneAPI](https://software.intel.com/content/www/us/en/develop/articles/installing-intel-oneapi-toolkits-via-apt.html) Base and HPC Toolkits including the [Intel Visual Fortran Compiler](https://software.intel.com/en-us/fortran-compilers) (Alternatively install the GNU compilers `sudo apt-get install gfortran gcc g++`)
 3. Install the [Node Version Manager](https://github.com/nvm-sh/nvm#install--update-script)
 4. Install Node.js (`nvm install node`)
 5. Install Python 3 and pip3 (`sudo apt-get install python3 python3-pip`)
