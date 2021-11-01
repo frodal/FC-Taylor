@@ -435,7 +435,7 @@ def Calibrate(s11, s22, s33, s12, s23, s31, choice, exponent):
         c = OptimizeMinimize(s11, s22, s33, s12, s23, s31, choice, exponent)
     else:
         c = OptimizeLS(s11, s22, s33, s12, s23, s31, choice, exponent)
-    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice)
+    # c = OptimizeBasinhopping(s11, s22, s33, s12, s23, s31, choice, exponent)
     return c
 
 
