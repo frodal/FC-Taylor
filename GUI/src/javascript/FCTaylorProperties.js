@@ -22,6 +22,10 @@ class FCTaylorProperties {
         this.ncpu = document.getElementById('ncpu');
         this.nStressPoints = document.getElementById('nStressPoints');
 
+        this.YSexponentContainer = document.getElementById('YSexponentContainer');
+        this.YSexponent = document.getElementById('YSexponent');
+        this.YSexponentOption = document.getElementById('YSexponentOption');
+
         // Handle multi-threading
         // Set up options to select the number of cores to use
         for (let i = 1; i < os.cpus().length; ++i) {
@@ -43,6 +47,14 @@ class FCTaylorProperties {
         });
         this.npts.addEventListener('input', (event) => {
             this.UpdateNstressPoints();
+        });
+
+        this.YSexponentOption.addEventListener('change', (event) => {
+            if (this.YSexponentOption.selectedIndex == 0) {
+                this.YSexponentContainer.style.display = 'block';
+            } else {
+                this.YSexponentContainer.style.display = 'none';
+            }
         });
     }
 
@@ -162,6 +174,11 @@ ${this.planeStress.checked ? 1 : 0}, ${this.centro.checked ? 1 : 0}, ${parseInt(
                 && (utils.isNumber(this.npts.value) && parseInt(this.npts.value) >= 2)
                 && utils.isPositiveNumber(this.epsdot.value) && utils.isPositiveNumber(this.wpc.value);
         }
+    }
+
+    // Check if the exponent from the user is greater or equal to 2
+    SafeExponent() {
+        return utils.isNumber(this.YSexponent.value) && parseFloat(this.YSexponent.value) >= 2;
     }
 }
 
