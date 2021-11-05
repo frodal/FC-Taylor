@@ -37,6 +37,7 @@
     "gen-icon-mac": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
   },
   "dependencies": {
+    "about-window": "^1.15.2",
     "bent": "^7.3.12",
     "csv-parser": "^3.0.0",
     "electron-is-dev": "^2.0.0",

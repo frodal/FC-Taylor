@@ -2,9 +2,13 @@ const { app, Menu, shell, dialog, nativeImage, BrowserWindow } = require('electr
 const path = require('path');
 const fs = require('fs');
 const LicenseChecker = require('./license');
+const openAboutWindow = require('about-window').default;
 
 const appName = app.name;
-const appIcon = nativeImage.createFromPath(path.join(__dirname, '../../assets/icons/png/64x64.png'))
+const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
+const appIcon = nativeImage.createFromPath(appIconPath);
+const bugReportURL = 'https://gitreports.com/issue/frodal/FC-Taylor';
+const defaultLicenseString = 'Copyright (c) 2018-2021 Bjørn Håkon Frodal';
 let licenseString = '';
 
 function GetLicense() {
@@ -12,7 +16,7 @@ function GetLicense() {
         try {
             licenseString = fs.readFileSync(path.join(__dirname, '../../LICENSE.md'));
         } catch (err) {
-            licenseString = 'Copyright (c) 2018-2021 Bjørn Håkon Frodal';
+            licenseString = defaultLicenseString;
         }
     }
     return licenseString;
@@ -47,7 +51,7 @@ function CreateMenu(template = [
         submenu: [
             {
                 label: 'Report Issue',
-                click() { shell.openExternal('https://gitreports.com/issue/frodal/FC-Taylor') }
+                click() { shell.openExternal(bugReportURL) }
             },
             {
                 label: 'Learn More',
@@ -83,17 +87,10 @@ function CreateMenu(template = [
             {
                 label: 'About',
                 click() {
-                    dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
-                        type: "info",
-                        title: 'About ' + appName,
-                        message: appName + "\n" +
-                            "Version: " + app.getVersion() + "\n\n" +
-                            "Built with \n" +
-                            "Electron: " + process.versions.electron + "\n" +
-                            "Chrome: " + process.versions.chrome + "\n" +
-                            "Node.js: " + process.versions.node,
-                        buttons: ['Ok'],
-                        icon: appIcon
+                    openAboutWindow({
+                        icon_path: appIconPath,
+                        bug_report_url: bugReportURL,
+                        copyright: defaultLicenseString
                     });
                 }
             }
