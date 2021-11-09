@@ -4,6 +4,3 @@
 [submodule "GUI/Dependencies/Montserrat"]
 	path = GUI/Dependencies/Montserrat
 	url = https://github.com/JulietaUla/Montserrat.git
-[submodule "GUI/Dependencies/dark-mode-switch"]
-	path = GUI/Dependencies/dark-mode-switch
-	url = https://github.com/coliff/dark-mode-switch.git
