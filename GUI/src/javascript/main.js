@@ -8,6 +8,7 @@ const path = require('path');
 
 const ToolbarMenu = require('./mainmenu');
 const LicenseChecker = require('./license');
+const DarkMode = require('./darkMode');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -81,3 +82,4 @@ app.on('activate', function () {
 // code. You can also put them in separate files and require them here.
 require('./dialog');
 LicenseChecker.Init();
+DarkMode.Init();
