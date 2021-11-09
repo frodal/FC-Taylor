@@ -13,6 +13,14 @@ const DarkMode = require('./darkMode');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let isReadyOrFinishedLoading = false;
+
+function showWindowIfReadyAndFinishedLoading() {
+    if (isReadyOrFinishedLoading)
+        mainWindow.show()
+    else
+        isReadyOrFinishedLoading = true;
+}
 
 function createWindow() {
     // Create the browser window.
@@ -32,7 +40,9 @@ function createWindow() {
         });
 
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, '../html/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../html/index.html')).then(() => {
+        showWindowIfReadyAndFinishedLoading();
+    });
 
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
@@ -47,7 +57,7 @@ function createWindow() {
 
     // Shows the window once it is loaded and ready to be displayed
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
+        showWindowIfReadyAndFinishedLoading();
     });
 
     // Sets the application menu, i.e., 'File', 'Edit' etc. 
