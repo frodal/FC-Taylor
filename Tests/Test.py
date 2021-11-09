@@ -134,7 +134,7 @@ def PostProcess(tests, shouldPlot=False):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='Run tests for the SCMM-hypo subroutine.')
+        description='Run tests for the FC-Taylor application.')
     parser.add_argument('action', type=str, choices=['run', 'clean', 'post'],
                         help='Choose what to do.' +
                         ' "post": For post-processing the results.')
