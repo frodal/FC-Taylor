@@ -4,15 +4,14 @@
 
 const os = require('os');
 const fs = require('fs');
-const path = require('path');
 
-const mat = require('./Material');
 const utils = require('./Utils');
 
 class FCTaylorProperties {
 
 
     constructor() {
+        const mat = require('./Material');
         this.material = new mat.Material();
         this.epsdot = document.getElementById('epsdot');
         this.wpc = document.getElementById('wpc');
@@ -151,6 +150,7 @@ ${this.planeStress.checked ? 1 : 0}, ${this.centro.checked ? 1 : 0}, ${parseInt(
 
 
     SaveInput(inputPath, texFile) {
+        const path = require('path');
         this.ExportTaylor(path.join(inputPath, 'Taylor.inp'));
         fs.copyFileSync(texFile, path.join(inputPath, 'Euler.inp'));
     }

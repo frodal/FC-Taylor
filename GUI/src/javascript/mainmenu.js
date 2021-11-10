@@ -1,8 +1,5 @@
 const { app, Menu, shell, dialog, nativeImage, BrowserWindow } = require('electron');
 const path = require('path');
-const fs = require('fs');
-const LicenseChecker = require('./license');
-const openAboutWindow = require('about-window').default;
 
 const appName = app.name;
 const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
@@ -14,6 +11,7 @@ let licenseString = '';
 function GetLicense() {
     if (licenseString === '') {
         try {
+            const fs = require('fs');
             licenseString = fs.readFileSync(path.join(__dirname, '../../LICENSE.md'));
         } catch (err) {
             licenseString = defaultLicenseString;
@@ -79,7 +77,10 @@ function CreateMenu(template = [
             },
             {
                 label: 'Check for Updates',
-                click() { LicenseChecker.CheckVersion() }
+                click() { 
+                    const LicenseChecker = require('./license');
+                    LicenseChecker.CheckVersion();
+                }
             },
             {
                 type: 'separator'
@@ -87,6 +88,7 @@ function CreateMenu(template = [
             {
                 label: 'About',
                 click() {
+                    const openAboutWindow = require('about-window').default;
                     openAboutWindow({
                         icon_path: appIconPath,
                         bug_report_url: bugReportURL,

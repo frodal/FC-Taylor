@@ -4,8 +4,6 @@
 
 const Plotly = require('plotly.js-dist');
 
-const { setImmediatePromise } = require('./Utils');
-
 class Plotter {
 
     constructor(darkSwitch = document.getElementById('darkSwitch')) {
@@ -77,6 +75,7 @@ class Plotter {
                 scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
             }
         };
+        const { setImmediatePromise } = require('./Utils');
         await setImmediatePromise();
         Plotly.react(target, data, layout, config);
     }
