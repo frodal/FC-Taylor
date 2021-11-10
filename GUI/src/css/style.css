@@ -12,6 +12,7 @@ html {
 /* Draggable and selectable regions */
 body {
     -webkit-app-region: drag;
+    user-select: none;
     -webkit-user-select: none;
 }
 h4 {
@@ -27,6 +28,7 @@ td {
 #calibratedParameters {
     font-family: Courier, monospace;
     -webkit-app-region: no-drag;
+    user-select: text;
     -webkit-user-select: text;
 }
 form {
@@ -79,6 +81,7 @@ input {
     line-height: 18px;
     font-family: monospace;
     -webkit-app-region: no-drag;
+    user-select: text;
     -webkit-user-select: text;
     white-space: pre;
     width: fit-content;

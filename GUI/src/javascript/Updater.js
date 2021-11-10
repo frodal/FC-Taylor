@@ -1,9 +1,4 @@
-const assert = require('assert')
-const isURL = require('is-url')
-const isDev = require('electron-is-dev')
 const ms = require('ms')
-
-const LicenseChecker = require('./license');
 
 // TODO: Add support for linux
 const supportedPlatforms = ['darwin', 'win32']
@@ -13,6 +8,7 @@ module.exports = function updater(opts = {}) {
     opts = validateInput(opts)
 
     // don't attempt to update during development
+    const isDev = require('electron-is-dev')
     if (isDev) {
         const message = 'App update config looks good; aborting updates since app is in development mode'
         opts.logger ? opts.logger.log(message) : console.log(message)
@@ -36,6 +32,7 @@ function initUpdater(opts) {
         logger.log(...args)
     }
 
+    const LicenseChecker = require('./license');
     // exit early on unsupported platforms, e.g. `linux`
     if (typeof process !== 'undefined' && process.platform && !supportedPlatforms.includes(process.platform)) {
         log(`Electron's autoUpdater does not support the '${process.platform}' platform`)
@@ -101,6 +98,8 @@ function validateInput(opts) {
     // allows electron to be mocked in tests
     const electron = opts.electron || require('electron')
 
+    const assert = require('assert')
+    const isURL = require('is-url')
     assert(
         isURL(host) && host.startsWith('https'),
         'host must be a valid HTTPS URL'

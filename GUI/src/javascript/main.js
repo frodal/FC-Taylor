@@ -1,19 +1,23 @@
 // Handle installation, update and uninstall events
 if (require('electron-squirrel-startup')) return;
-// update application
-require('./Updater')({ logger: require('electron-log') })
+
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron');
-const path = require('path');
-
-const ToolbarMenu = require('./mainmenu');
-const LicenseChecker = require('./license');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let isReadyOrFinishedLoading = false;
+
+function showWindowIfReadyAndFinishedLoading() {
+    if (isReadyOrFinishedLoading)
+        mainWindow.show()
+    else
+        isReadyOrFinishedLoading = true;
+}
 
 function createWindow() {
+    const path = require('path');
     // Create the browser window.
     mainWindow = new BrowserWindow(
         {
@@ -31,10 +35,15 @@ function createWindow() {
         });
 
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, '../html/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../html/index.html')).then(() => {
+        showWindowIfReadyAndFinishedLoading();
+    });
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    const isDev = require('electron-is-dev')
+    if (isDev) {
+        mainWindow.webContents.openDevTools()
+    }
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
@@ -46,12 +55,13 @@ function createWindow() {
 
     // Shows the window once it is loaded and ready to be displayed
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
+        showWindowIfReadyAndFinishedLoading();
     });
 
     // Sets the application menu, i.e., 'File', 'Edit' etc. 
     // Passing null will suppress the default menu. On Windows and Linux, 
     // this has the additional effect of removing the menu bar from the window.
+    const ToolbarMenu = require('./mainmenu');
     ToolbarMenu.CreateMenu();
 }
 
@@ -79,5 +89,13 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+require('./Updater')({ logger: require('electron-log') }) // update application
+
 require('./dialog');
+
+const LicenseChecker = require('./license');
 LicenseChecker.Init();
+
+const DarkMode = require('./darkMode');
+DarkMode.Init();

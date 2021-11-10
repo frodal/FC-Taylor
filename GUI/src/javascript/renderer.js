@@ -3,13 +3,10 @@
 // All of the Node.js APIs are available in this process.
 
 const { ipcRenderer } = require('electron');
-const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const fsExtra = require('fs-extra');
 
 const { FCTaylorProperties } = require('./FCTaylorProperties');
-const { Plotter } = require('./Plotter');
 const { YieldSurface, DiscreteYieldSurface } = require('./YieldSurface');
 
 const startProgramBtn = document.getElementById('StartProgramBtn');
@@ -52,8 +49,6 @@ let isPlaneStress = inputData.planeStress.checked;
 // Plot variables
 let DiscreteYS = new DiscreteYieldSurface();
 let ys = new YieldSurface();
-const plotter = new Plotter(darkSwitch);
-window.addEventListener('load', () => { setTimeout(UpdateAllPlots, 1000) });
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                 License check                                  //
@@ -161,6 +156,7 @@ startProgramBtn.addEventListener('click', (event) => {
         runMsg.innerHTML = 'Running';
         try // Try to execute the program and sets a callback for when the program terminates
         {
+            const { execFile } = require('child_process');
             subProcess = execFile(corePath, exeCommandArgs, options, function (err, data) {
                 if (err !== null && !(subProcess.killed || killedDueToError)) {
                     ipcRenderer.send('open-error-dialog');
@@ -250,6 +246,7 @@ function DeleteOutput() {
 window.addEventListener('beforeunload', () => {
     // Delete the working directory
     if (fs.existsSync(workDir)) {
+        const fsExtra = require('fs-extra');
         fsExtra.remove(workDir);
     }
 });
@@ -283,6 +280,7 @@ calibrateYsBtn.addEventListener('click', (event) => {
         } else {
             args.push('--calibrateExponent');
         }
+        const { execFile } = require('child_process');
         execFile(calibratePath, args, options, function (err, data) {
             startProgramBtn.disabled = false;
             calibrateYsBtn.disabled = false;
@@ -337,7 +335,11 @@ darkSwitch.addEventListener('change', (event) => {
     UpdateAllPlots();
 });
 
+window.addEventListener('load', () => { setTimeout(UpdateAllPlots, 1000) });
+
 async function UpdateAllPlots() {
+    const { Plotter } = require('./Plotter');
+    const plotter = new Plotter(darkSwitch);
     plotter.plotScatter('plot-window-1', DiscreteYS.s11, DiscreteYS.s22)
     plotter.plotYS('plot-window-2', ys);
     plotter.plotNormStress('plot-window-3', ys);
