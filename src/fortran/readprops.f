@@ -133,7 +133,7 @@
       write(6,*) '|              by Bjorn Hakon Frodal               |'
       write(6,*) '|              bjorn.h.frodal@ntnu.no              |'
       write(6,*) '|                                                  |'
-      write(6,*) '|             Copyright (c) 2018-2021              |'
+      write(6,*) '|             Copyright (c) 2018-2022              |'
       write(6,*) '|                Bjorn Hakon Frodal                |'
       write(6,*) '|      Structural Impact Laboratory (SIMLab),      |'
       write(6,*) '|       Department of Structural Engineering,      |'
