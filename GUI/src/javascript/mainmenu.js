@@ -5,7 +5,7 @@ const appName = app.name;
 const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
 const appIcon = nativeImage.createFromPath(appIconPath);
 const bugReportURL = 'https://gitreports.com/issue/frodal/FC-Taylor';
-const defaultLicenseString = 'Copyright (c) 2018-2021 Bjørn Håkon Frodal';
+const defaultLicenseString = 'Copyright (c) 2018-2022 Bjørn Håkon Frodal';
 let licenseString = '';
 
 function GetLicense() {

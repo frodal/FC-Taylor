@@ -1,4 +1,4 @@
-Copyright (C) 2018-2021 Bjørn Håkon Frodal
+Copyright (C) 2018-2022 Bjørn Håkon Frodal
 Structural Impact Laboratory (SIMLab),
 Department of Structural Engineering,
 Norwegian University of Science and Technology,
