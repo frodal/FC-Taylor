@@ -21,4 +21,4 @@ updates:
       interval: "weekly"
       day: "friday"
     ignore:
-      - dependency-name: "SCMM-hypo"
+      - dependency-name: "Dependencies/SCMM-hypo"
