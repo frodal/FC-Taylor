@@ -84,7 +84,7 @@ class FCTaylorProperties {
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             const items = line.split(',');
-            if (readProps && items.length === 12) {
+            if (readProps && items.length === 12 && !line.startsWith('**')) {
                 this.material.c11.value = utils.isNumber(items[0]) ? parseFloat(items[0]) : items[0];
                 this.material.c12.value = utils.isNumber(items[1]) ? parseFloat(items[1]) : items[1];
                 this.material.c44.value = utils.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
@@ -106,8 +106,9 @@ class FCTaylorProperties {
                     this.material.taus.value = utils.isNumber(items[9]) ? parseFloat(items[9]) : items[9];
                     this.material.a.value = utils.isNumber(items[10]) ? parseFloat(items[10]) : items[10];
                 }
+                readProps = false;
             }
-            else if (readDef && items.length === 6) {
+            else if (readDef && items.length === 6 && !line.startsWith('**')) {
                 this.planeStress.checked = utils.isNumber(items[0]) ? parseInt(items[0]) === 1 : this.planeStress.checked;
                 this.centro.checked = utils.isNumber(items[1]) ? parseInt(items[1]) === 1 : this.centro.checked;
                 this.npts.value = utils.isNumber(items[2]) ? parseFloat(items[2]) : items[2];
@@ -115,6 +116,7 @@ class FCTaylorProperties {
                 this.wpc.value = utils.isNumber(items[4]) ? parseFloat(items[4]) : items[4];
                 this.ncpu.selectedIndex = utils.isNumber(items[5]) ? (parseInt(items[5]) > 0 && parseInt(items[5]) <= os.cpus().length ? parseInt(items[5]) - 1 : os.cpus().length - 1) : os.cpus().length - 1;
                 this.UpdateNstressPoints();
+                readDef = false;
             }
             if (line.toUpperCase().startsWith('*PROPS')) {
                 readProps = true;
