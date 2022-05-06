@@ -4,7 +4,8 @@ const path = require('path');
 const appName = app.name;
 const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
 const appIcon = nativeImage.createFromPath(appIconPath);
-const bugReportURL = 'https://gitreports.com/issue/frodal/FC-Taylor';
+const LearnMoreURL = 'https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html'; // TODO: Change this to the Github page once it is public
+const bugReportURL = LearnMoreURL; // TODO: Change this to the Github issues URL once it is public
 const defaultLicenseString = 'Copyright (c) 2018-2022 Bjørn Håkon Frodal';
 let licenseString = '';
 
@@ -53,7 +54,7 @@ function CreateMenu(template = [
             },
             {
                 label: 'Learn More',
-                click() { shell.openExternal('https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html') }
+                click() { shell.openExternal(LearnMoreURL) }
             },
             {
                 type: 'separator'
