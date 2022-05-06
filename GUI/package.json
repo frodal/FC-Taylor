@@ -9,7 +9,7 @@
     "Discrete yield surface"
   ],
   "main": "./src/javascript/main.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Bjørn Håkon Frodal",
   "license": "UNLICENSED",
   "copyright": "Copyright (c) 2018-2022 Bjørn Håkon Frodal",
