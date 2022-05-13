@@ -51,7 +51,7 @@
     "plotly.js-dist": "^2.12.0"
   },
   "devDependencies": {
-    "electron": "^18.2.0",
+    "electron": "^18.2.3",
     "electron-installer-windows": "^3.0.0",
     "electron-packager": "^15.5.1",
     "icon-gen": "^3.0.1"
