@@ -1,13 +1,22 @@
-const { app, Menu, shell, dialog, nativeImage, BrowserWindow } = require('electron');
+const { app, Menu, shell, dialog, nativeImage, BrowserWindow, autoUpdater } = require('electron');
 const path = require('path');
 
 const appName = app.name;
 const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
 const appIcon = nativeImage.createFromPath(appIconPath);
-const LearnMoreURL = 'https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html'; // TODO: Change this to the Github page once it is public
-const bugReportURL = LearnMoreURL; // TODO: Change this to the Github issues URL once it is public
+const LearnMoreURL = 'https://github.com/frodal/FC-Taylor';
+const bugReportURL = 'https://github.com/frodal/FC-Taylor/issues';
 const defaultLicenseString = 'Copyright (c) 2018-2022 Bjørn Håkon Frodal';
 let licenseString = '';
+let updateAvailible = false;
+
+autoUpdater.on('update-available', () => {
+    updateAvailible = true;
+}).on('update-not-available', () => {
+    updateAvailible = false;
+}).on('error', (error) => {
+    console.log(error);
+});
 
 function GetLicense() {
     if (licenseString === '') {
@@ -20,6 +29,30 @@ function GetLicense() {
     }
     return licenseString;
 };
+
+function openVersionDialog(uptoDate, displayDialogOnUptoDate) {
+    if (uptoDate) {
+        if (displayDialogOnUptoDate) {
+            const options =
+            {
+                type: "info",
+                title: "You're all good",
+                message: "You've got the latest version of " + app.name + "; thanks for staying on the ball",
+                buttons: ['Ok']
+            };
+            dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+        }
+    } else {
+        const options =
+        {
+            type: "info",
+            title: "New version available",
+            message: "A new version of " + app.name + " is available.\nDownload it from the GitHub page.",
+            buttons: ['Ok']
+        };
+        dialog.showMessageBox(BrowserWindow.getFocusedWindow(), options);
+    }
+}
 
 function CreateMenu(template = [
     {
@@ -79,8 +112,10 @@ function CreateMenu(template = [
             {
                 label: 'Check for Updates',
                 click() { 
-                    const LicenseChecker = require('./license');
-                    LicenseChecker.CheckVersion();
+                    // const LicenseChecker = require('./license');
+                    // LicenseChecker.CheckVersion();
+                    // TODO: Check for updates
+                    openVersionDialog(!updateAvailible, true)
                 }
             },
             {

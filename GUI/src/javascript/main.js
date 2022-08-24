@@ -90,12 +90,10 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-require('./Updater')({ logger: require('electron-log') }) // update application
+// update application using update-electron-app
+require('update-electron-app')({ logger: require('electron-log') })
 
 require('./dialog');
-
-const LicenseChecker = require('./license');
-LicenseChecker.Init();
 
 const DarkMode = require('./darkMode');
 DarkMode.Init();
