@@ -130,8 +130,6 @@
       write(6,*) '|                                                  |'
       write(6,*) '|                FC-Taylor program                 |'
       write(6,*) '|                                                  |'
-      write(6,*) '|              by Bjorn Hakon Frodal               |'
-      write(6,*) '|                                                  |'
       write(6,*) '|             Copyright (c) 2018-2022              |'
       write(6,*) '|                Bjorn Hakon Frodal                |'
       write(6,*) '|        https://github.com/frodal/FC-Taylor       |'
