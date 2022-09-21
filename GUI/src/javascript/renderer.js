@@ -51,15 +51,6 @@ let DiscreteYS = new DiscreteYieldSurface();
 let ys = new YieldSurface();
 
 ////////////////////////////////////////////////////////////////////////////////////
-//                                 License check                                  //
-////////////////////////////////////////////////////////////////////////////////////
-let LicenseOK = false;
-ipcRenderer.on('LicenseCheck', (event, value) => {
-    LicenseOK = value;
-});
-window.addEventListener('load', () => { ipcRenderer.send('CheckLicensePlease'); });
-
-////////////////////////////////////////////////////////////////////////////////////
 //                           Setup working directory                              //
 ////////////////////////////////////////////////////////////////////////////////////
 function SetupWorkingDir() {
@@ -82,7 +73,8 @@ function SetupWorkingDir() {
         // OpenMP is statically linked for linux with the Intel compiler
     } else if (process.platform === 'darwin') {
         // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
-        console.log('OpenMP is not yet supported on darwin!')
+        logger = require('electron-log');
+        logger.info('OpenMP is not yet supported on darwin!')
     }
 }
 
@@ -136,10 +128,7 @@ startProgramBtn.addEventListener('click', (event) => {
     // Delete old output file
     DeleteOutput();
     UpdateEnableSaveAndCalibrate();
-    if (!LicenseOK) {
-        ipcRenderer.send('CheckLicensePlease');
-        return
-    }
+    // Start program
     if (inputData.SafeInput()) {
         // Clear output data field
         outArea.innerHTML = '';
@@ -255,12 +244,12 @@ window.addEventListener('beforeunload', () => {
 //                           Calibrate yield surface                              //
 ////////////////////////////////////////////////////////////////////////////////////
 calibrateYsBtn.addEventListener('click', (event) => {
-    if (!LicenseOK)
-        return
+    // Check exponent given by user
     if (!inputData.SafeExponent()) {
         ipcRenderer.send('check-input-dialog');
         return
     }
+    // Setup calibration parameters
     let outfilePath = path.join(outputPath, 'output.txt');
     // Sets the current working directory of the selected program to be its own directory
     let options = { cwd: path.dirname(outfilePath) };
@@ -272,7 +261,8 @@ calibrateYsBtn.addEventListener('click', (event) => {
     // Show calibrating roller
     calibRoller.classList.add('lds-roller');
     calibMsg.innerHTML = 'Calibrating';
-    try // Try to execute the program and sets a callback for when the program terminates
+    // Try to execute the program and sets a callback for when the program terminates
+    try
     {
         let args = [outfilePath, '--space', isPlaneStress ? '2D' : '3D'];
         if (inputData.YSexponentOption.selectedIndex == 0) {

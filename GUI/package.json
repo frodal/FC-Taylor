@@ -11,9 +11,9 @@
   "main": "./src/javascript/main.js",
   "version": "1.0.1",
   "author": "Bjørn Håkon Frodal",
-  "license": "UNLICENSED",
+  "license": "GPL-3.0",
   "copyright": "Copyright (c) 2018-2022 Bjørn Håkon Frodal",
-  "homepage": "https://folk.ntnu.no/frodal/Cite/Projects/FC-Taylor.html",
+  "homepage": "https://github.com/frodal/FC-Taylor",
   "private": true,
   "repository": {
     "type": "git",
@@ -48,7 +48,8 @@
     "mathjax": "^3.2.2",
     "ml-matrix": "^6.10.2",
     "ms": "^2.1.3",
-    "plotly.js-dist": "^2.14.0"
+    "plotly.js-dist": "^2.14.0",
+    "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
     "electron": "^20.1.4",

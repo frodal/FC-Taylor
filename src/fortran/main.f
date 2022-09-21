@@ -3,15 +3,9 @@
 !
 !                         FC-Taylor program
 !
-!                       by Bjorn Hakon Frodal
-!                       bjorn.h.frodal@ntnu.no
-!
 !                            Copyright (c)
 !                         Bjorn Hakon Frodal
-!               Structural Impact Laboratory (SIMLab),
-!                Department of Structural Engineering,
-!           Norwegian University of Science and Technology,
-!                         Trondheim, Norway.
+!                 https://github.com/frodal/FC-Taylor
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
