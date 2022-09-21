@@ -15,7 +15,8 @@ autoUpdater.on('update-available', () => {
 }).on('update-not-available', () => {
     updateAvailible = false;
 }).on('error', (error) => {
-    console.log(error);
+    logger = require('electron-log');
+    logger.error(error);
 });
 
 function GetLicense() {
@@ -112,9 +113,6 @@ function CreateMenu(template = [
             {
                 label: 'Check for Updates',
                 click() { 
-                    // const LicenseChecker = require('./license');
-                    // LicenseChecker.CheckVersion();
-                    // TODO: Check for updates
                     openVersionDialog(!updateAvailible, true)
                 }
             },

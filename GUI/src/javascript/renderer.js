@@ -73,7 +73,8 @@ function SetupWorkingDir() {
         // OpenMP is statically linked for linux with the Intel compiler
     } else if (process.platform === 'darwin') {
         // TODO: Statically link openMP for darwin or include the dynamic link library for darwin in Core
-        console.log('OpenMP is not yet supported on darwin!')
+        logger = require('electron-log');
+        logger.info('OpenMP is not yet supported on darwin!')
     }
 }
 
