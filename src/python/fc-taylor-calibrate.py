@@ -452,7 +452,7 @@ def main():
     parser.add_argument('--exponent', default=8.0, type=float,
                         help='Choose an exponent for the yield surface.')
     parser.add_argument('--calibrateExponent', action='store_true',
-                        help='Choose the exponent should be calibrated.')
+                        help='Choose to calibrate the yield surface exponent. This will overide the exponent passed in.')
     args = parser.parse_args()
     fileName = Path(args.inputFile)
     spaceInput = args.space
