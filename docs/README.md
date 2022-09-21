@@ -1,6 +1,8 @@
 # FC-Taylor Program
 
-A full constraint (FC) Taylor program useful for generating discrete yield surface data. The discrete yield surface data can further be used to calibrate the phenomenological Yld2004-18p yield surface with the application. The program uses the hypoelastic implementation in the SIMLab Crystal Mechanics Model (SCMM-hypo) for solving the single crystal response of each individual grain. Download the latest version of the FC-Taylor application [here](https://github.com/frodal/FC-Taylor/releases).
+A full constraint (FC) Taylor program useful for generating discrete yield surface data from the crystallographic texture of an alloy. The discrete yield surface data can further be used to calibrate the phenomenological Yld2004-18p yield surface with the application. The program uses the hypoelastic implementation in the SIMLab Crystal Mechanics Model ([SCMM-hypo](https://github.com/frodal/SCMM-hypo)) for solving the single crystal response of each individual grain. Download the latest version of the FC-Taylor application [here](https://github.com/frodal/FC-Taylor/releases).
+
+![FC-Taylor image](FC-Taylor-laptop.webp "FC-Taylor")
 
 ## Usage
 
