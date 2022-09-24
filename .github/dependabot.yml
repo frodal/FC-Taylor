@@ -8,12 +8,10 @@ updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "GUI/" # Location of package manifests
     schedule:
-      interval: "weekly"
-      day: "friday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 20
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "src/python/" # Location of package manifests
     schedule:
-      interval: "weekly"
-      day: "friday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 20
