@@ -43,7 +43,7 @@
     "electron-is-dev": "^2.0.0",
     "electron-log": "^4.4.8",
     "electron-squirrel-startup": "^1.0.0",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.1.0",
     "is-url": "^1.2.4",
     "mathjax": "^3.2.2",
     "ml-matrix": "^6.10.2",
