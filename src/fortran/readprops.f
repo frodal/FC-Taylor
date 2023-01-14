@@ -134,7 +134,7 @@
       write(6,*) '|                Bjorn Hakon Frodal                |'
       write(6,*) '|        https://github.com/frodal/FC-Taylor       |'
       write(6,*) '|                                                  |'
-      write(6,*) '|                      v1.1.0                      |'
+      write(6,*) '|                      v1.1.1                      |'
       write(6,*) '|                                                  |'
       write(6,*) '|--------------------------------------------------|'
       write(6,*) '|                                                  |'
