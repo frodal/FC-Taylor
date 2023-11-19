@@ -11,7 +11,7 @@ let isReadyOrFinishedLoading = false;
 
 function showWindowIfReadyAndFinishedLoading() {
     if (isReadyOrFinishedLoading)
-        mainWindow.show()
+        mainWindow.show();
     else
         isReadyOrFinishedLoading = true;
 }
@@ -42,7 +42,7 @@ function createWindow() {
     // Open the DevTools.
     const isDev = require('electron-is-dev')
     if (isDev) {
-        mainWindow.webContents.openDevTools()
+        mainWindow.webContents.openDevTools();
     }
 
     // Emitted when the window is closed.
@@ -91,7 +91,8 @@ app.on('activate', function () {
 // code. You can also put them in separate files and require them here.
 
 // update application using update-electron-app
-require('update-electron-app')({ logger: require('electron-log') })
+const { updateElectronApp } = require('update-electron-app');
+updateElectronApp({ logger: require('electron-log') });
 
 require('./dialog');
 
