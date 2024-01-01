@@ -41,7 +41,7 @@
     "bent": "^7.3.12",
     "csv-parser": "^3.0.0",
     "electron-is-dev": "^2.0.0",
-    "electron-log": "^5.0.1",
+    "electron-log": "^5.0.3",
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^11.2.0",
     "is-url": "^1.2.4",
