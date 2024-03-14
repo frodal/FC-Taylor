@@ -40,7 +40,7 @@ function createWindow() {
     });
 
     // Open the DevTools.
-    const isDev = require('electron-is-dev')
+    const isDev = !app.isPackaged
     if (isDev) {
         mainWindow.webContents.openDevTools();
     }

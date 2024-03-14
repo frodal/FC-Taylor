@@ -1,60 +1,59 @@
 {
-  "name": "fc-taylor",
-  "productName": "FC-Taylor",
-  "description": "A full constraint (FC) Taylor program",
-  "keywords": [
-    "FC-Taylor",
-    "Crystal plasticity",
-    "Plastic anisotropy",
-    "Discrete yield surface"
-  ],
-  "main": "./src/javascript/main.js",
-  "version": "1.1.2",
-  "author": "Bjørn Håkon Frodal",
-  "license": "GPL-3.0",
-  "copyright": "Copyright (c) 2018-2022 Bjørn Håkon Frodal",
-  "homepage": "https://github.com/frodal/FC-Taylor",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/frodal/FC-Taylor"
-  },
-  "scripts": {
-    "start": "electron .",
-    "build": "npm run build-win64 && npm run build-linux64 && npm run build-darwin64",
-    "build-debug": "set DEBUG=electron-packager && npm run build",
-    "build-win": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=all --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
-    "build-win32": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=ia32 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
-    "build-win64": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=x64 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
-    "build-linux64": "electron-packager ./ --overwrite --asar --prune=true --platform=linux --arch=x64 --no-tmpdir --icon=assets/icons/png/1024x1024.png --out=../GUIbinaries/",
-    "build-darwin64": "electron-packager ./ --overwrite --asar --prune=true --platform=darwin --arch=x64 --no-tmpdir --icon=assets/icons/mac/icon.icns --out=../GUIbinaries/ --darwinDarkModeSupport=true",
-    "setup": "npm run setup-win64",
-    "setup-win32": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer-ia32/ --icon=./assets/icons/win/icon.ico --noMsi",
-    "setup-win64": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-x64/ --dest=../GUIbinaries/installer-x64/ --icon=./assets/icons/win/icon.ico --noMsi",
-    "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64",
-    "gen-icons": "npm run gen-icon-win && npm run gen-icon-mac",
-    "gen-icon-win": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/win --ico name=icon --report",
-    "gen-icon-mac": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
-  },
-  "dependencies": {
-    "about-window": "^1.15.2",
-    "bent": "^7.3.12",
-    "csv-parser": "^3.0.0",
-    "electron-is-dev": "^3.0.1",
-    "electron-log": "^5.1.1",
-    "electron-squirrel-startup": "^1.0.0",
-    "fs-extra": "^11.2.0",
-    "is-url": "^1.2.4",
-    "mathjax": "^3.2.2",
-    "ml-matrix": "^6.11.0",
-    "ms": "^2.1.3",
-    "plotly.js-dist": "^2.29.1",
-    "update-electron-app": "^3.0.0"
-  },
-  "devDependencies": {
-    "electron": "^29.1.1",
-    "electron-installer-windows": "^3.0.0",
-    "electron-packager": "^17.1.2",
-    "icon-gen": "^4.0.0"
-  }
+    "name": "fc-taylor",
+    "productName": "FC-Taylor",
+    "description": "A full constraint (FC) Taylor program",
+    "keywords": [
+        "FC-Taylor",
+        "Crystal plasticity",
+        "Plastic anisotropy",
+        "Discrete yield surface"
+    ],
+    "main": "./src/javascript/main.js",
+    "version": "1.1.2",
+    "author": "Bjørn Håkon Frodal",
+    "license": "GPL-3.0",
+    "copyright": "Copyright (c) 2018-2022 Bjørn Håkon Frodal",
+    "homepage": "https://github.com/frodal/FC-Taylor",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/frodal/FC-Taylor"
+    },
+    "scripts": {
+        "start": "electron .",
+        "build": "npm run build-win64 && npm run build-linux64 && npm run build-darwin64",
+        "build-debug": "set DEBUG=electron-packager && npm run build",
+        "build-win": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=all --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
+        "build-win32": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=ia32 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
+        "build-win64": "electron-packager ./ --overwrite --asar --prune=true --platform=win32 --arch=x64 --no-tmpdir --icon=assets/icons/win/icon.ico --out=../GUIbinaries/",
+        "build-linux64": "electron-packager ./ --overwrite --asar --prune=true --platform=linux --arch=x64 --no-tmpdir --icon=assets/icons/png/1024x1024.png --out=../GUIbinaries/",
+        "build-darwin64": "electron-packager ./ --overwrite --asar --prune=true --platform=darwin --arch=x64 --no-tmpdir --icon=assets/icons/mac/icon.icns --out=../GUIbinaries/ --darwinDarkModeSupport=true",
+        "setup": "npm run setup-win64",
+        "setup-win32": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-ia32/ --dest=../GUIbinaries/installer-ia32/ --icon=./assets/icons/win/icon.ico --noMsi",
+        "setup-win64": "electron-installer-windows --src=../GUIbinaries/FC-Taylor-win32-x64/ --dest=../GUIbinaries/installer-x64/ --icon=./assets/icons/win/icon.ico --noMsi",
+        "setup-debian": "electron-installer-debian --src=../GUIbinaries/FC-Taylor-linux-x64/ --dest=../GUIbinaries/debian/ --arch=amd64",
+        "gen-icons": "npm run gen-icon-win && npm run gen-icon-mac",
+        "gen-icon-win": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/win --ico name=icon --report",
+        "gen-icon-mac": "icon-gen --input ./assets/icons/Icon.svg --output ./assets/icons/mac --icns name=icon --report"
+    },
+    "dependencies": {
+        "about-window": "^1.15.2",
+        "bent": "^7.3.12",
+        "csv-parser": "^3.0.0",
+        "electron-log": "^5.1.1",
+        "electron-squirrel-startup": "^1.0.0",
+        "fs-extra": "^11.2.0",
+        "is-url": "^1.2.4",
+        "mathjax": "^3.2.2",
+        "ml-matrix": "^6.11.0",
+        "ms": "^2.1.3",
+        "plotly.js-dist": "^2.29.1",
+        "update-electron-app": "^3.0.0"
+    },
+    "devDependencies": {
+        "electron": "^29.1.1",
+        "electron-installer-windows": "^3.0.0",
+        "electron-packager": "^17.1.2",
+        "icon-gen": "^4.0.0"
+    }
 }
