@@ -6,14 +6,14 @@ const appIconPath = path.join(__dirname, '../../assets/icons/png/512x512.png');
 const appIcon = nativeImage.createFromPath(appIconPath);
 const LearnMoreURL = 'https://github.com/frodal/FC-Taylor#fc-taylor-program';
 const bugReportURL = 'https://github.com/frodal/FC-Taylor/issues';
-const defaultLicenseString = 'Copyright (c) 2018-2022 Bjørn Håkon Frodal';
+const defaultLicenseString = 'Copyright (c) 2018-2024 Bjørn Håkon Frodal';
 let licenseString = '';
-let updateAvailible = false;
+let updateAvailable = false;
 
 autoUpdater.on('update-available', () => {
-    updateAvailible = true;
+    updateAvailable = true;
 }).on('update-not-available', () => {
-    updateAvailible = false;
+    updateAvailable = false;
 }).on('error', (error) => {
     logger = require('electron-log');
     logger.error(error);
@@ -112,8 +112,8 @@ function CreateMenu(template = [
             },
             {
                 label: 'Check for Updates',
-                click() { 
-                    openVersionDialog(!updateAvailible, true)
+                click() {
+                    openVersionDialog(!updateAvailable, true)
                 }
             },
             {
