@@ -47,7 +47,7 @@
         "mathjax": "^3.2.2",
         "ml-matrix": "^6.11.0",
         "ms": "^2.1.3",
-        "plotly.js-dist": "^2.29.1",
+        "plotly.js-dist": "^2.30.1",
         "update-electron-app": "^3.0.0"
     },
     "devDependencies": {
