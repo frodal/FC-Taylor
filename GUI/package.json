@@ -51,9 +51,9 @@
         "update-electron-app": "^3.0.0"
     },
     "devDependencies": {
+        "@electron/packager": "^18.3.2",
         "electron": "^29.1.6",
         "electron-installer-windows": "^3.0.0",
-        "electron-packager": "^17.1.2",
         "icon-gen": "^4.0.0"
     }
 }
