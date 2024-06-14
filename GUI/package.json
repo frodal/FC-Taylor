@@ -45,14 +45,14 @@
         "fs-extra": "^11.2.0",
         "is-url": "^1.2.4",
         "mathjax": "^3.2.2",
-        "ml-matrix": "^6.11.0",
+        "ml-matrix": "^6.11.1",
         "ms": "^2.1.3",
         "plotly.js-dist": "^2.33.0",
         "update-electron-app": "^3.0.0"
     },
     "devDependencies": {
         "@electron/packager": "^18.3.2",
-        "electron": "^30.0.9",
+        "electron": "^31.0.1",
         "electron-installer-windows": "^3.0.0",
         "icon-gen": "^4.0.0"
     }
