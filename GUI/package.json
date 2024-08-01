@@ -40,7 +40,7 @@
         "about-window": "^1.15.2",
         "bent": "^7.3.12",
         "csv-parser": "^3.0.0",
-        "electron-log": "^5.1.5",
+        "electron-log": "^5.1.7",
         "electron-squirrel-startup": "^1.0.1",
         "fs-extra": "^11.2.0",
         "is-url": "^1.2.4",
